@@ -1,25 +1,65 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add login logic here
-    console.log('Login details:', { email, password });
+
+    if (!email || !password) {
+      setErrorMessage('Please provide both email and password.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // IMPORTANT: Needed for session cookies
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const data = await res.json();
+      console.log('Backend response:', data);
+
+      if (!res.ok || !data.user) {
+        setErrorMessage(data?.message || 'Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Save user data
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Navigate to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
-    setShowPassword((prevState) => !prevState);
+    setShowPassword((prev) => !prev);
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Login Form */}
         <div className="w-1/2 p-10">
           <div className="flex items-center mb-6">
             <img src={logo} alt="SwiftFunds Logo" className="w-16 h-auto mr-3" />
@@ -43,7 +83,7 @@ const Login = () => {
             </div>
             <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-6 border border-gray-300 w-full relative">
               <input
-                type={showPassword ? 'text' : 'password'} // Toggle input type based on showPassword state
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 required
                 className="bg-transparent outline-none flex-grow text-gray-700"
@@ -54,27 +94,27 @@ const Login = () => {
                 className="ml-2 text-gray-500 cursor-pointer absolute right-3"
                 onClick={togglePasswordVisibility}
               >
-                <i className={showPassword ? 'bx bx-show' : 'bx bx-hide'}></i> {/* Eye icon */}
+                <i className={showPassword ? 'bx bx-show' : 'bx bx-hide'}></i>
               </span>
             </div>
+            {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full"
+              disabled={loading}
+              className={`${
+                loading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white font-bold py-2 px-4 rounded-lg w-full`}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
           <p className="text-center text-gray-500 mt-4">
             Forgot your password?{' '}
-            <a href="/forgot-password" className="text-blue-500 hover:underline">
-              Reset it here
-            </a>
+            <a href="/forgot-password" className="text-blue-500 hover:underline">Reset it here</a>
           </p>
           <p className="text-center text-gray-500 mt-4">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-500 hover:underline">
-              Sign up here
-            </a>
+            <a href="/register" className="text-blue-500 hover:underline">Sign up here</a>
           </p>
         </div>
 
@@ -83,10 +123,7 @@ const Login = () => {
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
           <p className="mb-6">New to Swiftfund?</p>
           <a href="/register">
-            <button
-              onClick={() => (window.location.href = '/register')}
-              className="border-2 border-white py-2 px-4 rounded-lg hover:bg-white hover:text-blue-500"
-            >
+            <button className="border-2 border-white py-2 px-4 rounded-lg hover:bg-white hover:text-blue-500">
               Sign Up
             </button>
           </a>

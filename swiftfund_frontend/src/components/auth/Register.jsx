@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const Registration = () => {
-  const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false); // Add state to toggle password visibility
-  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,15 +17,13 @@ const Registration = () => {
   };
 
   const validatePassword = (password) => {
-    // Regex to enforce password rules
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$*&])[A-Za-z\d@#$*&]{8,}$/;
     return passwordRegex.test(password);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate the password
     if (!validatePassword(formData.password)) {
       setErrorMessage(
         'Password must include at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character (@, #, $, *, &).'
@@ -33,11 +31,32 @@ const Registration = () => {
       return;
     }
 
-    // If validation passes, proceed with registration
-    console.log('Registration successful:', formData);
+    setErrorMessage('');
 
-    // After successful registration, navigate to the "Verify Email" page
-    navigate('/verify-email');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        navigate('/verify-email');
+      } else {
+        if (data.message === 'User already exists') {
+          setErrorMessage('An account with this email already exists. Please log in or use a different email.');
+        } else {
+          setErrorMessage(data.message || 'Registration failed. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage('Something went wrong. Please try again later.');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -47,7 +66,6 @@ const Registration = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="flex w-full max-w-7xl bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Registration Form */}
         <div className="w-1/2 p-10">
           <div className="flex items-center mb-6">
             <img src={logo} alt="SwiftFunds Logo" className="w-16 h-auto mr-3" />
@@ -59,11 +77,11 @@ const Registration = () => {
             <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-4 border border-gray-300 w-full">
               <input
                 type="text"
-                name="fullName"
+                name="fullname"
                 placeholder="Full Name"
                 required
                 className="bg-transparent outline-none flex-grow text-gray-700"
-                value={formData.fullName}
+                value={formData.fullname}
                 onChange={handleChange}
               />
               <span className="ml-2 text-gray-500">
@@ -86,7 +104,7 @@ const Registration = () => {
             </div>
             <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-4 border border-gray-300 w-full relative">
               <input
-                type={showPassword ? 'text' : 'password'} // Toggle input type based on showPassword state
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="Password"
                 required
@@ -98,7 +116,7 @@ const Registration = () => {
                 className="ml-2 text-gray-500 cursor-pointer absolute right-3"
                 onClick={togglePasswordVisibility}
               >
-                <i className={showPassword ? 'bx bx-show' : 'bx bx-hide'}></i> {/* Eye icon */}
+                <i className={showPassword ? 'bx bx-show' : 'bx bx-hide'}></i>
               </span>
             </div>
             {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
@@ -107,7 +125,7 @@ const Registration = () => {
             </p>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full cursor-pointer"
             >
               Register
             </button>
@@ -126,7 +144,6 @@ const Registration = () => {
           </div>
         </div>
 
-        {/* Welcome Section */}
         <div className="w-1/2 bg-blue-500 text-white flex flex-col justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
           <p className="mb-6">Already have an account?</p>

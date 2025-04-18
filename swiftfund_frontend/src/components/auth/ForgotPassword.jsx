@@ -1,12 +1,42 @@
 import React, { useState } from 'react';
-import logo from '../../assets/logo.png'; 
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add forgot password logic here
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (!email) {
+      setErrorMessage('Please enter your email address.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccessMessage(data.message || 'We have sent you an email with instructions to reset your password.');
+        setTimeout(() => navigate('/login'), 3000);
+      } else {
+        setErrorMessage(data.message || 'This email address is not registered.');
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      setErrorMessage('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -32,7 +62,7 @@ const ForgotPassword = () => {
             <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-6 border border-gray-300">
               <input
                 type="email"
-                placeholder="johndoe@mail.com"
+                placeholder="youremail@example.com"
                 required
                 className="bg-transparent outline-none flex-grow text-gray-700"
                 value={email}
@@ -42,9 +72,11 @@ const ForgotPassword = () => {
                 <i className="bx bx-envelope"></i>
               </span>
             </div>
+            {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+            {successMessage && <p className="text-green-500 text-sm mb-4">{successMessage}</p>}
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full cursor-pointer"
             >
               Reset Password
             </button>
