@@ -3,6 +3,11 @@ const User = require("../models/User");
 const sendVerificationEmail = require("../utils/sendVerificationEmail");
 const sendResetEmail = require("../utils/sendResetEmail");
 
+// Utility function for error handling
+const handleError = (res, statusCode, message) => {
+  res.status(statusCode).json({ message });
+};
+
 // REGISTER
 exports.register = async (req, res) => {
   try {
@@ -11,7 +16,7 @@ exports.register = async (req, res) => {
 
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
+      return handleError(res, 400, "Email already in use");
     }
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -33,7 +38,7 @@ exports.register = async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -45,16 +50,16 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return handleError(res, 400, "User not found");
     }
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return handleError(res, 400, "Invalid credentials");
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email first" });
+      return handleError(res, 403, "Please verify your email first");
     }
 
     req.session.userId = user._id;
@@ -71,7 +76,7 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -83,7 +88,7 @@ exports.forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(404).json({ message: "This email address is not registered." });
+      return handleError(res, 404, "This email address is not registered.");
     }
 
     const token = crypto.randomBytes(32).toString("hex");
@@ -98,7 +103,7 @@ exports.forgotPassword = async (req, res) => {
     res.json({ message: "A reset link has been sent to your email address." });
   } catch (err) {
     console.error("Forgot password error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -109,12 +114,12 @@ exports.updateProfile = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== userId) {
-      return res.status(400).json({ message: "Email is already taken by another user." });
+      return handleError(res, 400, "Email is already taken by another user.");
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return handleError(res, 404, "User not found");
     }
 
     user.fullname = fullname || user.fullname;
@@ -125,7 +130,7 @@ exports.updateProfile = async (req, res) => {
     res.status(200).json({ message: "Profile updated successfully", user });
   } catch (err) {
     console.error("Update profile error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -136,13 +141,13 @@ exports.viewBalance = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return handleError(res, 404, "User not found");
     }
 
     res.status(200).json({ balance: user.balance });
   } catch (err) {
     console.error("View balance error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -153,11 +158,11 @@ exports.updateBalance = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return handleError(res, 404, "User not found");
     }
 
     if (isNaN(amount) || amount < 0) {
-      return res.status(400).json({ message: "Invalid balance amount" });
+      return handleError(res, 400, "Invalid balance amount");
     }
 
     user.balance += amount;
@@ -166,7 +171,7 @@ exports.updateBalance = async (req, res) => {
     res.status(200).json({ message: "Balance updated successfully", balance: user.balance });
   } catch (err) {
     console.error("Update balance error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
 
@@ -175,13 +180,13 @@ exports.logout = async (req, res) => {
   try {
     req.session.destroy((err) => {
       if (err) {
-        return res.status(500).json({ message: "Logout failed" });
+        return handleError(res, 500, "Logout failed");
       }
       res.clearCookie("connect.sid");
       res.status(200).json({ message: "Logged out successfully" });
     });
   } catch (err) {
     console.error("Logout error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    handleError(res, 500, "Internal server error");
   }
 };
