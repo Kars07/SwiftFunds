@@ -197,12 +197,30 @@ This project is licensed under the MIT License.
 
 ## Dependencies
 express: Web framework for Node.js.
+
+
 mongoose: MongoDB object modeling tool.
+
+
 nodemailer: Email sending utility.
+
+
 bcryptjs: Password hashing.
+
+
 dotenv: Environment variable management.
+
+
 express-validator: Input validation.
+
+
 helmet: Security middleware.
+
+
 cors: Cross-Origin Resource Sharing.
+
+
 express-session: Session management.
+
+
 express-rate-limit: Rate limiting middleware.
