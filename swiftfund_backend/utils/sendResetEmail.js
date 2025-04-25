@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const sendResetEmail = async (email, token) => {
-    const frontendUrl = "http://localhost:5173/reset-password"; 
+    const frontendUrl = "https://swiftfund.vercel.app/reset-password"; 
     const resetLink = `${frontendUrl}?token=${token}`; 
 
     const transporter = nodemailer.createTransport({

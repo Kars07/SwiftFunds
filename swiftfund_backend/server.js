@@ -5,6 +5,8 @@ const cors = require('cors');
 const session = require('express-session');
 const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const adminRoutes = require("./routes/adminRoutes");
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -13,6 +15,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 
 // Enable CORS for your frontend URL
@@ -42,7 +45,7 @@ const mongoURI = process.env.MONGO_URI; // Ensure your .env file has the MONGO_U
 mongoose
   .connect(mongoURI)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Connected to Mongo Atlas!');
   })
   .catch((err) => {
     console.error('Error connecting to MongoDB:', err);
@@ -56,7 +59,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use('/api/users', userRoutes);
-
+app.use("/api/admin", adminRoutes)
 // Error handling middleware
 app.use(errorHandler);
 
