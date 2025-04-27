@@ -19,7 +19,7 @@ const sendVerificationEmail = async (email, token) => {
       <h1>Verify Your Email Address</h1>
       <p>Hello,</p>
       <p>Thank you for signing up with SwiftFund. Please click the button below to verify your email address:</p>
-      <a href="${verificationLink}" style="background-color:blue;color:white;padding:10px 20px;text-decoration:none;">Verify Email</a>
+      <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verify Email</a>
       <p>If the button above does not work, you can copy and paste the following link into your browser:</p>
       <p>${verificationLink}</p>
       <br>
