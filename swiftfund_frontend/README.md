@@ -49,17 +49,17 @@ swiftfund_frontend/ ├── public/ # Static assets (images, videos, fonts) �
 
 
 2.  Install dependencies:
-    '''
+    ```bash
     npm install
 
 
 3. Create a .env file in the root directory and add the following:
-   '''
+   ```bash
    VITE_API_URL=http://localhost:5000
 
 
 4. Start the development server:
-   '''
+   ```bash
    npm run dev
 
 
@@ -67,6 +67,7 @@ swiftfund_frontend/ ├── public/ # Static assets (images, videos, fonts) �
 
 
 
+---
 
 ## Technologies Used
 React: Frontend library for building user interfaces.
@@ -92,7 +93,8 @@ npm run build: Build the application for production.
 npm run preview: Preview the production build.
 
 
-** Environment Variables **
+##Environment Variables
 The following environment variables are used in the project:
+
 
 VITE_API_URL: The base URL for the backend API.
