@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Enable CORS for your frontend URL
-const allowedOrigins = [process.env.FRONTEND_URL]; // Add more URLs if needed
+const allowedOrigins = [process.env.FRONTEND_URL];
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, Postman)
@@ -47,7 +47,7 @@ app.use(
 );
 
 // MongoDB connection
-const mongoURI = process.env.MONGO_URI; // Ensure your .env file has the MONGO_URI variable
+const mongoURI = process.env.MONGO_URI;
 mongoose
   .connect(mongoURI)
   .then(() => {
