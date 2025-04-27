@@ -17,11 +17,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
 // Enable CORS for your frontend URL
 const allowedOrigins = [process.env.FRONTEND_URL]; // Add more URLs if needed
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies and credentials
 };
 app.use(cors(corsOptions));
@@ -34,7 +40,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Use secure cookies in production
+      secure: false, // Set to true if using HTTPS in production
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
@@ -59,7 +65,8 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use('/api/users', userRoutes);
-app.use("/api/admin", adminRoutes)
+app.use('/api/admin', adminRoutes);
+
 // Error handling middleware
 app.use(errorHandler);
 
