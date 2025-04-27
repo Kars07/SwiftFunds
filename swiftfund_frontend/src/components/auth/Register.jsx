@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // <-- Added Link
 import logo from '../../assets/logo.png';
 
 const Registration = () => {
   const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false); // <-- Added loading state
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -32,6 +33,7 @@ const Registration = () => {
     }
 
     setErrorMessage('');
+    setLoading(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/register`, {
@@ -47,15 +49,13 @@ const Registration = () => {
       if (response.ok) {
         navigate('/verify-email');
       } else {
-        if (data.message === 'User already exists') {
-          setErrorMessage('An account with this email already exists. Please log in or use a different email.');
-        } else {
-          setErrorMessage(data.message || 'Registration failed. Please try again.');
-        }
+        setErrorMessage(data.message || data.error || 'Registration failed. Please try again.');
       }
     } catch (error) {
       console.error('Error:', error);
       setErrorMessage('Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,7 +68,7 @@ const Registration = () => {
       <div className="flex w-full max-w-7xl bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="w-1/2 p-10">
           <div className="flex items-center mb-6">
-            <img src={logo} alt="SwiftFunds Logo" className="w-16 h-auto mr-3" />
+            <img src={logo} alt="SwiftFunds Logo" className="w-13 h-auto mr-3" />
             <h2 className="text-2xl font-bold text-black">Swiftfund</h2>
           </div>
           <h2 className="text-2xl font-bold text-black mb-2">Sign Up</h2>
@@ -121,37 +121,38 @@ const Registration = () => {
             </div>
             {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
             <p className="text-gray-500 mb-6">
-              <span className="text-blue-500">*</span> Your password should be a combination of capital and small letters, numbers, and special characters (@, #, $, *, &).
+              <span className="text-orange-500">*</span> Your password should be a combination of capital and small letters, numbers, and special characters (@, #, $, *, &).
             </p>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full cursor-pointer"
+              disabled={loading}
+              className={`bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg w-full cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Register
+              {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
           <p className="text-center text-gray-500 my-4">or register with social platforms</p>
           <div className="flex justify-center space-x-6">
             <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-google text-blue-500 text-xl"></i>
+              <i className="bx bxl-google text-orange-500 text-xl"></i>
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-twitter text-blue-500 text-xl"></i>
+            <button className="bg-gray-100 hover:bg-orange-200 rounded-lg p-3 shadow cursor-pointer">
+              <i className="bx bxl-twitter text-orange-500 text-xl"></i>
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-discord-alt text-blue-500 text-xl"></i>
+            <button className="bg-gray-100 hover:bg-orange-200 rounded-lg p-3 shadow cursor-pointer">
+              <i className="bx bxl-discord-alt text-orange-500 text-xl"></i>
             </button>
           </div>
         </div>
 
-        <div className="w-1/2 bg-blue-500 text-white flex flex-col justify-center items-center">
+        <div className="w-1/2 bg-orange-600 text-white flex flex-col justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
           <p className="mb-6">Already have an account?</p>
-          <a href="/login">
+          <Link to="/login">
             <button className="border-2 border-white py-2 px-4 rounded-lg hover:bg-white hover:text-blue-500">
               Login
             </button>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

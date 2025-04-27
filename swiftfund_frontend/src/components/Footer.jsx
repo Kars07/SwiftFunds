@@ -19,8 +19,8 @@ const Footer = () => {
       <div className="footer-column flex-1 min-w-[200px] mt-15 px-2 mr-20">
           <h3 className="text-white text-base mb-5">Products</h3>
           <ul className="list-none pb-4">
-            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Stamp Pass</li>
-            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Stamp Auth</li>
+            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Fund Pass</li>
+            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Fund Auth</li>
             <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Documentation</li>
           </ul>
         </div>
@@ -38,8 +38,8 @@ const Footer = () => {
           <h3 className="text-white text-base mb-5">Support</h3>
           <ul className="list-none pb-4">
             <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Help Center</li>
-            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Bug Bounty</li>
-            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Press Kit</li>
+            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Information</li>
+            <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Loan Agreements</li>
             <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Brand Guidelines</li>
           </ul>
         </div>

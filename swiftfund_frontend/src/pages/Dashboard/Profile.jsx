@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import default_profile from "../assets/default_profile.png";
+import default_profile from "../../assets/default_profile.png";
 
 const Profile = () => {
   const [user, setUser] = useState({

@@ -1,9 +1,9 @@
 const nodemailer = require("nodemailer");
 
 const sendVerificationEmail = async (email, token) => {
-  // Use HTTP for local development unless you have HTTPS configured
-  const backendUrl = "https://swiftfund-api.onrender.com/api/users/verify";
-  const verificationLink = `${backendUrl}/${token}`; // Use path param now
+
+  const backendUrl = process.env.BASE_URL; 
+  const verificationLink = `${backendUrl}/api/users/verify/${token}`;
 
   const transporter = nodemailer.createTransport({
     service: "gmail",

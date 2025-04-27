@@ -51,7 +51,7 @@ function Navbar() {
           <div className="hidden lg:block">
             <button
               onClick={handleLaunchApp}
-              className="bg-orange-600 text-white font-bold py-2 px-4 rounded-4xl transition duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-orange-500"
+              className="bg-orange-600 text-white font-bold py-2 px-4 rounded-4xl transition duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-orange-500 cursor-pointer"
             >
               Launch App
             </button>

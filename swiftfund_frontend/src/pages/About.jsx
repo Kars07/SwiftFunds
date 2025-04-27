@@ -77,7 +77,7 @@ const About = () => {
           <img src={michael} alt="" className="w-[350px] rounded-4xl h-[450px]" />
           <div className="flex flex-col justify-end items-center">
             <div className="transform -translate-y-30">
-              <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Oloyode Micheal</h1>
+              <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Oloyede Micheal</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">Team Leader and Full Stack Developer</h2>
               <span className="text-gray-700">Meet our amazing team leader, Michael. A full-stack developer with a passion for building cool and functional projects. He’s not just skilled, he’s also fun, encouraging, and always bringing good energy to the team. Leading by example, Michael makes working together a great experience.</span>
               <div className="socials pt-5 ">

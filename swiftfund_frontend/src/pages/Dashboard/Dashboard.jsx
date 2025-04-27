@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Outlet } from 'react-router-dom';
-import logo from '../assets/logo.png';
-import default_profile from '../assets/default_profile.png'
+import logo from '../../assets/logo.png';
+import default_profile from '../../assets/default_profile.png'
 
 const Dashboard = () => {
   const [isNaira, setIsNaira] = useState(true);

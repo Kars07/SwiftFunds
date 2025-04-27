@@ -26,7 +26,7 @@ const VerifyEmail = () => {
         </div>
 
         {/* Welcome/Login Section */}
-        <div className="w-1/2 bg-blue-500 text-white flex flex-col justify-center items-center">
+        <div className="w-1/2 bg-orange-500 text-white flex flex-col justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Welcome!</h2>
           <p className="mb-6">Already clicked the link?</p>
           <button
