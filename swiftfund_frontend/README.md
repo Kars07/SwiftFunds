@@ -93,8 +93,7 @@ npm run build: Build the application for production.
 npm run preview: Preview the production build.
 
 
-##Environment Variables
+## Environment Variables
 The following environment variables are used in the project:
-
 
 VITE_API_URL: The base URL for the backend API.
