@@ -127,21 +127,36 @@ SwiftFunds/ ├── swiftfund_frontend/ # Frontend codebase │ ├── src/
 
 
 2. Setup Backend
+    ```bash
     cd swiftfund_backend
     npm install
     cp .env.example .env
-    # Configure environment variables in .env
-    npm start
 
 
-3. Setup Frontend
+3. Configure environment variables in .env and then run the server.js file 
+    ```bash
+    node server.js 
+
+
+4. The backend would be running on port 5000
+   ```bash
+   Server running on port 5000
+   Connected to Mongo Atlas!
+
+
+6. Setup Frontend
+   ```bash
     cd swiftfund_frontend
     npm install
     npm run dev
 
-4. Deploy smart Contracts 
+8. Deploy smart Contracts 
     Follow the instructions in swiftfund-smartcontract/README.md to deploy the Plutus scripts.
 
+
+### frontend port for testing: http://localhost:5173
+
+### Backend port for testing :  http://localhost:5000/
 
 ### Technologies Used
 Frontend: React, Vite, TailwindCSS
@@ -160,4 +175,6 @@ Email Service: Nodemailer
 
 
 License
+
+
 This project is licensed under the MIT License. ```
