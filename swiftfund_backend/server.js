@@ -4,8 +4,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const session = require('express-session');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const errorHandler = require('./middleware/errorHandler');
-const adminRoutes = require("./routes/adminRoutes");
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -18,18 +18,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Enable CORS for your frontend URL
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "http://localhost:5173",
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error("Blocked by CORS: ", origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true, // Allow cookies and credentials
 };
+
 app.use(cors(corsOptions));
 
 // Session middleware

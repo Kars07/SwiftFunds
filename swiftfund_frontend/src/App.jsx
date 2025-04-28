@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Dashboard/Profile';
 import Settings from './pages/Dashboard/settings';
 import DefaultDashboardContent from './pages/Dashboard/DefaultDashboardContent';
+import Transactions from './pages/Dashboard/transaction';
 import Register from './components/auth/Register';
 import Login from './components/auth/Login';
 import VerifyEmail from './components/auth/VerifyEmail';
@@ -49,6 +50,7 @@ const Layout = () => {
           }
         >
           <Route index element={<DefaultDashboardContent />} />
+          <Route path="transactions" element={<Transactions />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>

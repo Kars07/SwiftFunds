@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Outlet } from 'react-router-dom';
 import logo from '../../assets/logo.png';
-import default_profile from '../../assets/default_profile.png'
+import default_profile from '../../assets/default_profile.png';
 
 const Dashboard = () => {
   const [isNaira, setIsNaira] = useState(true);
@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [userEmail, setUserEmail] = useState("");
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLoanActions, setShowLoanActions] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const Dashboard = () => {
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        setUserName(parsedUser.fullname || "User"); // Updated here
+        setUserName(parsedUser.fullname || "User");
         setUserEmail(parsedUser.email || "user@example.com");
       } catch (error) {
         console.error("Failed to parse stored user:", error);
@@ -67,6 +68,10 @@ const Dashboard = () => {
     }
   };
 
+  const toggleLoanActions = () => {
+    setShowLoanActions(!showLoanActions);
+  };
+
   return (
     <div className="flex flex-row h-screen bg-gray-100">
       {/* Sidebar */}
@@ -75,14 +80,14 @@ const Dashboard = () => {
           <div className="flex items-center space-x-2 mb-10">
             <img src={logo} alt="Swiftfund Logo" className="w-12 h-auto" />
             <div className="text-lg font-bold">
-              <span className="text-blue-500">Swiftfund</span>
+              <span className="text-black-500">Swiftfund</span>
             </div>
           </div>
 
           <nav>
             <ul className="space-y-5 cursor-pointer">
               <li
-                className="flex items-center space-x-2 bg-blue-700 text-white py-2 px-3 rounded-md"
+                className="flex items-center space-x-2 bg-orange-700 text-white py-2 px-3 rounded-md"
                 onClick={() => navigate('/dashboard')}
               >
                 <i className="bx bx-home text-lg"></i>
@@ -99,11 +104,51 @@ const Dashboard = () => {
                 <i className="bx bx-user text-lg"></i>
                 <span>Profile</span>
               </li>
-              <li className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md">
-                <i className="bx bx-money text-lg"></i>
-                <span>Loans</span>
+
+              {/* Loan Actions */}
+              <li className="relative">
+                <div
+                  className="flex items-center justify-between hover:bg-gray-700 py-2 px-3 rounded-md cursor-pointer w-full"
+                  onClick={toggleLoanActions}
+                >
+                  <div className="flex items-center space-x-2">
+                    <i className="bx bx-money text-lg"></i>
+                    <span>Loan Actions</span>
+                  </div>
+                  <i className={`bx bx-chevron-${showLoanActions ? 'up' : 'down'} text-lg`}></i>
+                </div>
+                {showLoanActions && (
+                  <ul className="bg-gray-800 rounded-md overflow-hidden w-full">
+                    <li
+                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => navigate('/dashboard/loan-applications')}
+                    >
+                      <i className="bx bx-edit text-lg"></i>
+                      <span>Loan Applications</span>
+                    </li>
+                    <li
+                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => navigate('/dashboard/loans-funded')}
+                    >
+                      <i className="bx bx-dollar-circle text-lg"></i>
+                      <span>Loans Funded</span>
+                    </li>
+                    <li
+                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      onClick={() => navigate('/dashboard/loans-repaid')}
+                    >
+                      <i className="bx bx-refresh text-lg"></i>
+                      <span>Loans Repaid</span>
+                    </li>
+                  </ul>
+                )}
               </li>
-              <li className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md">
+
+              {/* Other Items */}
+              <li 
+                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
+                onClick={() => navigate('/dashboard/transactions')}
+              >
                 <i className="bx bx-transfer text-lg"></i>
                 <span>Transactions</span>
               </li>
@@ -142,20 +187,20 @@ const Dashboard = () => {
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-blue-100 rounded-lg shadow-xl p-6 w-96">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Confirm Logout</h2>
+        <div className="fixed inset-0 bg-white/10 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-96">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Confirm Logout</h2>
             <p className="text-gray-600 mb-6">Are you sure you want to log out?</p>
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 cursor-pointer"
+                className="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
+                className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
               >
                 Logout
               </button>

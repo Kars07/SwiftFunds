@@ -73,7 +73,7 @@ const ResetPassword = () => {
       <div className="flex flex-col justify-center items-center min-h-screen pt-24">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-black">Create New Password</h2>
+            <h2 className="text-2xl font-bold text-orange-500">Create New Password</h2>
             <p className="text-gray-500">
               Enter your new password and confirm it to reset your password.
             </p>
@@ -90,7 +90,7 @@ const ResetPassword = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
               />
               <span
-                className="ml-2 text-gray-500 cursor-pointer"
+                className="ml-2 text-orange-500 cursor-pointer"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
                 <i className={showNewPassword ? 'bx bx-show' : 'bx bx-hide'}></i>
@@ -107,7 +107,7 @@ const ResetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <span
-                className="ml-2 text-gray-500 cursor-pointer"
+                className="ml-2 text-orange-500 cursor-pointer"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 <i className={showConfirmPassword ? 'bx bx-show' : 'bx bx-hide'}></i>
@@ -119,7 +119,7 @@ const ResetPassword = () => {
 
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full"
+              className="bg-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-lg w-1/2 ml-25 cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-300"
             >
               Reset Password
             </button>

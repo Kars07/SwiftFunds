@@ -53,7 +53,7 @@ const ForgotPassword = () => {
       <div className="flex flex-col justify-center items-center min-h-screen pt-24">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-black">Reset your password</h2>
+            <h2 className="text-2xl font-bold text-orange-500">Reset your password</h2>
             <p className="text-gray-500">
               Enter your email address and we will send you instructions to reset your password.
             </p>
@@ -68,7 +68,7 @@ const ForgotPassword = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <span className="ml-2 text-gray-500">
+              <span className="ml-2 text-orange-500">
                 <i className="bx bx-envelope"></i>
               </span>
             </div>
@@ -76,7 +76,7 @@ const ForgotPassword = () => {
             {successMessage && <p className="text-green-500 text-sm mb-4">{successMessage}</p>}
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full cursor-pointer"
+              className="bg-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-lg w-1/2 ml-25 cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-300"
             >
               Reset Password
             </button>
