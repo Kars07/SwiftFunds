@@ -101,8 +101,7 @@ SwiftFund is a decentralized platform built on the Cardano blockchain that conne
 
 ## Project Structure
 
-GitHub Copilot
-Here is a README.md file that describes the project and its integration between the frontend, backend, and smart contracts:
+README.md file that describes the project and its integration between the frontend, backend, and smart contracts:
 
 SwiftFunds/ ├── swiftfund_frontend/ # Frontend codebase │ ├── src/ │ │ ├── components/ # Reusable React components │ │ ├── pages/ # Page-level components │ │ ├── api/ # Axios instance for API calls │ │ └── assets/ # Static assets (images, logos) │ ├── public/ # Public assets │ ├── package.json # Frontend dependencies │ └── README.md # Frontend documentation ├── swiftfund_backend/ # Backend codebase │ ├── models/ # Mongoose models │ ├── routes/ # API routes │ ├── controller/ # Business logic for routes │ ├── utils/ # Utility functions (e.g., email sending) │ ├── server.js # Entry point for the backend │ ├── package.json # Backend dependencies │ └── README.md # Backend documentation └── swiftfund-smartcontract/ # Smart contract codebase ├── lucid/ # Lucid scripts for blockchain interaction ├── validators/ # Plutus smart contracts ├── aiken.toml # Aiken configuration └── README.md # Smart contract documentation
 
@@ -150,13 +149,18 @@ SwiftFunds/ ├── swiftfund_frontend/ # Frontend codebase │ ├── src/
     npm install
     npm run dev
 
-8. Deploy smart Contracts 
+8. Deploy smart Contracts
+
     Follow the instructions in swiftfund-smartcontract/README.md to deploy the Plutus scripts.
 
+
+---
 
 ### frontend port for testing: http://localhost:5173
 
 ### Backend port for testing :  http://localhost:5000/
+
+---
 
 ### Technologies Used
 Frontend: React, Vite, TailwindCSS
@@ -173,8 +177,9 @@ Blockchain: Cardano
 
 Email Service: Nodemailer
 
+---
 
-License
+### License
 
 
 This project is licensed under the MIT License. ```
