@@ -1,6 +1,6 @@
 # SwiftFund: Decentralized Peer-to-Peer Lending Platform
 
-SwiftFund is a decentralized platform built on the Cardano blockchain that connects borrowers and lenders directly. By leveraging blockchain technology, SwiftFund ensures transparency, security, and trust in financial transactions. The platform includes a **frontend**, **backend**, and **smart contracts** that work seamlessly together to provide a robust and user-friendly experience.
+SwiftFund is a decentralized platform built on the Cardano blockchain that connects borrowers and lenders directly. By leveraging blockchain technology, SwiftFund ensures transparency, security, and trust in financial transactions. The platform includes a **frontend**, **backend**, and **smart contracts** that work seamlessly together to provide a robust and user-friendly experience. This platform isn't just meant for web3 enthusiast, it's targetting the whole of Africa and is going to revolutionize lending on a large scale
 
 ---
 
