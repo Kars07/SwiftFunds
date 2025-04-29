@@ -103,8 +103,32 @@ SwiftFund is a decentralized platform built on the Cardano blockchain that conne
 
 README.md file that describes the project and its integration between the frontend, backend, and smart contracts:
 
-SwiftFunds/ ├── swiftfund_frontend/ # Frontend codebase │ ├── src/ │ │ ├── components/ # Reusable React components │ │ ├── pages/ # Page-level components │ │ ├── api/ # Axios instance for API calls │ │ └── assets/ # Static assets (images, logos) │ ├── public/ # Public assets │ ├── package.json # Frontend dependencies │ └── README.md # Frontend documentation ├── swiftfund_backend/ # Backend codebase │ ├── models/ # Mongoose models │ ├── routes/ # API routes │ ├── controller/ # Business logic for routes │ ├── utils/ # Utility functions (e.g., email sending) │ ├── server.js # Entry point for the backend │ ├── package.json # Backend dependencies │ └── README.md # Backend documentation └── swiftfund-smartcontract/ # Smart contract codebase ├── lucid/ # Lucid scripts for blockchain interaction ├── validators/ # Plutus smart contracts ├── aiken.toml # Aiken configuration └── README.md # Smart contract documentation
 
+SwiftFunds/
+├── swiftfund_frontend/              # 🌐 Frontend (React + Vite + Tailwindcss)
+│   ├── src/
+│   │   ├── components/              # Reusable React components
+│   │   ├── pages/                   # Page-level views
+│   │   ├── api/                     # Axios instances & API functions
+│   │   └── assets/                  # Static assets (images, logos)
+│   ├── public/                      # Public files served directly
+│   ├── package.json                 # Frontend dependencies and scripts
+│   └── README.md                    # Frontend-specific documentation
+│
+├── swiftfund_backend/              # 🛠️ Backend (Node.js + Express + MongoDB)
+│   ├── models/                      # Mongoose models
+│   ├── routes/                      # API route definitions
+│   ├── controller/                  # Route business logic
+│   ├── utils/                       # Utility functions (e.g., email services)
+│   ├── server.js                    # Backend entry point
+│   ├── package.json                 # Backend dependencies and scripts
+│   └── README.md                    # Backend-specific documentation
+│
+└── swiftfund-smartcontract/        # ⛓️ Smart Contract Code (Cardano)
+    ├── lucid/                       # Lucid scripts for blockchain interactions
+    ├── validators/                 # Aiken/Plutus smart contract validators
+    ├── aiken.toml                  # Aiken configuration file
+    └── README.md                   # Smart contract documentation
 
 
 
