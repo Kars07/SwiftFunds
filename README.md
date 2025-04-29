@@ -104,6 +104,7 @@ SwiftFund is a decentralized platform built on the Cardano blockchain that conne
 README.md file that describes the project and its integration between the frontend, backend, and smart contracts:
 
 
+```bash
 SwiftFunds/
 ├── swiftfund_frontend/              # 🌐 Frontend (React + Vite + Tailwindcss)
 │   ├── src/
