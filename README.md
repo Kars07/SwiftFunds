@@ -130,7 +130,7 @@ SwiftFunds/
     ├── validators/                 # Aiken/Plutus smart contract validators
     ├── aiken.toml                  # Aiken configuration file
     └── README.md                   # Smart contract documentation
-
+```
 
 
 ---
