@@ -43,7 +43,7 @@ SwiftFund is a decentralized platform built on the Cardano blockchain that conne
 ## Architecture Overview
 
 ### 1. **Frontend**
-   - Built with **React**, **Vite**, and **TailwindCSS**.
+   - Built with **React** and **TailwindCSS**.
    - Provides a user-friendly interface for borrowers and lenders.
    - Handles wallet connections, KYC verification, and loan management.
    - Communicates with the backend via REST APIs.
@@ -106,7 +106,7 @@ README.md file that describes the project and its integration between the fronte
 
 ```bash
 SwiftFunds/
-├── swiftfund_frontend/              # 🌐 Frontend (React + Vite + Tailwindcss)
+├── swiftfund_frontend/              # 🌐 Frontend (React + Tailwindcss)
 │   ├── src/
 │   │   ├── components/              # Reusable React components
 │   │   ├── pages/                   # Page-level views
@@ -181,14 +181,14 @@ SwiftFunds/
 
 ---
 
-### frontend port for testing: http://localhost:5173
+### frontend port for testing: http://localhost:3000
 
 ### Backend port for testing :  http://localhost:5000/
 
 ---
 
 ### Technologies Used
-Frontend: React, Vite, TailwindCSS
+Frontend: React, TailwindCSS
 
 
 Backend: Node.js, Express, MongoDB
