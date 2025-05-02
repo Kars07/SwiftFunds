@@ -34,8 +34,47 @@ This is the frontend for the SwiftFund application, a decentralized platform for
 ---
 
 ## Project Structure
-swiftfund_frontend/ ├── public/ # Static assets (images, videos, fonts) ├── src/ # Source code │ ├── api/ # Axios instance for API calls │ ├── assets/ # Images and other assets │ ├── components/ # Reusable React components │ ├── pages/ # Page-level components │ ├── gradient-text/ # Custom CSS for gradient text │ ├── App.jsx # Main application component │ ├── main.jsx # Entry point for the React app │ ├── index.css # Global styles ├── .env # Environment variables ├── package.json # Dependencies and scripts ├── tailwind.config.js # TailwindCSS  └── README.md # Project documentation
 
+```bash
+swiftfund_frontend/
+├── public/                          # Static assets (images, videos, fonts)
+│   ├── index.html                   # Main HTML file
+│   ├── logo.png                     # Logo file (example)
+│   └── [other-static-assets]        # Other static files (e.g., videos, fonts)
+│
+├── src/                             # Source code
+│   ├── api/                         # Axios instance for API calls
+│   │   └── axiosInstance.js         # API setup (Axios instance for calls)
+│   │
+│   ├── assets/                      # Images and other assets
+│   │   ├── logo.png                 # Image assets (example)
+│   │   └── [other-assets]           # Other asset files (icons, etc.)
+│   │
+│   ├── components/                  # Reusable React components
+│   │   ├── Header.jsx               # Example reusable component
+│   │   ├── Footer.jsx               # Another reusable component
+│   │   └── [other-components]       # Additional reusable components
+│   │
+│   ├── pages/                       # Page-level components
+│   │   ├── HomePage.jsx             # Home page component
+│   │   ├── LoginPage.jsx            # Login page component
+│   │   ├── RegisterPage.jsx         # Registration page component
+│   │   └── [other-pages]            # Other page components (e.g., About, Dashboard)
+│   │
+│   ├── gradient-text/               # Custom CSS for gradient text
+│   │   └── gradientText.css         # Styles for gradient text effect
+│   │
+│   ├── App.jsx                      # Main application component
+│   ├── main.jsx                     # Entry point for the React app
+│   ├── index.css                    # Global styles (tailwind + custom CSS)
+│   └── [other-js-or-css-files]      # Other files like helpers, hooks, utilities, etc.
+│
+├── .env                              # Environment variables (API URL, etc.)
+├── package.json                      # Dependencies and scripts
+├── tailwind.config.js                # TailwindCSS configuration
+└── README.md                         # Project documentation
+
+ ```
 
 
 ---
@@ -55,15 +94,15 @@ swiftfund_frontend/ ├── public/ # Static assets (images, videos, fonts) �
 
 3. Create a .env file in the root directory and add the following:
    ```bash
-   VITE_API_URL=http://localhost:5000
+   REACT_APP_API_URL=http://localhost:5000
 
 
 4. Start the development server:
    ```bash
-   npm run dev
+   npm start
 
 
-5. Open the application in your browser at http://localhost:5173.
+5. Open the application in your browser at http://localhost:3000.
 
 
 
@@ -71,9 +110,6 @@ swiftfund_frontend/ ├── public/ # Static assets (images, videos, fonts) �
 
 ## Technologies Used
 React: Frontend library for building user interfaces.
-
-
-Vite: Fast build tool for modern web projects.
 
 
 TailwindCSS: Utility-first CSS framework for styling.
@@ -96,4 +132,4 @@ npm run preview: Preview the production build.
 ## Environment Variables
 The following environment variables are used in the project:
 
-VITE_API_URL: The base URL for the backend API.
+REACT_APP_API_URL: The base URL for the backend API.
