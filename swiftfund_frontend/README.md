@@ -1,6 +1,6 @@
 # SwiftFund Frontend
 
-This is the frontend for the SwiftFund application, a decentralized platform for peer-to-peer lending and borrowing built on the Cardano blockchain. The frontend is developed using **React** , with **TailwindCSS** for styling.
+This is the frontend for the SwiftFund application, a decentralized platform for peer-to-peer lending and borrowing built on the Cardano blockchain. The frontend is developed using **React** and  **vite** with **TailwindCSS** for styling.
 
 ---
 
@@ -94,15 +94,16 @@ swiftfund_frontend/
 
 3. Create a .env file in the root directory and add the following:
    ```bash
-   REACT_APP_API_URL=http://localhost:5000
+   VITE_API_URL=http://localhost:5000
 
 
 4. Start the development server:
    ```bash
-   npm start
+   npm run dev
 
 
-5. Open the application in your browser at http://localhost:3000.
+5. Open the application in your browser at http://localhost:5173
+
 
 
 
@@ -110,6 +111,8 @@ swiftfund_frontend/
 
 ## Technologies Used
 React: Frontend library for building user interfaces.
+
+Vite: a fast, modern frontend build tool that offers instant startup, lightning-fast hot module replacement, and optimized production builds with minimal configuration.
 
 
 TailwindCSS: Utility-first CSS framework for styling.
