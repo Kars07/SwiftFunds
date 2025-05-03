@@ -3,7 +3,12 @@ import secure from '../assets/secure.png';
 import fast from '../assets/fast.png';
 import middleman from '../assets/middleman.png';
 
-const FlipCard = ({ title, image }) => {
+interface FlipCardProps {
+  title: string;
+  image: string;
+}
+
+const FlipCard: React.FC<FlipCardProps> = ({ title, image }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -17,15 +22,20 @@ const FlipCard = ({ title, image }) => {
         } hover:rotate-y-180`}
       >
         {/* Front Face */}
-        <div className="absolute w-full h-full backface-hidden bg-cover rounded-xl shadow-lg z-10" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-
-          <div className="flex justify-center  items-center h-full">
+        <div
+          className="absolute w-full h-full backface-hidden bg-cover rounded-xl shadow-lg z-10"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        >
+          <div className="flex justify-center items-center h-full">
             <img src={image} alt="card visual" className="w-78 h-78 object-contain" />
           </div>
         </div>
 
         {/* Back Face */}
-        <div className="absolute w-full pt-10 h-full backface-hidden rotate-y-180 bg-cover rounded-xl shadow-lg" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <div
+          className="absolute w-full pt-10 h-full backface-hidden rotate-y-180 bg-cover rounded-xl shadow-lg"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        >
           <div>
             <h1 className="text-3xl text-center text-orange-600 font-bold p-10 leading-relaxed">
               {title}
@@ -37,7 +47,7 @@ const FlipCard = ({ title, image }) => {
   );
 };
 
-export const WhyChoose = () => {
+export const WhyChoose: React.FC = () => {
   return (
     <div className="align-middle">
       <div className="pt-20 font-special text-4xl text-white text-center font-bold">

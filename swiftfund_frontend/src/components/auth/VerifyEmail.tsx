@@ -2,7 +2,7 @@ import React from 'react';
 import logo from '../../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 
-const VerifyEmail = () => {
+const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
 
   return (

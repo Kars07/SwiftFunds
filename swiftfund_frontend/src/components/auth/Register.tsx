@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
-const Registration = () => {
-  const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+interface FormData {
+  fullname: string;
+  email: string;
+  password: string;
+}
+
+const Registration: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({ fullname: '', email: '', password: '' });
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -17,12 +23,12 @@ const Registration = () => {
     }));
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = (password: string): boolean => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$*&])[A-Za-z\d@#$*&]{8,}$/;
     return passwordRegex.test(password);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!validatePassword(formData.password)) {
@@ -145,8 +151,7 @@ const Registration = () => {
           </div>
         </div>
 
-
-         {/* Welcome Section */}
+        {/* Welcome Section */}
         <div className="w-1/2 bg-blue-600 text-white flex flex-col justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
           <p className="mb-6">Already have an account?</p>

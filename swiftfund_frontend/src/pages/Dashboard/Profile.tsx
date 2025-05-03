@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import default_profile from "../../assets/default_profile.png";
 
-const Profile = () => {
-  const [user, setUser] = useState({
+interface User {
+  fullName: string;
+  email: string;
+  emailConfirmed: boolean;
+}
+
+const Profile: React.FC = () => {
+  const [user, setUser] = useState<User>({
     fullName: "",
     email: "",
     emailConfirmed: false,
   });
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Fetch user profile on mount
@@ -40,8 +46,10 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  const handlePhotoChange = (e) => {
-    setProfilePhoto(e.target.files[0]);
+  const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setProfilePhoto(e.target.files[0]);
+    }
   };
 
   const handleSaveChanges = async () => {

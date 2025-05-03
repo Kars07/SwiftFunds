@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 
-const Transactions = () => {
-  const [transactions, setTransactions] = useState([]);
+interface Transaction {
+  description: string;
+  date: string;
+  amount: number;
+}
+
+const Transactions: React.FC = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   return (
     <div className="p-6 bg-gray-900 text-white rounded-lg shadow-md space-y-4">

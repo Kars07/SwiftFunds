@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 
-const Settings = () => {
-  const [notifications, setNotifications] = useState(true);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [passwords, setPasswords] = useState({
+const Settings: React.FC = () => {
+  const [notifications, setNotifications] = useState<boolean>(true);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>(false);
+  const [passwords, setPasswords] = useState<{
+    current: string;
+    new: string;
+    confirm: string;
+  }>({
     current: "",
     new: "",
     confirm: ""
@@ -37,21 +41,27 @@ const Settings = () => {
               type="password"
               placeholder="Current Password"
               value={passwords.current}
-              onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+              onChange={(e) =>
+                setPasswords({ ...passwords, current: e.target.value })
+              }
               className="w-full p-3 border border-gray-300 rounded"
             />
             <input
               type="password"
               placeholder="New Password"
               value={passwords.new}
-              onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+              onChange={(e) =>
+                setPasswords({ ...passwords, new: e.target.value })
+              }
               className="w-full p-3 border border-gray-300 rounded"
             />
             <input
               type="password"
               placeholder="Confirm New Password"
               value={passwords.confirm}
-              onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+              onChange={(e) =>
+                setPasswords({ ...passwords, confirm: e.target.value })
+              }
               className="w-full p-3 border border-gray-300 rounded"
             />
             <button
@@ -65,7 +75,9 @@ const Settings = () => {
 
         {/* Notification Settings */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2 text-black">Notification Preferences</h3>
+          <h3 className="text-lg font-medium mb-2 text-black">
+            Notification Preferences
+          </h3>
           <label className="flex items-center space-x-2 text-black-700">
             <input
               type="checkbox"
@@ -73,13 +85,17 @@ const Settings = () => {
               onChange={() => setNotifications(!notifications)}
               className="form-checkbox"
             />
-            <span className="text-black">Email notifications for loan updates</span>
+            <span className="text-black">
+              Email notifications for loan updates
+            </span>
           </label>
         </div>
 
         {/* 2FA */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2 text-black">Two-Factor Authentication</h3>
+          <h3 className="text-lg font-medium mb-2 text-black">
+            Two-Factor Authentication
+          </h3>
           <label className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -87,7 +103,9 @@ const Settings = () => {
               onChange={() => setTwoFactorEnabled(!twoFactorEnabled)}
               className="form-checkbox"
             />
-            <span className="text-black">Enable Two-Factor Authentication (2FA)</span>
+            <span className="text-black">
+              Enable Two-Factor Authentication (2FA)
+            </span>
           </label>
         </div>
 

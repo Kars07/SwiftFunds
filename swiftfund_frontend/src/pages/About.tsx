@@ -1,77 +1,115 @@
 import React, { useRef, useEffect } from "react";
-import wura from '../assets/wura.jpg'
-import dami from '../assets/dami.jpg'
-import raphael from '../assets/raphael.jpg'
-import michael from '../assets/Micheal.jpg'
-import dani from '../assets/dani.jpg'
-import zigzag from '../assets/zigzag.png'
+import wura from '../assets/wura.jpg';
+import dami from '../assets/dami.jpg';
+import raphael from '../assets/raphael.jpg';
+import michael from '../assets/Micheal.jpg';
+import dani from '../assets/dani.jpg';
+import zigzag from '../assets/zigzag.png';
 
-const About = () => {
-   const pathRef = useRef(null);
-  
-    useEffect(() => {
-      const path = pathRef.current;
-      if (!path) return;
-  
-      const pathLength = path.getTotalLength();
-      path.style.strokeDasharray = `${pathLength} ${pathLength}`;
-      path.style.strokeDashoffset = pathLength;
-  
-      const handleScroll = () => {
-        const pathTop = path.getBoundingClientRect().top;
-        const pathHeight = path.getBoundingClientRect().height;
-        const windowHeight = window.innerHeight;
-  
-        if (pathTop < windowHeight && pathTop + pathHeight > 0) {
-          const visibleRatio = Math.min(1, (windowHeight - pathTop) / (windowHeight + pathHeight));
-          const speedFactor = 1.5;
-          const drawLength = Math.min(pathLength, pathLength * visibleRatio * speedFactor);
-          path.style.strokeDashoffset = pathLength - drawLength;
-        }
-      };
-  
-      window.addEventListener('scroll', handleScroll);
-      window.addEventListener('resize', handleScroll);
-      handleScroll();
-  
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        window.removeEventListener('resize', handleScroll);
-      };
-    }, []);
+const About: React.FC = () => {
+  const pathRef = useRef<SVGPathElement | null>(null);
+
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) return;
+
+    const pathLength = path.getTotalLength();
+    path.style.strokeDasharray = `${pathLength} ${pathLength}`;
+    path.style.strokeDashoffset = `${pathLength}`;
+
+    const handleScroll = () => {
+      const pathTop = path.getBoundingClientRect().top;
+      const pathHeight = path.getBoundingClientRect().height;
+      const windowHeight = window.innerHeight;
+
+      if (pathTop < windowHeight && pathTop + pathHeight > 0) {
+        const visibleRatio = Math.min(1, (windowHeight - pathTop) / (windowHeight + pathHeight));
+        const speedFactor = 1.5;
+        const drawLength = Math.min(pathLength, pathLength * visibleRatio * speedFactor);
+        path.style.strokeDashoffset = `${pathLength - drawLength}`;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   return (
-    <div className="w-full  h-full text-white overflow-hidden">
-       <div className="absolute left-30 pl-8 rotate-z-65 translate-y-[-10px]">
-          <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
-        </div>
+    <div className="w-full h-full text-white overflow-hidden">
+      <div className="absolute left-30 pl-8 rotate-z-65 translate-y-[-10px]">
+        <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
+      </div>
       <h1 className="text-4xl text-center pt-30 font-bold text-gray-900">MEET OUR DEVELOPERS</h1>
       <div className="absolute right-30 pl-8 rotate-z-125 translate-y-[-170px]">
-          <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
-        </div>
-       <div className="relative">
-        <svg width="1584" height="3509" viewBox="0 0 1584 2479" className="absolute transform -translate-y-50 -z-10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
+      </div>
+      <div className="relative">
+        <svg
+          width="1584"
+          height="3509"
+          viewBox="0 0 1584 2479"
+          className="absolute transform -translate-y-50 -z-10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <g filter="url(#filter0_d_1_3)">
-          <path ref={pathRef}
-          d="M5 5C349.784 47.2114 515.585 84.7439 773 171C966.325 241.023 1066.55 283.289 1201 375L1465 544C1534.56 573.225 1559.12 568.34 1574 517C1557.98 469.576 1544.77 447.112 1489.5 438C1447.28 444.151 1423.51 447.845 1378 462.5L1165.5 544C1114.82 562.835 1018.91 688.1 694 726.5C610.572 738.871 582.247 762.236 506.5 764.5C447.49 800.127 385.658 787.338 305 835.5C235.175 863.434 203.682 892.377 144 928C73.1972 980.026 53.5941 1026.61 54 1140.5C54.4636 1249.68 66.5695 1294.06 108 1345C382.089 1474.27 865.5 1555 865.5 1555L1377.5 1647.5C1449.99 1682.25 1491.29 1701.02 1481 1825C1467.05 1917.22 1447.27 1949.93 1377.5 1953.5L1075.5 1992.5C863.211 2043.66 815.185 2053.95 694 2081.5L250 2184.5C143.944 2225.37 109.153 2261.45 69 2337.5L15.5 2469" stroke="#EA580C" stroke-width="10" shape-rendering="crispEdges" style={{
-            transition: 'stroke-dashoffset 0.3s ease-out',
-          }}/>
+            <path
+              ref={pathRef}
+              d="M5 5C349.784 47.2114 515.585 84.7439 773 171C966.325 241.023 1066.55 283.289 1201 375L1465 544C1534.56 573.225 1559.12 568.34 1574 517C1557.98 469.576 1544.77 447.112 1489.5 438C1447.28 444.151 1423.51 447.845 1378 462.5L1165.5 544C1114.82 562.835 1018.91 688.1 694 726.5C610.572 738.871 582.247 762.236 506.5 764.5C447.49 800.127 385.658 787.338 305 835.5C235.175 863.434 203.682 892.377 144 928C73.1972 980.026 53.5941 1026.61 54 1140.5C54.4636 1249.68 66.5695 1294.06 108 1345C382.089 1474.27 865.5 1555 865.5 1555L1377.5 1647.5C1449.99 1682.25 1491.29 1701.02 1481 1825C1467.05 1917.22 1447.27 1949.93 1377.5 1953.5L1075.5 1992.5C863.211 2043.66 815.185 2053.95 694 2081.5L250 2184.5C143.944 2225.37 109.153 2261.45 69 2337.5L15.5 2469"
+              stroke="#EA580C"
+              strokeWidth="10"
+              shapeRendering="crispEdges"
+              style={{
+                transition: 'stroke-dashoffset 0.3s ease-out',
+              }}
+            />
           </g>
           <defs>
-          <filter id="filter0_d_1_3" x="0.392395" y="0.037056" width="1582.85" height="2478.85" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feOffset dy="4"/>
-          <feGaussianBlur stdDeviation="2"/>
-          <feComposite in2="hardAlpha" operator="out"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_3"/>
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_3" result="shape"/>
-          </filter>
+            <filter
+              id="filter0_d_1_3"
+              x="0.392395"
+              y="0.037056"
+              width="1582.85"
+              height="2478.85"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              />
+              <feOffset dy="4" />
+              <feGaussianBlur stdDeviation="2" />
+              <feComposite in2="hardAlpha" operator="out" />
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+              />
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow_1_3"
+              />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow_1_3"
+                result="shape"
+              />
+            </filter>
           </defs>
-          </svg>
+        </svg>
+      </div>
 
-       </div>
       <div className="py-20 flex flex-col gap-20">
         <div className="w-full flex gap-20  justify-end px-40">
           <img src={michael} alt="" className="w-[350px] rounded-4xl h-[450px]" />
@@ -158,10 +196,7 @@ const About = () => {
           </div>
 
         </div>
-       
-        
-
-      </div>
+    </div>
     </div>
   );
 };

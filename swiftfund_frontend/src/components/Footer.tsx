@@ -1,22 +1,20 @@
 import React from "react";
-import logo from "../assets/logo.png"
+import logo from "../assets/logo.png";
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
     <footer className="footer overflow-hidden w-full bg-gray-900 flex flex-col items-center py-10 relative">
       <hr className="w-[90vw] h-[1px] bg-white my-5 border-none" />
 
       <div className="footer-content flex flex-wrap justify-start items-start pt-16 max-w-[1200px] relative">
-       
-    
-        <div className="-mx-40 w-full justify-start flex h-auto gap-2 text-2xl font-bold  text-white mt-12 pl-36 absolute top-[-40px] ">
-            
-            <img className="w-[50px]  h-auto mb-5" src={logo} alt="Logo" /> 
-            <div className="flex justify-center items-center"><h1>SWIFTFUND</h1></div> 
-        
-            
+        <div className="-mx-40 w-full justify-start flex h-auto gap-2 text-2xl font-bold text-white mt-12 pl-36 absolute top-[-40px]">
+          <img className="w-[50px] h-auto mb-5" src={logo} alt="Logo" />
+          <div className="flex justify-center items-center">
+            <h1>SWIFTFUND</h1>
+          </div>
         </div>
-      <div className="footer-column flex-1 min-w-[200px] mt-15 px-2 mr-20">
+
+        <div className="footer-column flex-1 min-w-[200px] mt-15 px-2 mr-20">
           <h3 className="text-white text-base mb-5">Products</h3>
           <ul className="list-none pb-4">
             <li className="text-white/70 text-sm mb-3 cursor-pointer hover:text-white">Fund Pass</li>
@@ -53,7 +51,7 @@ const Footer = () => {
           </ul>
         </div>
       </div>
-    
+
       <div className="footer-bottom flex justify-between items-center py-4 text-white text-sm gap-[33rem]">
         &copy;2025. All rights reserved.
         <div className="footer-social-icons flex gap-4 ml-40">

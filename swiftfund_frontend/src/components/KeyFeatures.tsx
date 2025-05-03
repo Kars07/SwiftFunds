@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import arrow from "../assets/arrow.png";
 
-const KeyFeatures = () => {
-  const pathRef = useRef(null);
+const KeyFeatures: React.FC = () => {
+  const pathRef = useRef<SVGPathElement | null>(null);
 
   useEffect(() => {
     const path = pathRef.current;
@@ -10,18 +10,19 @@ const KeyFeatures = () => {
 
     const pathLength = path.getTotalLength();
     path.style.strokeDasharray = `${pathLength} ${pathLength}`;
-    path.style.strokeDashoffset = pathLength;
+    path.style.strokeDashoffset = pathLength.toString();
 
     const handleScroll = () => {
-      const pathTop = path.getBoundingClientRect().top;
-      const pathHeight = path.getBoundingClientRect().height;
+      const rect = path.getBoundingClientRect();
+      const pathTop = rect.top;
+      const pathHeight = rect.height;
       const windowHeight = window.innerHeight;
 
       if (pathTop < windowHeight && pathTop + pathHeight > 0) {
         const visibleRatio = Math.min(1, (windowHeight - pathTop) / (windowHeight + pathHeight));
         const speedFactor = 1.5;
         const drawLength = Math.min(pathLength, pathLength * visibleRatio * speedFactor);
-        path.style.strokeDashoffset = pathLength - drawLength;
+        path.style.strokeDashoffset = (pathLength - drawLength).toString();
       }
     };
 
@@ -36,20 +37,20 @@ const KeyFeatures = () => {
   }, []);
 
   return (
-    <div className='py-30 px-5 overflow-hidden'>
-      <h1 className='text-4xl font-bold text-gray-900 text-center'>KEY FEATURES OF SWIFTFUND</h1>
-      <div className='justify-center pt-3 flex'>
-        <div className='border border-gray-900 w-50 rounded-2xl h-3 bg-gray-900 items-center'></div>
+    <div className="py-30 px-5 overflow-hidden">
+      <h1 className="text-4xl font-bold text-gray-900 text-center">KEY FEATURES OF SWIFTFUND</h1>
+      <div className="justify-center pt-3 flex">
+        <div className="border border-gray-900 w-50 rounded-2xl h-3 bg-gray-900 items-center"></div>
       </div>
-      <div className='flex justify-center pt-20 pb-10'>
-        <div className='border-3 w-12 animate-bounce h-12 rounded-full justify-center items-center flex'>
-          <img src={arrow} alt="" className='w-8' style={{ filter: "brightness(0)" }} />
+      <div className="flex justify-center pt-20 pb-10">
+        <div className="border-3 w-12 animate-bounce h-12 rounded-full justify-center items-center flex">
+          <img src={arrow} alt="arrow" className="w-8" style={{ filter: "brightness(0)" }} />
         </div>
       </div>
 
       {/* 🟢 Animated SVG */}
-      <div className='relative'>
-        <svg width="1184" height="741" viewBox="0 0 1584 941" className='transform absolute -z-10 -translate-y-10' fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div className="relative">
+        <svg width="1184" height="741" viewBox="0 0 1584 941" className="transform absolute -z-10 -translate-y-10" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g filter="url(#filter0_d_1_3)">
             <path
               ref={pathRef}
@@ -57,9 +58,7 @@ const KeyFeatures = () => {
               stroke="#37FF10"
               strokeWidth="10"
               shapeRendering="crispEdges"
-              style={{
-                transition: 'stroke-dashoffset 0.3s ease-out',
-              }}
+              style={{ transition: 'stroke-dashoffset 0.3s ease-out' }}
             />
           </g>
           <defs>
@@ -80,16 +79,28 @@ const KeyFeatures = () => {
       {/* 📝 Key Features Content */}
       <div>
         <div>
-          <h1 className='text-orange-600 font-medium text-3xl pt-10 pb-5'>🔁 Dual Roles</h1>
-          <h2>Every user can be a borrower or lender at <br />any time. This flexibility promotes a healthy,<br /> sustainable loan ecosystem.</h2>
+          <h1 className="text-orange-600 font-medium text-3xl pt-10 pb-5">🔁 Dual Roles</h1>
+          <h2>
+            Every user can be a borrower or lender at <br />
+            any time. This flexibility promotes a healthy,<br />
+            sustainable loan ecosystem.
+          </h2>
         </div>
-        <div className='justify-center flex flex-col items-center'>
-          <h1 className='text-orange-600 font-medium text-3xl pt-10 pb-5'>📤 Blockchain Submissions</h1>
-          <h2>Loan requests are submitted to the Cardano<br /> blockchain, ensuring transparency, immutability, <br />and auditability of all actions.</h2>
+        <div className="justify-center flex flex-col items-center">
+          <h1 className="text-orange-600 font-medium text-3xl pt-10 pb-5">📤 Blockchain Submissions</h1>
+          <h2>
+            Loan requests are submitted to the Cardano<br />
+            blockchain, ensuring transparency, immutability, <br />
+            and auditability of all actions.
+          </h2>
         </div>
-        <div className='justify-end flex flex-col items-end'>
-          <h1 className='text-orange-600 font-medium text-3xl pt-10 pb-5 transform -translate-x-17'>⏳ Timely Repayment</h1>
-          <h2>Borrowers are expected to repay on or before<br /> the deadline. Failure to repay may affect reputation<br /> and access to future funds.</h2>
+        <div className="justify-end flex flex-col items-end">
+          <h1 className="text-orange-600 font-medium text-3xl pt-10 pb-5 transform -translate-x-17">⏳ Timely Repayment</h1>
+          <h2>
+            Borrowers are expected to repay on or before<br />
+            the deadline. Failure to repay may affect reputation<br />
+            and access to future funds.
+          </h2>
         </div>
       </div>
     </div>

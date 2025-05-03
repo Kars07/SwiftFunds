@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Outlet } from 'react-router-dom';
-import logo from '../../assets/logo.png';
-import default_profile from '../../assets/default_profile.png';
+import { useNavigate, Outlet } from "react-router-dom";
+import logo from "../../assets/logo.png";
+import default_profile from "../../assets/default_profile.png";
 
-const Dashboard = () => {
-  const [isNaira, setIsNaira] = useState(true);
-  const [exchangeRate, setExchangeRate] = useState(null);
-  const [nairaBalance] = useState(5000);
+const Dashboard: React.FC = () => {
+  const [isNaira, setIsNaira] = useState<boolean>(true);
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [nairaBalance] = useState<number>(5000);
 
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showLoanActions, setShowLoanActions] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
+  const [showLoanActions, setShowLoanActions] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchExchangeRate = async () => {
       try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=ngn');
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=ngn"
+        );
         const data = await response.json();
         const rate = data.cardano.ngn;
         setExchangeRate(rate);
@@ -31,7 +33,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -39,32 +41,39 @@ const Dashboard = () => {
         setUserEmail(parsedUser.email || "user@example.com");
       } catch (error) {
         console.error("Failed to parse stored user:", error);
-        navigate('/login');
+        navigate("/login");
       }
     } else {
-      navigate('/login');
+      navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
-  const computedAdaBalance = exchangeRate ? (nairaBalance / exchangeRate).toFixed(2) : '...';
+  const computedAdaBalance = exchangeRate
+    ? (nairaBalance / exchangeRate).toFixed(2)
+    : "...";
 
   const handleToggleCurrency = () => {
     setIsNaira(!isNaira);
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
 
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+      await fetch(
+        `${
+          import.meta.env.VITE_API_URL || "http://localhost:5000"
+        }/api/users/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     } finally {
       setShowLogoutModal(false);
-      navigate('/login');
+      navigate("/login");
     }
   };
 
@@ -88,7 +97,7 @@ const Dashboard = () => {
             <ul className="space-y-5 cursor-pointer">
               <li
                 className="flex items-center space-x-2 bg-orange-700 text-white py-2 px-3 rounded-md"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate("/dashboard")}
               >
                 <i className="bx bx-home text-lg"></i>
                 <span>Home</span>
@@ -99,7 +108,7 @@ const Dashboard = () => {
               </li>
               <li
                 className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
-                onClick={() => navigate('/dashboard/profile')}
+                onClick={() => navigate("/dashboard/profile")}
               >
                 <i className="bx bx-user text-lg"></i>
                 <span>Profile</span>
@@ -115,27 +124,31 @@ const Dashboard = () => {
                     <i className="bx bx-money text-lg"></i>
                     <span>Loan Actions</span>
                   </div>
-                  <i className={`bx bx-chevron-${showLoanActions ? 'up' : 'down'} text-lg`}></i>
+                  <i
+                    className={`bx bx-chevron-${
+                      showLoanActions ? "up" : "down"
+                    } text-lg`}
+                  ></i>
                 </div>
                 {showLoanActions && (
                   <ul className="bg-gray-800 rounded-md overflow-hidden w-full">
                     <li
                       className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => navigate('/dashboard/loan-applications')}
+                      onClick={() => navigate("/dashboard/loan-applications")}
                     >
                       <i className="bx bx-edit text-lg"></i>
                       <span>Loan Applications</span>
                     </li>
                     <li
                       className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => navigate('/dashboard/loans-funded')}
+                      onClick={() => navigate("/dashboard/loans-funded")}
                     >
                       <i className="bx bx-dollar-circle text-lg"></i>
                       <span>Loans Funded</span>
                     </li>
                     <li
                       className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => navigate('/dashboard/loans-repaid')}
+                      onClick={() => navigate("/dashboard/loans-repaid")}
                     >
                       <i className="bx bx-refresh text-lg"></i>
                       <span>Loans Repaid</span>
@@ -145,16 +158,16 @@ const Dashboard = () => {
               </li>
 
               {/* Other Items */}
-              <li 
+              <li
                 className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
-                onClick={() => navigate('/dashboard/transactions')}
+                onClick={() => navigate("/dashboard/transactions")}
               >
                 <i className="bx bx-transfer text-lg"></i>
                 <span>Transactions</span>
               </li>
-              <li 
+              <li
                 className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
-                onClick={() => navigate('/dashboard/settings')}
+                onClick={() => navigate("/dashboard/settings")}
               >
                 <i className="bx bx-cog text-lg"></i>
                 <span>Settings</span>
@@ -166,7 +179,7 @@ const Dashboard = () => {
         {/* Sign Out */}
         <div className="mt-4 flex items-center bg-gray-800 py-2 px-3 rounded-md">
           <img
-            src={default_profile} 
+            src={default_profile}
             alt="User Avatar"
             className="w-10 h-10 rounded-full"
           />
@@ -174,7 +187,10 @@ const Dashboard = () => {
             <h2 className="text-sm font-bold">{userName}</h2>
             <p className="text-xs text-gray-400 truncate">{userEmail}</p>
           </div>
-          <button onClick={() => setShowLogoutModal(true)} className="text-gray-400 hover:text-white cursor-pointer">
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="text-gray-400 hover:text-white cursor-pointer"
+          >
             <i className="bx bx-log-in text-lg"></i>
           </button>
         </div>
@@ -189,8 +205,12 @@ const Dashboard = () => {
       {showLogoutModal && (
         <div className="fixed inset-0 bg-white/10 backdrop-blur-md flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-96">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Confirm Logout</h2>
-            <p className="text-gray-600 mb-6">Are you sure you want to log out?</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              Confirm Logout
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to log out?
+            </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowLogoutModal(false)}

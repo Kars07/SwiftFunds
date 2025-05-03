@@ -1,16 +1,17 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Docs from './pages/Docs';
+import "./index.css"
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import Docs from './pages/Docs'
 import HeaderSection from './pages/HeaderSection';
-import ResetPassword from './components/auth/ResetPassword';
+import ResetPassword from './components/auth/ResetPassword'
 import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Dashboard/Profile';
-import Settings from './pages/Dashboard/settings';
+import Settings from './pages/Dashboard/settings'
 import DefaultDashboardContent from './pages/Dashboard/DefaultDashboardContent';
 import Transactions from './pages/Dashboard/transaction';
-import Register from './components/auth/Register';
+import Register from './components/auth/Register'
 import Login from './components/auth/Login';
 import VerifyEmail from './components/auth/VerifyEmail';
 import ForgotPassword from './components/auth/ForgotPassword';
@@ -18,7 +19,7 @@ import PrivateRoute from './components/PrivateRoute';
 import About from './pages/About';
 import Contact from './pages/Contact';
 
-const Layout = () => {
+const Layout: React.FC = () => {
   const location = useLocation();
   const showNavbarFooter = ["/", "/about", "/contact"].includes(location.pathname);
 
@@ -61,8 +62,8 @@ const Layout = () => {
   );
 };
 
-function App() {
+const App: React.FC = () => {
   return <Layout />;
-}
+};
 
 export default App;

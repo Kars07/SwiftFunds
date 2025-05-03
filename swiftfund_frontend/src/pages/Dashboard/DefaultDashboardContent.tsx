@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const DefaultDashboardContent = () => {
-  const [userName, setUserName] = useState("User");
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletName, setWalletName] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
-  const [showWalletModal, setShowWalletModal] = useState(false);
+declare global {
+  interface Window {
+    cardano?: any;
+  }
+}
+
+const DefaultDashboardContent: React.FC = () => {
+  const [userName, setUserName] = useState<string>("User");
+  const [walletConnected, setWalletConnected] = useState<boolean>(false);
+  const [walletName, setWalletName] = useState<string>("");
+  const [walletAddress, setWalletAddress] = useState<string>("");
+  const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -20,7 +26,7 @@ const DefaultDashboardContent = () => {
     }
   }, []);
 
-  const handleWalletConnect = async (wallet) => {
+  const handleWalletConnect = async (wallet: string) => {
     try {
       if (!window.cardano || !window.cardano[wallet]) {
         alert(`The selected wallet (${wallet}) is not installed.`);
@@ -47,16 +53,15 @@ const DefaultDashboardContent = () => {
 
   return (
     <div className="space-y-8 relative">
-
       {/* Wallet Modal */}
       <AnimatePresence>
         {showWalletModal && (
           <>
             {/* Semi-transparent nice background */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 0.6 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black backdrop-blur-sm z-40"
             />
 
@@ -155,7 +160,9 @@ const DefaultDashboardContent = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg text-center">
           <p className="text-gray-600 dark:text-gray-300 text-sm">Credit Score</p>
-          <p className="text-3xl font-bold">200<span className="text-sm font-normal">/600</span></p>
+          <p className="text-3xl font-bold">
+            200<span className="text-sm font-normal">/600</span>
+          </p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg text-center">
           <p className="text-gray-600 dark:text-gray-300 text-sm">Active Loans</p>

@@ -1,21 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
+interface FormData {
+  fullName: string;
+  email: string;
+  companyName: string;
+  message: string;
+}
+
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
     fullName: "",
     email: "",
     companyName: "",
     message: "",
   });
 
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await axios.post("/api/contact", formData);
@@ -96,7 +103,7 @@ const Contact = () => {
               value={formData.message}
               onChange={handleChange}
               className="w-full px-4 py-2 border-3 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-              rows="4"
+              rows={4}
               required
             />
           </div>

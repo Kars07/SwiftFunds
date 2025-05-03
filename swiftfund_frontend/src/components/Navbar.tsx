@@ -3,7 +3,7 @@ import logo from "../assets/logo.png";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 
-function Navbar() {
+const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = () => setIsOpen(!isOpen);
@@ -112,6 +112,6 @@ function Navbar() {
       </div>
     </>
   );
-}
+};
 
 export default Navbar;
