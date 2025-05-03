@@ -19,8 +19,8 @@ app.use(cookieParser());
 
 // Enable CORS for your frontend URL
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:3000",
-  "http://localhost:3000",
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "http://localhost:5173",
 ];
 
 const corsOptions = {
