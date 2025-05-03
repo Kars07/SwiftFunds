@@ -1,6 +1,6 @@
 # SwiftFund Frontend
 
-This is the frontend for the SwiftFund application, a decentralized platform for peer-to-peer lending and borrowing built on the Cardano blockchain. The frontend is developed using **React** and  **vite** with **TailwindCSS** for styling.
+This is the frontend for the SwiftFund application, a decentralized platform for peer-to-peer lending and borrowing built on the Cardano blockchain. The frontend is developed using **React** , **vite** and **TypeScript** with **TailwindCSS** for styling.
 
 ---
 
@@ -51,21 +51,21 @@ swiftfund_frontend/
 │   │   └── [other-assets]           # Other asset files (icons, etc.)
 │   │
 │   ├── components/                  # Reusable React components
-│   │   ├── Header.jsx               # Example reusable component
-│   │   ├── Footer.jsx               # Another reusable component
+│   │   ├── Header.tsx               # Example reusable component
+│   │   ├── Footer.tsx               # Another reusable component
 │   │   └── [other-components]       # Additional reusable components
 │   │
 │   ├── pages/                       # Page-level components
-│   │   ├── HomePage.jsx             # Home page component
-│   │   ├── LoginPage.jsx            # Login page component
-│   │   ├── RegisterPage.jsx         # Registration page component
+│   │   ├── HomePage.tsx             # Home page component
+│   │   ├── LoginPage.tsx            # Login page component
+│   │   ├── RegisterPage.tsx         # Registration page component
 │   │   └── [other-pages]            # Other page components (e.g., About, Dashboard)
 │   │
 │   ├── gradient-text/               # Custom CSS for gradient text
 │   │   └── gradientText.css         # Styles for gradient text effect
 │   │
-│   ├── App.jsx                      # Main application component
-│   ├── main.jsx                     # Entry point for the React app
+│   ├── App.tsx                      # Main application component
+│   ├── main.tsx                     # Entry point for the React app
 │   ├── index.css                    # Global styles (tailwind + custom CSS)
 │   └── [other-js-or-css-files]      # Other files like helpers, hooks, utilities, etc.
 │
