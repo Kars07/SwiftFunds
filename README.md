@@ -65,7 +65,7 @@ SwiftFund is a decentralized platform built on the Cardano blockchain that conne
    - **Security**: Implements session management and centralized error handling.
 
 ### 3. **Smart Contracts**
-   - Written in **Plutus** and deployed on the Cardano blockchain.
+   - Written in **Aiken** and deployed on the Cardano blockchain.
    - Handles the core logic for loan requests, funding, and repayments.
    - Ensures transparency and security through immutable smart contracts.
 
