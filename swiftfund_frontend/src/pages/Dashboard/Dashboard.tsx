@@ -102,7 +102,10 @@ const Dashboard: React.FC = () => {
                 <i className="bx bx-home text-lg"></i>
                 <span>Home</span>
               </li>
-              <li className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md">
+              <li 
+                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
+                onClick={() => navigate("/dashboard/applications")}
+              >
                 <i className="bx bx-folder text-lg"></i>
                 <span>Applications</span>
               </li>

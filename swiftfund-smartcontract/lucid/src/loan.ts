@@ -42,7 +42,7 @@ const lucid = await Lucid(
 );
 console.log("Lucid initialized successfully");
 
-const LenderSeedPhrase = ""
+const LenderSeedPhrase =  "source witness fury romance owner envelope announce earn suggest regular screen will exotic copy athlete life spend wasp noise road rookie famous forward heavy"
 const LenderSignWithWallet = lucid.selectWallet.fromSeed(LenderSeedPhrase);
 console.log("Lender Wallet selected");
 

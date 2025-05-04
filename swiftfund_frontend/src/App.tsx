@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 import Docs from './pages/Docs'
 import HeaderSection from './pages/HeaderSection';
 import ResetPassword from './components/auth/ResetPassword'
+import Applications from './pages/Dashboard/applications';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Dashboard/Profile';
 import Settings from './pages/Dashboard/settings'
@@ -52,6 +53,7 @@ const Layout: React.FC = () => {
         >
           <Route index element={<DefaultDashboardContent />} />
           <Route path="transactions" element={<Transactions />} />
+          <Route path="applications" element={<Applications />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
         </Route>
