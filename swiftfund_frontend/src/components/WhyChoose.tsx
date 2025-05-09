@@ -4,41 +4,50 @@ import fast from '../assets/fast.png';
 import middleman from '../assets/middleman.png';
 
 interface FlipCardProps {
-  title: string;
+  frontTitle: string;
+  backText: string;
   image: string;
 }
 
-const FlipCard: React.FC<FlipCardProps> = ({ title, image }) => {
+const FlipCard: React.FC<FlipCardProps> = ({ frontTitle, backText, image }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
     <div
-      className="pt-20 w-[270px] h-[480px] m-4 perspective cursor-pointer"
-      onClick={() => setIsFlipped(!isFlipped)} // Mobile tap
+      className="w-[260px] shadow-xl mt-12 border-4 border-gray-600 rounded-3xl h-[400px] m-4 perspective cursor-pointer"
+      onClick={() => setIsFlipped(!isFlipped)}
     >
       <div
-        className={`w-full h-full relative preserve-3d transition-transform duration-500 rounded-xl ${
+        className={`w-full h-full relative preserve-3d transition-transform duration-500 delay-200 rounded-2xl ${
           isFlipped ? 'rotate-y-180' : ''
         } hover:rotate-y-180`}
       >
         {/* Front Face */}
-        <div
-          className="absolute w-full h-full backface-hidden bg-cover rounded-xl shadow-lg z-10"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-        >
-          <div className="flex justify-center items-center h-full">
-            <img src={image} alt="card visual" className="w-78 h-78 object-contain" />
+        <div className="absolute w-full h-full backface-hidden rounded-2xl shadow-lg z-10 overflow-hidden">
+          <div
+            className="absolute w-full h-full"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(50px)',
+              WebkitBackdropFilter: 'blur(50px)',
+              zIndex: 1,
+            }}
+          />
+          <div className="flex flex-col justify-center items-center h-full relative z-10 text-black font-bold text-2xl">
+            <img src={image} alt="card visual" className="w-34 h-34 object-contain mb-4" />
+            <div className='text-2xl'> {frontTitle}</div>
           </div>
         </div>
 
         {/* Back Face */}
         <div
-          className="absolute w-full pt-10 h-full backface-hidden rotate-y-180 bg-cover rounded-xl shadow-lg"
+          className="absolute w-full h-full pt-10 backface-hidden rotate-y-180 bg-cover rounded-xl shadow-lg"
           style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
         >
+          <div className='text-2xl font-bold text-white text-center'> {frontTitle}</div>
           <div>
-            <h1 className="text-3xl text-center text-orange-600 font-bold p-10 leading-relaxed">
-              {title}
+            <h1 className="text-xl mt-10 text-center flex justify-center items-center h-50 border-4 border-gray-600 rounded-3xl m-2 text-white font-bold p-5 leading-relaxed">
+              {backText}
             </h1>
           </div>
         </div>
@@ -50,23 +59,34 @@ const FlipCard: React.FC<FlipCardProps> = ({ title, image }) => {
 export const WhyChoose: React.FC = () => {
   return (
     <div className="align-middle">
-      <div className="pt-20 font-special text-4xl text-white text-center font-bold">
-        <h1 className="pb-3 text-4xl">WHY CHOOSE SWIFTFUND</h1>
-        <div className="justify-center flex">
-          <div className="border border-white w-50 rounded-2xl h-3 bg-white items-center"></div>
+      <div className="pt-20 text-white text-center">
+        <h1 className="pb-3 text-4xl font-bold text-black">WHY CHOOSE SWIFTFUND</h1>
+        <h2 className="text-black max-w-4xl mx-auto leading-relaxed">
+          At SwiftFund, we believe financial freedom should be accessible to everyone. That’s why we’ve
+          built a community-first platform where borrowers and lenders connect directly. 
+        </h2>
+        <div className="justify-center flex mt-4">
+          <div className="border border-white w-50 rounded-2xl h-3 bg-white"></div>
         </div>
       </div>
 
       <div className="flex flex-col justify-center items-center">
-        {/* First two cards */}
         <div className="flex flex-wrap justify-center space-x-2">
-          <FlipCard title='"Built on Cardano ensuring end-to-end security"' image={secure} />
-          <FlipCard title='"Quick application and approval process"' image={fast} />
-        </div>
-
-        {/* One card at bottom */}
-        <div className="flex justify-center">
-          <FlipCard title='"Connects directly with lenders or borrowers, no middleman"' image={middleman} />
+          <FlipCard
+            frontTitle="Secure"
+            backText="Built on Cardano ensuring end-to-end security"
+            image={secure}
+          />
+          <FlipCard
+            frontTitle="Transparent"
+            backText="Quick application and approval process"
+            image={fast}
+          />
+          <FlipCard
+            frontTitle="No Middleman"
+            backText="Connects directly with lenders or borrowers, no middleman"
+            image={middleman}
+          />
         </div>
       </div>
     </div>

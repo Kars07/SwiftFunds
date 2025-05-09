@@ -1,37 +1,41 @@
-import React from "react";
+import React, { useRef } from "react";
 import { HowItWorks } from "../components/HowItWorks";
 import { WhyChoose } from "../components/WhyChoose";
 import FAQ from "../components/FAQ";
+import HorizontalScrollEffect from "../components/HorizontalScrollEffect";
 import { Ready } from "../components/Ready";
-import Footer from "../components/Footer";
 import KeyFeatures from "../components/KeyFeatures";
+import { useTransform, motion, useScroll } from "framer-motion";
 
-const HeaderSection: React.FC = () => {
+// Video Component
+const Video: React.FC<{ scrollYProgress: any }> = ({ scrollYProgress }) => {
   const handleLearnMore = () => {
-    // Open the registration page in a new tab
     window.open("/register", "_blank");
   };
 
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, -5]);
+
   return (
-    <div className="justify-center">
-      <div>
+    <motion.div style={{ scale, rotate }} className="h-[150vh] top-0 sticky">
+      <div className="relative">
         <video
           className="absolute top-0 right-0 w-full h-full object-cover"
           autoPlay
           muted
           loop
           playsInline
-          src="/videos/market-women.mp4"
           style={{ zIndex: -1 }}
-        ></video>
+        >
+          <source src="/videos/market-women.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-black opacity-50"></div>
 
-        {/* Hero Section */}
-        <div className="text-white text-center justify-center min-h-screen flex flex-col align-middle py-20 transform translate-y-10">
-          <h1 className="md:text-5xl text-4xl font-extrabold mb-6 z-10">
+        <div className="text-white text-center justify-center min-h-screen flex flex-col align-middle py-20 transform translate-y-10 relative z-10">
+          <h1 className="md:text-5xl text-4xl font-extrabold mb-6">
             Borrow and Lend with Ease
           </h1>
-          <h2 className="z-10">
+          <h2 className="lg:px-0 px-5">
             Whether you’re a student, small‑business owner, or retiree, SwiftFund
             lets you borrow or lend in minutes. <br />
             With clear, simple terms and the security of Cardano’s smart contracts,
@@ -41,57 +45,50 @@ const HeaderSection: React.FC = () => {
           <div className="flex justify-center">
             <button
               onClick={handleLearnMore}
-              className="
-                relative overflow-hidden rounded-4xl cursor-pointer
-                transform transition-all duration-300 ease-in-out
-                hover:-translate-y-1 hover:scale-110
-                bg-[length:200%_100%] bg-no-repeat
-                bg-[linear-gradient(to_right,_#ea580c_50%,#c2410c_50%)]
-                bg-right  
-                hover:bg-left 
-                text-white font-bold py-4 px-7 m-7
-              "
+              className="relative overflow-hidden rounded-4xl cursor-pointer transform transition-all duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 bg-[length:200%_100%] bg-no-repeat bg-[linear-gradient(to_right,_#ea580c_50%,_#c2410c_50%)] bg-right hover:bg-left text-white font-bold py-4 px-7 m-7"
             >
               Get Started
             </button>
           </div>
         </div>
+      </div>
+    </motion.div>
+  );
+};
 
-        <section className="bg-white py-16 flex justify-start items-start w-[70%] text-start">
-          <div className="px-5 mx-auto">
-            <h2 className="text-3xl font-bold mb-4 text-gray-900">
-              Explore Decentralized Lending with SWIFT FUND
-            </h2>
-            <p className="text-lg text-gray-700 mb-6">
-              Start with SWIFTFund to take control of your financial future through secure, transparent, peer-to-peer lending. Experience trustless finance with blockchain at its core.
-            </p>
-            <a
-              href="#"
-              className="inline-block hover:bg-orange-600 border-3 hover:text-white delay-100 duration-150 text-orange-600 rounded-3xl px-6 py-3 font-semibold shadow hover:transition"
-            >
-              Discover More
-            </a>
-          </div>
-        </section>
+// Main HeaderSection Component
+const HeaderSection: React.FC = () => {
+  const container = useRef<HTMLDivElement>(null); // ✅ Fix: typed ref properly
+  const { scrollYProgress } = useScroll({
+    target: container,
+    offset: ["start start", "end end"]
+  });
 
-        <div>
-          <HowItWorks />
-          <KeyFeatures />
-        </div>
-
-        <div className="w-full h-full relative top-0 object-cover bg-gray-900">
-          <h1 className="text-9xl pt-0 pl-10 transform translate-y-30 font-bold sticky text-white">
-            FAQ
-          </h1>
-          <FAQ />
-        </div>
-
-        <div className="bg-gray-900">
-          <WhyChoose />
-        </div>
+  return (
+    <div>
+      <div ref={container} className="justify-center relative h-[300vh]">
+        <Video scrollYProgress={scrollYProgress} />
+        <HowItWorks />
       </div>
 
-      <div className="bg-gray-900">
+      <KeyFeatures />
+
+      <div className="w-full h-full relative top-0 object-cover bg-zinc-900">
+        <h1 className="md:text-9xl text-7xl pb-10 pl-10 transform translate-y-30 font-bold sticky text-white">
+          FAQ
+        </h1>
+        <FAQ />
+      </div>
+
+      <div className="pt-25">
+        <WhyChoose />
+      </div>
+
+      <div>
+        <HorizontalScrollEffect />
+      </div>
+
+      <div>
         <Ready />
       </div>
     </div>

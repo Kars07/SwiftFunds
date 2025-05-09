@@ -1,71 +1,71 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import "./index.css"
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import Docs from './pages/Docs'
+import { AnimatePresence } from 'framer-motion';
+import { useLocation, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import PageWrapper from './components/PageWrapper';
 import HeaderSection from './pages/HeaderSection';
-import ResetPassword from './components/auth/ResetPassword'
-import Applications from './pages/Dashboard/applications';
-import Dashboard from './pages/Dashboard/Dashboard';
-import Profile from './pages/Dashboard/Profile';
-import Settings from './pages/Dashboard/settings'
-import DefaultDashboardContent from './pages/Dashboard/DefaultDashboardContent';
-import Transactions from './pages/Dashboard/transaction';
-import Register from './components/auth/Register'
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Docs from './pages/Docs';
+import Register from './components/auth/Register';
+import ResetPassword from './components/auth/ResetPassword';
 import Login from './components/auth/Login';
 import VerifyEmail from './components/auth/VerifyEmail';
 import ForgotPassword from './components/auth/ForgotPassword';
 import PrivateRoute from './components/PrivateRoute';
-import About from './pages/About';
-import Contact from './pages/Contact';
+import Dashboard from './pages/Dashboard/Dashboard';
+import DefaultDashboardContent from './pages/Dashboard/DefaultDashboardContent';
+import Transactions from './pages/Dashboard/transaction';
+import Applications from './pages/Dashboard/applications';
+import Profile from './pages/Dashboard/Profile';
+import Settings from './pages/Dashboard/settings';
 
-const Layout: React.FC = () => {
+const App: React.FC = () => {
   const location = useLocation();
-  const showNavbarFooter = ["/", "/about", "/contact"].includes(location.pathname);
+  const animatedRoutes = ["/", "/about", "/contact"];
+  const showNavbarFooter = animatedRoutes.includes(location.pathname);
 
   return (
     <>
       {showNavbarFooter && <Navbar />}
 
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HeaderSection />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/docs" element={<Docs />} />
-
-        {/* Auth Routes */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-
-        {/* Dashboard with nested routes */}
-        <Route
-          path="/dashboard/*"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<DefaultDashboardContent />} />
-          <Route path="transactions" element={<Transactions />} />
-          <Route path="applications" element={<Applications />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
+      {animatedRoutes.includes(location.pathname) ? (
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageWrapper><HeaderSection /></PageWrapper>} />
+            <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
+            <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+          </Routes>
+        </AnimatePresence>
+      ) : (
+        <Routes>
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/dashboard/*"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          >
+            <Route index element={<DefaultDashboardContent />} />
+            <Route path="transactions" element={<Transactions />} />
+            <Route path="applications" element={<Applications />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      )}
 
       {showNavbarFooter && <Footer />}
     </>
   );
-};
-
-const App: React.FC = () => {
-  return <Layout />;
 };
 
 export default App;

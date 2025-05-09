@@ -3,8 +3,8 @@ import logo from "../assets/logo.png";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="footer overflow-hidden w-full bg-gray-900 flex flex-col items-center py-10 relative">
-      <hr className="w-[90vw] h-[1px] bg-white my-5 border-none" />
+    <footer className="footer overflow-hidden w-full px-10 rounded-t-4xl bg-zinc-900 flex flex-col items-center py-10 relative">
+     
 
       <div className="footer-content flex flex-wrap justify-start items-start pt-16 max-w-[1200px] relative">
         <div className="-mx-40 w-full justify-start flex h-auto gap-2 text-2xl font-bold text-white mt-12 pl-36 absolute top-[-40px]">
@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
           </ul>
         </div>
       </div>
-
+      <hr className="w-[90vw] h-[1px] mt-20 mb-5 bg-zinc-100  border-none" />
       <div className="footer-bottom flex justify-between items-center py-4 text-white text-sm gap-[33rem]">
         &copy;2025. All rights reserved.
         <div className="footer-social-icons flex gap-4 ml-40">

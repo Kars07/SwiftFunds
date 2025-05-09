@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: 'jit',
     content: [
       "./index.html", 
       "./src/**/*.{js,ts,jsx,tsx}",
@@ -12,7 +13,7 @@ module.exports = {
             DEFAULT: '#1A73E8', // Bright Blue
             dark: '#0056D2', // Dark Blue
           },
-  
+       
           // Secondary Colors
           gray: {
             dark: '#2B2B2B', // Dark Gray for backgrounds
@@ -27,18 +28,15 @@ module.exports = {
             DEFAULT: '#22C55E', // Green for success or wallet balances
           },
         },
-  
-        gradientColorStops: {
-          // Gradients
-          blueGradient: {
-            from: '#1A73E8',
-            to: '#0056D2',
-          },
-          accentGradient: {
-            from: '#22C55E',
-            to: '#FFB300',
-          },
-        },
+        fontFamily: {
+          title: [
+            '"Roboto Condensed"', 'sans-serif',
+          ],
+          body: [
+            '"Special Gothic Expanded One"', 'sans-serif',
+          ],
+        }
+        
       },
     },
     plugins: [],

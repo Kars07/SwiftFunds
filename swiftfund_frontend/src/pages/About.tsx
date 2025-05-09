@@ -42,14 +42,17 @@ const About: React.FC = () => {
 
   return (
     <div className="w-full h-full text-white overflow-hidden">
-      <div className="absolute left-30 pl-8 rotate-z-65 translate-y-[-10px]">
+      <div className="absolute lg:block hidden left-30 pl-8 rotate-z-65 translate-y-[-10px]">
         <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
       </div>
       <h1 className="text-4xl text-center pt-30 font-bold text-gray-900">MEET OUR DEVELOPERS</h1>
-      <div className="absolute right-30 pl-8 rotate-z-125 translate-y-[-170px]">
+      <div className='justify-center pt-3 flex lg:hidden '>
+        <div className='border border-orange-600 w-50 block rounded-2xl h-3 bg-orange-600 items-center'></div>
+      </div>
+      <div className="absolute lg:block hidden right-30 pl-8 rotate-z-125 translate-y-[-170px]">
         <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
       </div>
-      <div className="relative">
+      <div className="relative lg:block hidden">
         <svg
           width="1584"
           height="3509"
@@ -110,11 +113,11 @@ const About: React.FC = () => {
         </svg>
       </div>
 
-      <div className="py-20 flex flex-col gap-20">
-        <div className="w-full flex gap-20  justify-end px-40">
-          <img src={michael} alt="" className="w-[350px] rounded-4xl h-[450px]" />
-          <div className="flex flex-col justify-end items-center">
-            <div className="transform -translate-y-30">
+      <div className="py-20  flex flex-col md:gap-20 ">
+        <div className="w-full flex  flex-col lg:flex-row lg:gap-20  justify-end md:px-40 px-10">
+          <img src={michael} alt="" className="lg:w-[350px] rounded-4xl lg:h-[450px]" />
+          <div className="flex flex-col justify-center  items-center">
+            <div className="transform lg:py-0 py-5 pb-15 lg:pb-0 ">
               <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Oloyede Micheal</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">Team Leader and Full Stack Developer</h2>
               <span className="text-gray-700">Meet our amazing team leader, Michael. A full-stack developer with a passion for building cool and functional projects. He’s not just skilled, he’s also fun, encouraging, and always bringing good energy to the team. Leading by example, Michael makes working together a great experience.</span>
@@ -128,9 +131,9 @@ const About: React.FC = () => {
           </div>
 
         </div>
-        <div className="w-full  flex gap-20  justify px-40">
-          <div className="flex gap-20 justify-end items-center">
-            <div className="transform translate-y-10">
+        <div className="w-full flex gap-20 justify md:px-40 px-10">
+          <div className="flex lg:flex-row flex-col-reverse lg:gap-20 lg:justify-end items-center">
+            <div className="transform  lg:py-0 py-5 pb-15 lg:pb-0  lg:translate-y-10">
               <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Abibi Daniella</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">Project Manager and Backend Developer</h2>
               <span className="text-gray-700">Daniella keeps our team organized and on track while also handling the backend magic. She's the calm in the chaos, making sure tasks are done, deadlines are met, and everyone stays focused. With a sharp mind for logic and a knack for structure, se’s the kind of teammate who just gets things done. she is very reliably and efficiently.</span>
@@ -141,14 +144,14 @@ const About: React.FC = () => {
                 </a>
               </div>
             </div>
-            <img src={dani} alt="" className="w-[350px] rounded-4xl h-[450px]" />
-          
+             <img src={dani} alt="" className="lg:w-[350px]  rounded-4xl lg:h-[450px]" />
+            
           </div>
         </div>
-        <div className="w-full flex gap-20  justify-start px-40">
-          <img src={dami} alt="" className="w-[350px] rounded-4xl h-[450px]" />
-          <div className="flex flex-col justify-end items-center">
-            <div className="transform -translate-y-30">
+        <div className="w-full flex lg:gap-20 flex-col lg:flex-row justify-end md:px-40 px-10">
+          <img src={dami} alt="" className="lg:w-[350px] rounded-4xl lg:h-[450px]" />
+          <div className="flex flex-col justify-center items-center">
+            <div className="transform lg:py-0 py-5 pb-15 lg:pb-0 ">
               <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Emmanuel Damilola</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">UI/UX Designer</h2>
               <span className="text-gray-700">Dami brings our ideas to life with stunning visuals and user-friendly designs. He has a natural talent for combining creativity with functionality, making sure our users always have a great experience. Easy to talk to, collaborative, and super thoughtful .</span>
@@ -162,9 +165,9 @@ const About: React.FC = () => {
           </div>
 
         </div>
-        <div className="w-full  flex gap-20  justify px-40">
-          <div className="flex gap-20 justify-end items-center">
-            <div className="transform translate-y-10">
+        <div className="w-full  flex gap-20  justify md:px-40 px-10">
+          <div className="flex lg:flex-row flex-col-reverse lg:gap-20 lg:justify-end items-center">
+            <div className="transform  lg:py-0 py-5 pb-15 lg:pb-0   lg:translate-y-10 ">
               <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Omilabu Wuraola</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">Frontend Developer and Creative Designer</h2>
               <span className="text-gray-700">Wuraola is the creative spirit of our team. From animations to clean interfaces, she knows how to turn vision into vibrant web experiences. With a blend of design flair and coding skills, she bridges the gap between aesthetics and functionality. She’s fun, imaginative, and a joy to collaborate with.</span>
@@ -175,14 +178,14 @@ const About: React.FC = () => {
                 </a>
               </div>
             </div>
-            <img src={wura} alt="" className="w-[350px] rounded-4xl h-[450px]" />
+            <img src={wura} alt="" className="lg:w-[350px] rounded-4xl lg:h-[450px]" />
           
           </div>
         </div>
-        <div className="w-full flex gap-20  justify-start px-40">
-          <img src={raphael} alt="" className="w-[350px] rounded-4xl h-[450px]" />
-          <div className="flex flex-col justify-end items-center">
-            <div className="transform -translate-y-30">
+        <div className="w-full flex lg:gap-20 flex-col lg:flex-row justify-end md:px-40 px-10">
+          <img src={raphael} alt="" className="lg:w-[350px] rounded-4xl lg:h-[450px]" />
+          <div className="flex flex-col justify-center items-center">
+            <div className="transform  lg:py-0 py-5 pb-15 lg:pb-0  ">
               <h1 className="text-3xl text-orange-600 font-bold pb-3 text-start">Eniaiyejuni Raphael</h1>
               <h2 className="text-2xl font-bold text-gray-900 pb-5">Smart Contract Developer</h2>
               <span className="text-gray-700">Raphael is our blockchain brain! He handles the smart contracts that make our project secure and decentralized. Quietly brilliant and deeply focused, he brings technical depth with a cool-headed approach. You can trust him to write clean, reliable code and explain even the complex stuff in simple terms.</span>

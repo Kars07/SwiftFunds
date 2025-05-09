@@ -70,17 +70,17 @@ const Registration: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="flex w-full max-w-7xl bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="w-1/2 p-10">
-          <div className="flex items-center mb-6">
-            <img src={logo} alt="SwiftFunds Logo" className="w-13 h-auto mr-3" />
-            <h2 className="text-2xl font-bold text-black">Swiftfund</h2>
+    <div className="min-h-screen w-full h-full bg-gray-100 flex items-center justify-center">
+      <div className="flex w-[70%] max-w-7xl h-[85vh] bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="w-1/2 px-10 py-5">
+          <div className="flex items-center mb-4">
+            <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
+            <h2 className="text-xl font-bold text-black">Swiftfund</h2>
           </div>
-          <h2 className="text-2xl font-bold text-orange-500 mb-2">Sign Up</h2>
+          <h2 className="text-xl font-bold text-orange-500 ">Sign Up</h2>
           <h4 className="text-gray-500 mb-6">Enter your details below to create an account</h4>
           <form onSubmit={handleSubmit}>
-            <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-4 border border-gray-300 w-full">
+            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full">
               <input
                 type="text"
                 name="fullname"
@@ -94,7 +94,7 @@ const Registration: React.FC = () => {
                 <i className="bx bxs-user"></i>
               </span>
             </div>
-            <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-4 border border-gray-300 w-full">
+            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full">
               <input
                 type="email"
                 name="email"
@@ -108,7 +108,7 @@ const Registration: React.FC = () => {
                 <i className="bx bx-envelope"></i>
               </span>
             </div>
-            <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-4 border border-gray-300 w-full relative">
+            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
@@ -125,19 +125,21 @@ const Registration: React.FC = () => {
                 <i className={showPassword ? 'bx bx-show' : 'bx bx-hide'}></i>
               </span>
             </div>
-            {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
-            <p className="text-gray-500 mb-6">
-              <span className="text-orange-500">*</span> Your password should be a combination of capital and small letters, numbers, and special characters (@, #, $, *, &).
+            {errorMessage && <p className="text-red-500 text-sm mb-2">{errorMessage}</p>}
+            <p className="text-gray-500 mb-4 flex">
+              <span className="text-orange-500">*</span> <h1 className='text-[10px]'>Your password should be a combination of capital and small letters, numbers, and special characters (@, #, $, *, &).</h1>
             </p>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`bg-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-lg w-1/2 ml-30 cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {loading ? 'Registering...' : 'Register'}
-            </button>
+            <div className='flex justify-center items-center'>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`text-orange-600 border-2 border-orange-600 font-bold py-2 px-10 rounded-3xl  cursor-pointer hover:bg-orange-600 hover:text-white transition-colors duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'Registering...' : 'Register'}
+              </button>
+           </div>
           </form>
-          <p className="text-center text-gray-500 my-4">or register with social platforms</p>
+          <p className="text-center text-gray-500 mt-4">or register with social platforms</p>
           <div className="flex justify-center space-x-6">
             <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
               <i className="bx bxl-google text-blue-500 text-xl"></i>
@@ -152,11 +154,11 @@ const Registration: React.FC = () => {
         </div>
 
         {/* Welcome Section */}
-        <div className="w-1/2 bg-blue-600 text-white flex flex-col justify-center items-center">
+        <div className="w-1/2 bg-orange-600 text-white flex flex-col justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
           <p className="mb-6">Already have an account?</p>
           <Link to="/login">
-            <button className="border-2 border-white py-2 px-4 rounded-lg hover:bg-white hover:text-blue-500">
+            <button className="border-2 border-white py-2 px-10 transition-colors duration-300 font-bold rounded-3xl hover:bg-white hover:text-orange-600">
               Login
             </button>
           </Link>

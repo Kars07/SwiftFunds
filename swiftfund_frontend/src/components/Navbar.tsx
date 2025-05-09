@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="bg-white/50 z-50 backdrop-blur-lg shadow-xl/20 fixed w-[90%] md:w-[80%] lg:w-[70%] top-4 left-1/2 transform -translate-x-1/2 rounded-2xl">
+      <div className="bg-white/20 z-50 backdrop-blur-lg shadow-xl/20 fixed w-[90%] md:w-[80%] lg:w-[70%] top-4 left-1/2 transform -translate-x-1/2 rounded-4xl">
         <div className="flex justify-between items-center px-6 py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center text-xl font-bold space-x-2">
@@ -65,10 +65,10 @@ const Navbar: React.FC = () => {
             >
               <div
                 className={`transition-transform duration-500 ease-in-out ${
-                  isOpen ? "rotate-90 scale-110 text-[#ea580c]" : "rotate-0 scale-100"
+                  isOpen ? "rotate-90 scale-110 text-black" : "rotate-0 scale-100"
                 }`}
               >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6h-6" />}
               </div>
             </button>
           </div>
@@ -76,25 +76,25 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`lg:hidden px-6 transition-all duration-500 ease-in-out transform origin-top ${
+          className={`lg:hidden h-[100vh] px-6 transition-all duration-500 ease-in-out transform origin-top ${
             isOpen
               ? "max-h-96 opacity-100 scale-100 translate-y-0"
-              : "max-h-0 opacity-0 scale-95 -translate-y-5"
+              : "max-h-0  opacity-0 scale-95 -translate-y-5"
           } overflow-hidden`}
         >
-          <ul className="flex flex-col space-y-4 text-black pt-4">
+          <ul className="flex flex-col  space-y-4 text-black pt-4">
             {navItems.map(({ label, path }) => (
               <li key={label}>
                 {path ? (
                   <Link
                     to={path}
-                    className="cursor-pointer hover:scale-105 transition-transform duration-200 block text-[#ea580c]"
+                    className="cursor-pointer hover:scale-105 transition-transform hover:text-orange-600 text-2xl py-2 duration-200 block text-black "
                     onClick={() => setIsOpen(false)}
                   >
                     {label}
                   </Link>
                 ) : (
-                  <span className="block text-[#ea580c] cursor-default">{label}</span>
+                  <span className="block text-black hover:scale-105 transition-transform hover:text-orange-600 text-2xl py-2 cursor-default">{label}</span>
                 )}
               </li>
             ))}
@@ -103,7 +103,7 @@ const Navbar: React.FC = () => {
           <div className="mt-4">
             <button
               onClick={handleLaunchApp}
-              className="w-full bg-orange-600 text-white font-bold py-2 rounded-lg transition duration-300 ease-in-out hover:bg-orange-500"
+              className="w-full bg-orange-600 text-white font-bold py-4 rounded-3xl my-2  transition duration-300 ease-in-out hover:bg-orange-500"
             >
               Launch App
             </button>
