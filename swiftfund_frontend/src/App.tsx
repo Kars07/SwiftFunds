@@ -16,8 +16,11 @@ import ForgotPassword from './components/auth/ForgotPassword';
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard/Dashboard';
 import DefaultDashboardContent from './pages/Dashboard/DefaultDashboardContent';
-import Transactions from './pages/Dashboard/transaction';
 import Applications from './pages/Dashboard/applications';
+import LoansToBeRepaid from './pages/Dashboard/loanstoberepaid';
+import MyLoanApplications from './pages/Dashboard/myloan-applications';
+import LoansFunded from './pages/Dashboard/loans-funded';
+import LoansRepaid from './pages/Dashboard/loansirepaid';
 import Profile from './pages/Dashboard/Profile';
 import Settings from './pages/Dashboard/settings';
 
@@ -55,8 +58,12 @@ const App: React.FC = () => {
             }
           >
             <Route index element={<DefaultDashboardContent />} />
-            <Route path="transactions" element={<Transactions />} />
+            <Route path="LoansToRepay" element={<LoansToBeRepaid />} />
             <Route path="applications" element={<Applications />} />
+            <Route path="loanstoberepaid" element={<LoansToBeRepaid />} />
+            <Route path="myloan-applications" element={<MyLoanApplications />} />
+            <Route path="loans-funded" element={<LoansFunded />} />
+            <Route path="loansirepaid" element={<LoansRepaid />} />
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
           </Route>

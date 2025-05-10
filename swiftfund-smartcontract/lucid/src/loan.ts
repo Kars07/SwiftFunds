@@ -274,4 +274,3 @@ console.log(await fundLoan(lucid, LenderPKH, loanAmount ))
 
 
 
-

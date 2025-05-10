@@ -42,6 +42,14 @@ type LoanRequest = {
     utxo: UTxO;
 };
 
+type FundedLoan = {
+    txId: string;
+    outputIndex: number;
+    lenderPKH: string;
+    loanAmount: bigint;
+    utxo: UTxO;
+};
+
 // Define data schemas
 const loanRequestSchema = Data.Object({
     borrowerPKH: Data.Bytes(),
@@ -64,6 +72,7 @@ const Applications: React.FC = () => {
     const [connection, setConnection] = useState<Connection | null>(null);
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
     const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
+    const [fundedLoans, setFundedLoans] = useState<FundedLoan[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingFund, setLoadingFund] = useState<string | null>(null);
     
@@ -114,8 +123,8 @@ const Applications: React.FC = () => {
             const conn = { api, lucid, address, pkh };
             setConnection(conn);
             
-            // After connection, fetch loan requests
-            await fetchLoanRequests(lucid);
+            // After connection, fetch loan requests and funded loans
+            await fetchLoanData(lucid);
         } catch (error) {
             console.error("Error connecting wallet:", error);
             setError("Failed to connect wallet. Please try again.");
@@ -124,20 +133,82 @@ const Applications: React.FC = () => {
         }
     }
 
-    // Fetch loan requests from the blockchain
-    async function fetchLoanRequests(lucidInstance: LucidEvolution): Promise<void> {
+    // Fetch loan data (both requests and funded loans)
+    async function fetchLoanData(lucidInstance: LucidEvolution): Promise<void> {
         try {
             setIsLoading(true);
+            
+            // First, fetch funded loans
+            const fundedLoansData = await fetchFundedLoans(lucidInstance);
+            setFundedLoans(fundedLoansData);
+            
+            // Then fetch loan requests and filter out the funded ones
+            await fetchLoanRequests(lucidInstance, fundedLoansData);
+        } catch (error) {
+            console.error("Error fetching loan data:", error);
+            setError("Failed to fetch loan data. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    // Fetch funded loans from the blockchain
+    async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
+        const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
+        console.log("UTXOs at fund loan address:", fundedUtxos);
+        
+        const fundedLoans: FundedLoan[] = [];
+        
+        for (const utxo of fundedUtxos) {
+            if (!utxo.datum) continue;
+            
+            try {
+                const datumObject = Data.from(utxo.datum, redeemerType);
+                fundedLoans.push({
+                    txId: utxo.txHash,
+                    outputIndex: utxo.outputIndex,
+                    lenderPKH: datumObject.lenderPKH,
+                    loanAmount: datumObject.loanAmount,
+                    utxo
+                });
+            } catch (error) {
+                console.error("Error parsing funded loan datum:", error, "UTxO:", utxo);
+            }
+        }
+        
+        return fundedLoans;
+    }
+
+    // Fetch loan requests from the blockchain and filter out funded ones AND expired ones
+    async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData: FundedLoan[]): Promise<void> {
+        try {
             const utxosAtScript: UTxO[] = await lucidInstance.utxosAt(LoanRequestAddress);
-            console.log("UTxOs at script address:", utxosAtScript);
+            console.log("UTxOs at loan request address:", utxosAtScript);
 
             const requests: LoanRequest[] = [];
+            
+            // Create a set of funded loan amounts for efficient lookup
+            const fundedLoanAmounts = new Set(fundedLoansData.map(loan => loan.loanAmount.toString()));
+            const currentTime = Date.now();
 
             for (const utxo of utxosAtScript) {
                 if (!utxo.datum) continue;
                 
                 try {
                     const datumObject = Data.from(utxo.datum, BorrowerDatum);
+                    
+                    // Skip this loan request if it has already been funded
+                    if (fundedLoanAmounts.has(datumObject.loanAmount.toString())) {
+                        console.log(`Loan request with amount ${datumObject.loanAmount} has been funded, skipping`);
+                        continue;
+                    }
+                    
+                    // Skip expired loan requests
+                    if (Number(datumObject.deadline) < currentTime) {
+                        console.log(`Loan request with deadline ${new Date(Number(datumObject.deadline)).toLocaleString()} has expired, skipping`);
+                        continue;
+                    }
+                    
                     requests.push({
                         txId: utxo.txHash,
                         outputIndex: utxo.outputIndex,
@@ -157,8 +228,6 @@ const Applications: React.FC = () => {
         } catch (error) {
             console.error("Error fetching loan requests:", error);
             setError("Failed to fetch loan requests. Please try again.");
-        } finally {
-            setIsLoading(false);
         }
     }
 
@@ -172,6 +241,7 @@ const Applications: React.FC = () => {
         try {
             setIsSubmitting(true);
             setError(null);
+            setTxHash(null);
             
             const { lucid, pkh } = connection;
             
@@ -187,7 +257,6 @@ const Applications: React.FC = () => {
             };
             
             const dtm: Datum = Data.to<BorrowerDatum>(datum, BorrowerDatum);
-            // const transactionfees = BigInt(5000);
             
             // Create and submit the transaction
             const tx = await lucid
@@ -203,9 +272,9 @@ const Applications: React.FC = () => {
             console.log("Loan request submitted. Transaction hash:", txHash);
             setTxHash(txHash);
             
-            // Wait for a moment and then refresh the loan requests list
+            // Wait for a moment and then refresh the loan data
             setTimeout(() => {
-                fetchLoanRequests(lucid);
+                fetchLoanData(lucid);
             }, 10000);
             
         } catch (error) {
@@ -216,93 +285,78 @@ const Applications: React.FC = () => {
         }
     }
 
-  // Fund loan function
-async function fundLoan(loanRequest: LoanRequest): Promise<void> {
-    if (!connection) {
-        setError("Please connect your wallet first");
-        return;
-    }
-
-    try {
-
-        if (connection.pkh === loanRequest.borrowerPKH) {
-            setError("You cannot fund your own loan request");
+    // Fund loan function
+    async function fundLoan(loanRequest: LoanRequest): Promise<void> {
+        if (!connection) {
+            setError("Please connect your wallet first");
             return;
         }
 
-        setLoadingFund(loanRequest.txId);
-        const { lucid, pkh } = connection;
-        
-        // Create the redeemer
-        const FundRedeemer: redeemerType = {
-            lenderPKH: pkh,
-            loanAmount: loanRequest.loanAmount
-        };
-        
-        const fundredeem: Redeemer = Data.to<redeemerType>(FundRedeemer, redeemerType);
-        
-        // Get the borrower address from PKH
-        const borrowerAddressDetails = {
-            paymentCredential: {
-                hash: loanRequest.borrowerPKH,
-                type: "Key" as const
-            },
-            stakeCredential: undefined,
-            network: "Preprod" as const
-        };
-        
+        try {
+            setError(null);
+            setTxHash(null);
+            
+            if (connection.pkh === loanRequest.borrowerPKH) {
+                setError("You cannot fund your own loan request");
+                return;
+            }
 
-        const BorrowerAddress = credentialToAddress("Preprod", borrowerAddressDetails.paymentCredential);
-    
-        
-        console.log("Borrower Address:", BorrowerAddress);
-        console.log("Loan Request UTXO:", loanRequest.utxo);
-        
-        // Create and submit the transaction
-        const tx = await lucid
-            .newTx()
-            .readFrom([loanRequest.utxo])
-            .addSignerKey(pkh)
-            .attach.SpendingValidator(loanRequestValidatorScript)
-            .attach.SpendingValidator(FundRequestValidatorScript)
-            .pay.ToAddress(BorrowerAddress, { lovelace: loanRequest.loanAmount })
-            .pay.ToContract(FundLoanAddress, { kind: "inline", value: fundredeem })
-            .validFrom(Date.now() - 1000000)
-            .complete();
-        
-        const signedTx = await tx.sign.withWallet().complete();
-        const txHash = await signedTx.submit();
-        
-        console.log("Loan funded successfully. Transaction hash:", txHash);
-        setTxHash(txHash);
-        
-        // Wait for a moment and then refresh the loan requests
-        setTimeout(() => {
-            fetchLoanRequests(lucid);
-        }, 10000);
-        
-    } catch (error) {
-        console.error("Error funding loan:", error);
-        setError(`Failed to fund loan: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-        setLoadingFund(null);
+            setLoadingFund(loanRequest.txId);
+            const { lucid, pkh } = connection;
+            
+            // Create the redeemer
+            const FundRedeemer: redeemerType = {
+                lenderPKH: pkh,
+                loanAmount: loanRequest.loanAmount
+            };
+            
+            const fundredeem: Redeemer = Data.to<redeemerType>(FundRedeemer, redeemerType);
+            
+            // Get the borrower address from PKH
+            const borrowerAddressDetails = {
+                paymentCredential: {
+                    hash: loanRequest.borrowerPKH,
+                    type: "Key" as const
+                },
+                stakeCredential: undefined,
+                network: "Preprod" as const
+            };
+            
+            const BorrowerAddress = credentialToAddress("Preprod", borrowerAddressDetails.paymentCredential);
+            
+            console.log("Borrower Address:", BorrowerAddress);
+            console.log("Loan Request UTXO:", loanRequest.utxo);
+            
+            // Create and submit the transaction
+            const tx = await lucid
+                .newTx()
+                .readFrom([loanRequest.utxo])
+                .addSignerKey(pkh)
+                .attach.SpendingValidator(loanRequestValidatorScript)
+                .attach.SpendingValidator(FundRequestValidatorScript)
+                .pay.ToAddress(BorrowerAddress, { lovelace: loanRequest.loanAmount })
+                .pay.ToContract(FundLoanAddress, { kind: "inline", value: fundredeem })
+                .validFrom(Date.now() - 1000000)
+                .complete();
+            
+            const signedTx = await tx.sign.withWallet().complete();
+            const txHash = await signedTx.submit();
+            
+            console.log("Loan funded successfully. Transaction hash:", txHash);
+            setTxHash(txHash);
+            
+            // Wait for a moment and then refresh the loan data
+            setTimeout(() => {
+                fetchLoanData(lucid);
+            }, 10000);
+            
+        } catch (error) {
+            console.error("Error funding loan:", error);
+            setError(`Failed to fund loan: ${error instanceof Error ? error.message : String(error)}`);
+        } finally {
+            setLoadingFund(null);
+        }
     }
-}
-    
-    // Helper function to get address from PKH
-    // async function getAddressByPKH(pkh: string): Promise<string> {
-    //     // In a real implementation, you would have a proper way to get the address from the PKH
-    //     // This is a simplified version that creates a preprod address from the PKH
-    //     const addressDetails = {
-    //         paymentCredential: {
-    //             hash: pkh,
-    //             type: "Key" as const
-    //         },
-    //         network: "Preprod" as const
-    //     };
-        
-    //     return "addr_test1" + pkh; // Just a placeholder, this isn't a real address conversion
-    // }
     
     // Format date
     function formatDate(timestamp: bigint): string {
@@ -312,6 +366,14 @@ async function fundLoan(loanRequest: LoanRequest): Promise<void> {
     // Format lovelace to ADA
     function lovelaceToAda(lovelace: bigint): string {
         return (Number(lovelace) / 1_000_000).toFixed(6);
+    }
+    
+    // Calculate days remaining until deadline
+    function daysRemaining(deadline: bigint): number {
+        const now = Date.now();
+        const deadlineTime = Number(deadline);
+        const diffMs = deadlineTime - now;
+        return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     }
 
     return (
@@ -420,8 +482,8 @@ async function fundLoan(loanRequest: LoanRequest): Promise<void> {
                 </div>
             )}
             
-            {/* Loan Requests List */}
-            <div>
+            {/* Loan Requests List - Now only showing active, non-expired loans */}
+            <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Active Loan Requests</h2>
                 
                 {isLoading ? (
@@ -456,46 +518,50 @@ async function fundLoan(loanRequest: LoanRequest): Promise<void> {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                            {loanRequests.map((loan) => (
-    <tr key={`${loan.txId}-${loan.outputIndex}`}>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
-            {connection && loan.borrowerPKH === connection.pkh && (
-                <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                    You
-                </span>
-            )}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {lovelaceToAda(loan.loanAmount)} ADA
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {lovelaceToAda(loan.interest)} ADA
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {formatDate(loan.deadline)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm">
-            {connection && loan.borrowerPKH === connection.pkh ? (
-                <button
-                    disabled
-                    className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
-                    title="You cannot fund your own loan"
-                >
-                    Cannot Fund Own Loan
-                </button>
-            ) : (
-                <button
-                    onClick={() => fundLoan(loan)}
-                    disabled={!connection || loadingFund === loan.txId}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
-                >
-                    {loadingFund === loan.txId ? "Processing..." : "Fund Loan"}
-                </button>
-            )}
-        </td>
-    </tr>
-))}
+                                {loanRequests.map((loan) => (
+                                    <tr key={`${loan.txId}-${loan.outputIndex}`}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
+                                            {connection && loan.borrowerPKH === connection.pkh && (
+                                                <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                                    You
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {lovelaceToAda(loan.loanAmount)} ADA
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {lovelaceToAda(loan.interest)} ADA
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {formatDate(loan.deadline)}
+                                            <br />
+                                            <span className="text-green-600">
+                                                {daysRemaining(loan.deadline)} days remaining
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {connection && loan.borrowerPKH === connection.pkh ? (
+                                                <button
+                                                    disabled
+                                                    className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
+                                                    title="You cannot fund your own loan"
+                                                >
+                                                    Cannot Fund Own Loan
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => fundLoan(loan)}
+                                                    disabled={!connection || loadingFund === loan.txId}
+                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
+                                                >
+                                                    {loadingFund === loan.txId ? "Processing..." : "Fund Loan"}
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>

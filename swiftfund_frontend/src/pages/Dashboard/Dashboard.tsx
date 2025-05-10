@@ -137,7 +137,7 @@ const Dashboard: React.FC = () => {
                   <ul className="bg-gray-800 rounded-md overflow-hidden w-full">
                     <li
                       className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => navigate("/dashboard/loan-applications")}
+                      onClick={() => navigate("/dashboard/myloan-applications")}
                     >
                       <i className="bx bx-edit text-lg"></i>
                       <span>Loan Applications</span>
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
                     </li>
                     <li
                       className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                      onClick={() => navigate("/dashboard/loans-repaid")}
+                      onClick={() => navigate("/dashboard/loansirepaid")}
                     >
                       <i className="bx bx-refresh text-lg"></i>
                       <span>Loans Repaid</span>
@@ -163,10 +163,10 @@ const Dashboard: React.FC = () => {
               {/* Other Items */}
               <li
                 className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
-                onClick={() => navigate("/dashboard/transactions")}
+                onClick={() => navigate("/dashboard/loanstoberepaid")}
               >
                 <i className="bx bx-transfer text-lg"></i>
-                <span>Transactions</span>
+                <span>Loans To Repay</span>
               </li>
               <li
                 className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
