@@ -40,7 +40,7 @@ app.use(cors(corsOptions));
 // Session middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'defaultsecret', // Use a strong secret in production
+    secret: process.env.SESSION_SECRET || 'defaultsecret',
     resave: false,
     saveUninitialized: false,
     cookie: {

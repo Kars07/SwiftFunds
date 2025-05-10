@@ -6,13 +6,12 @@ const {
   register,
   login,
   updateProfile,
-  viewBalance,
-  updateBalance,
   logout,
 } = require("../controller/Usercont");
 
 const { forgotPassword } = require("../controller/forgotpassword");
 const { resetPassword } = require("../controller/resetpassword");
+const { handleContact } = require("../controller/contactController");
 const User = require("../models/User");
 const { protect } = require("../middleware/auth");
 
@@ -127,12 +126,11 @@ router.get("/profile", protect, async (req, res) => {
   }
 });
 
-
 // Update User Profile (Authenticated)
 router.put("/profile", protect, updateProfile);
 
-// Update User Balance (Authenticated)
-router.put("/balance", protect, updateBalance);
+//Handle Contact Submissions
+router.post("/contact", handleContact);
 
 // Logout
 router.post("/logout", protect, logout);

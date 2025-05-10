@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
 import axios from "axios";
 import '../gradient-text/gradient-text.css';
 import group from '../assets/Group.jpeg';
-import {useScroll ,  useTransform , motion} from 'framer-motion';
+import { useScroll, useTransform, motion } from 'framer-motion';
 
 interface FormData {
   fullName: string;
@@ -20,6 +20,7 @@ const Contact: React.FC = () => {
   });
 
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,13 +28,18 @@ const Contact: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(""); 
+
     try {
-      await axios.post("/api/contact", formData);
-      setSuccessMessage("Thank you for contacting SwiftFund! We'll get back to you soon.");
-      setFormData({ fullName: "", email: "", companyName: "", message: "" });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/contact`, formData);
+
+      if (response.status === 200) {
+        setSuccessMessage("Thank you for contacting SwiftFund! We'll get back to you soon.");
+        setFormData({ fullName: "", email: "", companyName: "", message: "" });
+      }
     } catch (error) {
       console.error(error);
-      setSuccessMessage("Something went wrong. Please try again later.");
+      setErrorMessage("Something went wrong. Please try again later.");
     }
   };
 
@@ -41,10 +47,10 @@ const Contact: React.FC = () => {
     <div className="300vh">
       <h1 className="text-6xl  text-center pt-30 font-bold">Get in Touch – We're Here to Help!</h1>
       <h2 className="py-5 text-xl text-center">Have a question, need support, or interested in a business collaboration? <br></br>Our team is ready to assist you!</h2>
-      <div className=" w-[100%]">
-        <Scale/>
-     </div>
-     <div className="text-gray-700 transform -translate-y-20 relative flex flex-col lg:flex-row w-full">
+      <div className="w-[100%]">
+        <Scale />
+      </div>
+      <div className="text-gray-700 transform -translate-y-20 relative flex flex-col lg:flex-row w-full">
         {/* Left Column */}
         <div className="w-full lg:w-[40%] pt-10 lg:pt-[5%] flex flex-col text-center justify-center items-center">
           <h1 className="text-4xl sm:text-5xl lg:text-7xl italic font-special">Let's Chat</h1>
@@ -116,7 +122,7 @@ const Contact: React.FC = () => {
             <div className="flex justify-center items-center pb-20">
               <button
                 type="submit"
-                className="inline-block hover:bg-orange-600 border-2 bg-blur hover:text-white text-orange-600 text-center  rounded-3xl px-14 py-3 font-semibold shadow transition duration-150 cursor-pointer"
+                className="inline-block hover:bg-orange-600 border-2 bg-blur hover:text-white text-orange-600 text-center rounded-3xl px-14 py-3 font-semibold shadow transition duration-150 cursor-pointer"
               >
                 Submit
               </button>
@@ -127,40 +133,38 @@ const Contact: React.FC = () => {
                 {successMessage}
               </div>
             )}
+
+            {errorMessage && (
+              <div className="text-center text-red-600 font-semibold">
+                {errorMessage}
+              </div>
+            )}
           </form>
         </div>
-     </div>
-   </div>
+      </div>
+    </div>
   );
 };
 
 export default Contact;
 
-
-
-
-
-
-
-const Scale = () =>{
+const Scale = () => {
   const container = useRef(null)
-  const {scrollYProgress} = useScroll({
-    target:container,
-    offset:['start start' , 'end end']
+  const { scrollYProgress } = useScroll({
+    target: container,
+    offset: ['start start', 'end end']
   })
   const scale4 = useTransform(scrollYProgress, [0, 1], [1, 3]);
 
-  return(
-    
+  return (
     <div ref={container} className="container">
-       <div className="sticky_">
-         <div className="element">
-          
-            <motion.div style={{scale:scale4}} className="videoContainer">
-             <img src={group} alt="" />
-            </motion.div>
-         </div>
-       </div>
+      <div className="sticky_">
+        <div className="element">
+          <motion.div style={{ scale: scale4 }} className="videoContainer">
+            <img src={group} alt="" />
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

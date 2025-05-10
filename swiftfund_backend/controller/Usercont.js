@@ -134,46 +134,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// VIEW BALANCE
-exports.viewBalance = async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return handleError(res, 404, "User not found");
-    }
-
-    res.status(200).json({ balance: user.balance });
-  } catch (err) {
-    console.error("View balance error:", err);
-    handleError(res, 500, "Internal server error");
-  }
-};
-
-// UPDATE BALANCE
-exports.updateBalance = async (req, res) => {
-  try {
-    const { userId, amount } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return handleError(res, 404, "User not found");
-    }
-
-    if (isNaN(amount) || amount < 0) {
-      return handleError(res, 400, "Invalid balance amount");
-    }
-
-    user.balance += amount;
-    await user.save();
-
-    res.status(200).json({ message: "Balance updated successfully", balance: user.balance });
-  } catch (err) {
-    console.error("Update balance error:", err);
-    handleError(res, 500, "Internal server error");
-  }
-};
 
 // LOGOUT
 exports.logout = async (req, res) => {
