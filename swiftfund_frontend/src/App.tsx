@@ -23,6 +23,7 @@ import LoansFunded from './pages/Dashboard/loans-funded';
 import LoansRepaid from './pages/Dashboard/loansirepaid';
 import Profile from './pages/Dashboard/Profile';
 import Settings from './pages/Dashboard/settings';
+import NotFound from './components/NotFound';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -39,6 +40,7 @@ const App: React.FC = () => {
             <Route path="/" element={<PageWrapper><HeaderSection /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+            <Route path="*" element={<NotFound />} /> {/* ✅ Added */}
           </Routes>
         </AnimatePresence>
       ) : (
@@ -67,6 +69,7 @@ const App: React.FC = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
           </Route>
+          <Route path="*" element={<NotFound />} /> {/* Added */}
         </Routes>
       )}
 
