@@ -106,7 +106,7 @@ README.md file that describes the project and its integration between the fronte
 
 ```bash
 SwiftFunds/
-├── swiftfund_frontend/              # 🌐 Frontend (React + Tailwindcss)
+├── swiftfund_frontend/              # 🌐 Frontend (React + TypeScript + Vite + Tailwindcss)
 │   ├── src/
 │   │   ├── components/              # Reusable React components
 │   │   ├── pages/                   # Page-level views
