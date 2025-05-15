@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@lucid-evolution/lucid": "^0.4.27",
+    "@reactour/tour": "^3.8.0",
     "@tailwindcss/vite": "^4.1.5",
     "axios": "^1.8.4",
     "buffer": "^6.0.3",
@@ -20,6 +21,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.30.0",
+    "recharts": "^2.15.3",
     "tailwindcss": "^4.1.5",
     "vite-plugin-wasm": "^3.4.1"
   },

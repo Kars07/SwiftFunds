@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import default_profile from "../../assets/default_profile.png";
+import default_profile from "../../assets/avatar-default.png";
 
 const Dashboard: React.FC = () => {
   const [isNaira, setIsNaira] = useState<boolean>(true);
@@ -84,43 +84,43 @@ const Dashboard: React.FC = () => {
   return (
     <div className="flex flex-row h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-1/5 bg-gray-900 text-white p-3 flex flex-col justify-between h-full overflow-hidden">
+      <aside className="w-1/5 bg-white text-white p-3 flex flex-col justify-between h-full overflow-hidden">
         <div>
           <div className="flex items-center space-x-2 mb-10">
-            <img src={logo} alt="Swiftfund Logo" className="w-12 h-auto" />
-            <div className="text-lg font-bold">
-              <span className="text-black-500">Swiftfund</span>
+            <img src={logo} alt="Swiftfund Logo" className="w-10 h-auto" />
+            <div className="text-2xl font-bold">
+              <span className="text-black">SWIFTFUND</span>
             </div>
           </div>
 
           <nav>
-            <ul className="space-y-5 cursor-pointer">
+            <ul className="space-y-6 cursor-pointer">
               <li
-                className="flex items-center space-x-2 bg-orange-700 text-white py-2 px-3 rounded-md"
+                className="flex items-center space-x-2 bg-orange-500 text-white py-2 px-3 rounded-md"
                 onClick={() => navigate("/dashboard")}
               >
                 <i className="bx bx-home text-lg"></i>
                 <span>Home</span>
               </li>
-              <li 
-                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
+              <li
+                className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600"
                 onClick={() => navigate("/dashboard/applications")}
               >
                 <i className="bx bx-folder text-lg"></i>
                 <span>Applications</span>
               </li>
               <li
-                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
-                onClick={() => navigate("/dashboard/profile")}
+                className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
+                onClick={() => navigate("/dashboard/transactions")}
               >
-                <i className="bx bx-user text-lg"></i>
-                <span>Profile</span>
+                <i className="bx bx-wallet text-lg"></i>
+                <span>Transactions</span>
               </li>
 
               {/* Loan Actions */}
               <li className="relative">
                 <div
-                  className="flex items-center justify-between hover:bg-gray-700 py-2 px-3 rounded-md cursor-pointer w-full"
+                  className="flex items-center justify-between py-2 text-gray-700 px-3 hover:text-orange-600 rounded-md cursor-pointer w-full"
                   onClick={toggleLoanActions}
                 >
                   <div className="flex items-center space-x-2">
@@ -134,23 +134,23 @@ const Dashboard: React.FC = () => {
                   ></i>
                 </div>
                 {showLoanActions && (
-                  <ul className="bg-gray-800 rounded-md overflow-hidden w-full">
+                  <ul className="bg-gray-100 rounded-md overflow-hidden w-full">
                     <li
-                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                       onClick={() => navigate("/dashboard/myloan-applications")}
                     >
                       <i className="bx bx-edit text-lg"></i>
                       <span>Loan Applications</span>
                     </li>
                     <li
-                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                       onClick={() => navigate("/dashboard/loans-funded")}
                     >
                       <i className="bx bx-dollar-circle text-lg"></i>
                       <span>Loans Funded</span>
                     </li>
                     <li
-                      className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                      className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                       onClick={() => navigate("/dashboard/loansirepaid")}
                     >
                       <i className="bx bx-refresh text-lg"></i>
@@ -162,14 +162,14 @@ const Dashboard: React.FC = () => {
 
               {/* Other Items */}
               <li
-                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
+                className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
                 onClick={() => navigate("/dashboard/loanstoberepaid")}
               >
                 <i className="bx bx-transfer text-lg"></i>
                 <span>Loans To Repay</span>
               </li>
               <li
-                className="flex items-center space-x-2 hover:bg-gray-700 py-2 px-3 rounded-md"
+                className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
                 onClick={() => navigate("/dashboard/settings")}
               >
                 <i className="bx bx-cog text-lg"></i>
@@ -180,27 +180,27 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Sign Out */}
-        <div className="mt-4 flex items-center bg-gray-800 py-2 px-3 rounded-md">
+        <div className="mt-2 flex items-center py-2 px-3">
           <img
             src={default_profile}
             alt="User Avatar"
             className="w-10 h-10 rounded-full"
           />
           <div className="ml-2 flex-1">
-            <h2 className="text-sm font-bold">{userName}</h2>
+            <h2 className="text-ls text-black font-bold">{userName}</h2>
             <p className="text-xs text-gray-400 truncate">{userEmail}</p>
           </div>
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="text-gray-400 hover:text-white cursor-pointer"
+            className="text-gray-600 hover:text-gray-400 cursor-pointer"
           >
-            <i className="bx bx-log-in text-lg"></i>
+            <i className="bx bx-log-in text-2xl"></i>
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-gray-200 p-6 h-screen overflow-y-auto">
+      <main className="flex-1 bg-white-100 p-6 h-screen overflow-y-auto">
         <Outlet />
       </main>
 

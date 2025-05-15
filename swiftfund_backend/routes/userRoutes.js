@@ -5,7 +5,6 @@ const router = express.Router();
 const {
   register,
   login,
-  updateProfile,
   logout,
 } = require("../controller/Usercont");
 
@@ -126,8 +125,6 @@ router.get("/profile", protect, async (req, res) => {
   }
 });
 
-// Update User Profile (Authenticated)
-router.put("/profile", protect, updateProfile);
 
 //Handle Contact Submissions
 router.post("/contact", handleContact);

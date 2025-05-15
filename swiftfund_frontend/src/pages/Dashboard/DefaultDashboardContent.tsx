@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import default_profile from "../../assets/default_profile.png";
 import { Address, Blockfrost, Lucid, LucidEvolution, paymentCredentialOf, SpendingValidator, validatorToAddress, WalletApi, UTxO, Data } from "@lucid-evolution/lucid";
+import RepaymentTimelineChart from './RepaymentTimelineChart';
+import default_profile from "../../assets/avatar-default.png";
 
 // Define types
 type Wallet = {
@@ -30,6 +31,20 @@ type LoanRequest = {
   utxo: any;
   isActive: boolean;
 };
+
+type ProfileDropdownProps = {
+  userName?: string;
+  connection?: {
+    address?: string;
+  };
+  default_profile: string;
+};
+
+function shortenAddress(address: string, start = 6, end = 4) {
+  if (!address) return "";
+  return `${address.slice(0, start)}...${address.slice(-end)}`;
+}
+
 
 // Import validator scripts
 const loanRequestValidatorScript: SpendingValidator = {
@@ -62,6 +77,7 @@ const fundloanredeemerschema = Data.Object({
 type redeemerType = Data.Static<typeof fundloanredeemerschema>;
 const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
+
 const DefaultDashboardContent: React.FC = () => {
   const [isNaira, setIsNaira] = useState<boolean>(true);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
@@ -75,7 +91,9 @@ const DefaultDashboardContent: React.FC = () => {
 
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
-
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+ 
   const navigate = useNavigate();
 
   // Get available wallets
@@ -247,97 +265,254 @@ const DefaultDashboardContent: React.FC = () => {
     if (!address) return "";
     return `${address.substring(0, 8)}...${address.substring(address.length - 8)}`;
   }
+  
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        event.target instanceof Node &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
+  
   return (
-    <>
-      {/* Main content with Outlet */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+  <div>
+    {/* Dashboard Header */}
+    <div className="flex items-center justify-between mb-3 mt-3">
+      {/* Welcome Section */}
+      <div>
         <h1 className="text-2xl font-bold mb-2">Welcome, {userName} 👋</h1>
-        <p className="text-gray-600">Access & manage your account effortlessly.</p>
+        <p className="text-gray-600">Your personal loan management dashboard</p>
       </div>
 
-      {/* Wallet Balance Section */}
-      <div className="bg-blue-600 rounded-lg shadow-lg p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Wallet Balance</h2>
-          {!connection ? (
-            <div className="flex flex-wrap gap-2">
-              {wallets.map((wallet) => (
-                <button
-                  key={wallet.name}
-                  onClick={() => connectWallet(wallet)}
-                  disabled={isConnecting}
-                  className="flex items-center bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition"
-                >
-                  {wallet.icon && (
-                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
-                  )}
-                  {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-                </button>
-              ))}
-            </div>
-          ) : (
+      {/* User Actions Section */}
+      <div className="flex items-center space-x-6">
+        {/* Notification Icon */}
+        <button className="relative text-gray-600 hover:text-gray-800">
+          <i className="bx bx-bell text-2xl"></i> {/* Bell Icon */}
+          <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span> {/* Notification Dot */}
+        </button>
+
+        {/* Settings Icon */}
+        <button className="text-gray-600 hover:text-gray-800">
+          <i className="bx bx-cog text-2xl"></i> {/* Settings Icon */}
+        </button>
+
+        {/* User Avatar */}
+        <div className="relative inline-block text-left" ref={dropdownRef}>
+          <div className="flex items-center space-x-2">
+            <img
+              src={default_profile}
+              alt="User Avatar"
+              className="w-8 h-8 rounded-full"
+            />
             <button
-              onClick={handleToggleCurrency}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition"
+              className="text-gray-600 hover:text-gray-900"
+              onClick={() => setShowDropdown((prev) => !prev)}
             >
-              {isNaira ? "Show ADA" : "Show NGN"}
+              ▼
             </button>
+          </div>
+
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-50 p-4">
+            <p className="text-sm text-gray-600">Signed in as</p>
+            <p className="font-medium">{userName || "User"}</p>
+          
+            {connection?.address && (
+              <>
+                <hr className="my-2 border-gray-300" />
+                <p className="text-sm text-gray-600">Wallet Address:</p>
+                <p className="text-xs font-mono break-all text-blue-600">
+                  {shortenAddress(connection.address)}
+                </p>
+              </>
+            )}
+          </div>  
           )}
         </div>
 
-        {connection && (
-          <div className="text-white mb-4">
-            <p>
-              <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
-            </p>
+      </div>
+    </div>
+    
+
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Total Applications */}
+      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-500">Total Applications</h3>
+          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
+            <i className="bx bx-file text-lg"></i>
           </div>
+        </div>
+        <p className="text-3xl font-bold text-gray-800">3</p>
+        <p className="text-sm text-green-500 flex items-center mt-2">
+          <i className="bx bx-trending-up mr-1"></i> +33% since last month
+        </p>
+      </div>
+
+      {/* Active Loans */}
+      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-500">Active Loans</h3>
+          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
+            <i className="bx bx-money text-lg"></i>
+          </div>
+        </div>
+        <p className="text-3xl font-bold text-gray-800">1</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Total amount: <span className="font-semibold text-blue-500">$5,000.00</span>
+        </p>
+      </div>
+
+      {/* Pending Approval */}
+      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-500">Pending Approval</h3>
+          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
+            <i className="bx bx-time text-lg"></i>
+          </div>
+        </div>
+        <p className="text-3xl font-bold text-gray-800">2</p>
+        <p className="text-sm text-yellow-500 mt-2 flex items-center">
+          <i className="bx bx-time mr-1"></i> Awaiting review
+        </p>
+      </div>
+
+      {/* Total Repaid */}
+      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-500">Total Repaid</h3>
+          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
+            <i className="bx bx-check-circle text-lg"></i>
+          </div>
+        </div>
+        <p className="text-3xl font-bold text-gray-800">$1,250.00</p>
+        <p className="text-sm text-green-500 mt-2 flex items-center">
+          <i className="bx bx-trending-up mr-1"></i> 25% of total loan amount
+        </p>
+      </div>
+    </div>
+
+    {/* Wallet Balance Section */}
+    <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-lg shadow-lg p-6 mb-6 mt-6 max-w-3xl"> 
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-semibold text-black">Wallet Balance</h2> {/* Reduced font size */}
+        {!connection ? (
+          <div className="flex flex-wrap gap-1">
+            {wallets.map((wallet) => (
+              <button
+                key={wallet.name}
+                onClick={() => connectWallet(wallet)}
+                disabled={isConnecting}
+                className="flex items-center bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-xl transition" 
+              >
+                {wallet.icon && (
+                  <img src={wallet.icon} alt={wallet.name} className="w-4 h-4 mr-1" /> 
+                )}
+                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <button
+            onClick={handleToggleCurrency}
+            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-xl transition"
+          >
+            {isNaira ? "Show ADA" : "Show NGN"}
+          </button>
         )}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-blue-700 rounded-lg p-6">
-            <p className="text-gray-300 mb-2">Total Balance {isNaira ? "(₦)" : "(ADA)"}</p>
-            <h3 className="text-3xl font-bold text-white">
-              {isNaira 
-                ? `₦${connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}`
-                : `${connection ? lovelaceToAda(walletBalance) : "0"} ADA`}
-            </h3>
+      {connection && (
+        <div className="text-white mb-3">
+          <p>
+            <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-0">
+        <div className="p-3 ">
+          <p className="text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
+          <h3 className="text-xl font-bold text-black">
+            {isNaira 
+              ? `₦${connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}`
+              : `${connection ? lovelaceToAda(walletBalance) : "0"} ADA`}
+          </h3>
+        </div>
+
+        <div className="bg-orange-300 p-3 rounded-md">
+          <p className="text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
+          <h3 className="text-xl font-bold text-black"> 
+            {!isNaira 
+              ? `₦${connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}`
+              : `${connection ? lovelaceToAda(walletBalance) : "0"} ADA`}
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    {/* Stats Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
+
+      {/* Chart Section */}
+      <div className="md:col-span-2 p-4">
+        <RepaymentTimelineChart />
+      </div>
+
+      {/* Verification Status Section */}
+      <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">Verification Status</h2>
+
+        {/* KYC Level Progress */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">KYC Level</span>
+            <span className="text-sm text-gray-900 font-bold">Level 1</span>
           </div>
-          <div className="bg-blue-700 rounded-lg p-6">
-            <p className="text-gray-300 mb-2">Total Balance {!isNaira ? "(₦)" : "(ADA)"}</p>
-            <h3 className="text-3xl font-bold text-white">
-              {!isNaira 
-                ? `₦${connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}`
-                : `${connection ? lovelaceToAda(walletBalance) : "0"} ADA`}
-            </h3>
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div className="h-2 rounded-full bg-orange-400" style={{ width: "33%" }}></div>
+          </div>
+          <a href="#" className="text-orange-500 text-sm font-medium mt-2 inline-block">
+            Upgrade to Level 2 →
+          </a>
+        </div>
+
+        {/* Credit Reputation Score */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Credit Reputation Score</span>
+            <span className="text-sm text-gray-900 font-bold">600</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div className="h-2 bg-green-500 rounded-full" style={{ width: "10%" }}></div>
+          </div>
+          <div className="bg-green-100 text-green-800 text-sm p-2 mt-2 rounded-md shadow">
+            <p className="font-medium">Good credit score</p>
+            <p>You qualify for loans up to $25,000 with competitive interest rates.</p>
           </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-300 mb-4">Credit Score</h2>
-          <p className="text-4xl font-bold text-white">200<span className="text-gray-400 text-lg">/600</span></p>
-        </div>
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-300 mb-4">Active Loans</h2>
-          <p className="text-4xl font-bold text-white">{connection ? activeLoans : "0"}</p>
-        </div>
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-300 mb-4">Verification Level</h2>
-          <p className="text-4xl font-bold text-white">Level 1</p>
-          <a href="#" className="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block">KYC Verification &rarr;</a>
-        </div>
+        {/* Verification Button for New Users */}
+        <button className="bg-orange-500 text-white w-full py-2 mt-4 rounded-md hover:bg-orange-600 transition">
+          Verify Yourself
+        </button>
       </div>
+    </div>
 
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-        <p className="text-gray-400 italic">More dashboard content coming soon...</p>
-      </div>
-
-      <Outlet />
-    </>
+    
+    <Outlet />
+  </div>
   );
 };
-
 export default DefaultDashboardContent;

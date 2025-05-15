@@ -107,33 +107,6 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// UPDATE PROFILE
-exports.updateProfile = async (req, res) => {
-  try {
-    const { userId, fullname, email } = req.body;
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser._id.toString() !== userId) {
-      return handleError(res, 400, "Email is already taken by another user.");
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return handleError(res, 404, "User not found");
-    }
-
-    user.fullname = fullname || user.fullname;
-    user.email = email || user.email;
-
-    await user.save();
-
-    res.status(200).json({ message: "Profile updated successfully", user });
-  } catch (err) {
-    console.error("Update profile error:", err);
-    handleError(res, 500, "Internal server error");
-  }
-};
-
 
 // LOGOUT
 exports.logout = async (req, res) => {
