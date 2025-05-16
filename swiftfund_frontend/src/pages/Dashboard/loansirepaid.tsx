@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Address, Blockfrost, Lucid, LucidEvolution, paymentCredentialOf, WalletApi, validatorToAddress, PaymentKeyHash, SpendingValidator, UTxO, Data, credentialToAddress } from "@lucid-evolution/lucid";
+import { Address, validatorToAddress, SpendingValidator } from "@lucid-evolution/lucid";
+import { useWallet } from "./Dashboard";
 
-// Import validator scripts
 const loanRequestValidatorScript: SpendingValidator = {
     type: "PlutusV2",
     script: "59030501010029800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cc0200092225980099b8748008c01cdd500144ca60026018003300c300d0019b87480012223322598009801800c566002601c6ea802600516403d15980099b874800800626464653001375a6028003375a6028007375a60280049112cc004c06001201116405430140013013001300e37540131640308060566002600260166ea800a33001300f300c37540052301030113011301130113011301130113011001911919800800801912cc00400629422b30013371e6eb8c04c00400e2946266004004602800280710112444b30013004300e375401513300137586004601e6ea8020dd7180918079baa0038999119912cc004c020c048dd5000c4cc88cc88c966002601a602e6ea8006264b30013370e9002180c1baa0018992cc004c03cc064dd5000c4c8c8c8ca60026eb4c0840066eb8c0840126eb4c08400e6eb4c0840092222598009813002c56600266e3cdd7181298111baa009375c604a60446ea805a2b30013370e6eb4c038c088dd50049bad30250138acc004cdc39bad300c302237540126eb4c0940462b30013370e6eb4c094c098c098c098c088dd50049bad3025302601189980a1bac3015302237540366eb8c094c088dd500b452820408a50408114a0810229410204590230c084004c080004c07c004c068dd5000c59018180e180c9baa0018b202e300230183754603660306ea80062c80b0cc01cdd61800980b9baa01025980099baf301b30183754603660306ea800400e266ebcc010c060dd50009802180c1baa30043018375400b14a080b0c060c054dd5180c180a9baa3001301537540044603260346034002602c60266ea80048c05cc0600062c8088c054008cc004dd6180a18089baa00a23375e602a60246ea8004024c03cdd5005111919800800801912cc0040062980103d87a80008992cc004c010006266e952000330160014bd7044cc00c00cc060009012180b000a02840348b2014300b375400e30083754005164018300800130033754011149a26cac80081"
@@ -21,198 +21,101 @@ const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestVal
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 const RepayLoanAddress: Address = validatorToAddress("Preprod", RepayRequestValidatorScript);
 
-// Define types
-type Wallet = {
-    name: string;
-    icon: string;
-    apiVersion: string;
-    enable(): Promise<WalletApi>;
-    isEnabled(): Promise<boolean>;
-};
-
-type Connection = {
-    api: WalletApi;
-    lucid: LucidEvolution;
-    address: Address;
-    pkh: PaymentKeyHash;
-};
 
 type RepaidLoan = {
-    txId: string;           // Transaction hash of the repayment
-    loanAmount: bigint;     // Original loan amount
-    interest: bigint;       // Interest amount
-    totalRepaid: bigint;    // Total amount repaid
-    lenderPKH: string;      // Payment key hash of the lender
-    datumObject: any;       // Raw datum data
-    repaymentDate: Date;    // Date when the loan was repaid
+    id: string;           // Unique ID for the repaid loan (fundedLoanId)
+    data: {
+        repaidAt: number; // Timestamp when the loan was repaid
+        repaymentTxHash: string; // Transaction hash of the repayment
+        loanAmount: string; // Original loan amount (as string)
+        interest: string; // Interest amount (as string)
+        originalLoanId?: string; // Reference to the original loan request UTXO ID
+        lenderPKH: string; // Payment key hash of the lender
+        borrowerPKH: string; // Payment key hash of the borrower
+    };
 };
 
-
-// Loan Request Datum
-const loanRequestSchema = Data.Object({
-    borrowerPKH: Data.Bytes(),
-    loanAmount: Data.Integer(),
-    interest: Data.Integer(),
-    deadline: Data.Integer(),
-});
-type BorrowerDatum = Data.Static<typeof loanRequestSchema>;
-const BorrowerDatum = loanRequestSchema as unknown as BorrowerDatum;
-
-// Fund Loan Datum
-const fundLoanSchema = Data.Object({
-    lenderPKH: Data.Bytes(),
-    loanAmount: Data.Integer(),
-});
-type FundLoanDatum = Data.Static<typeof fundLoanSchema>;
-const FundLoanDatum = fundLoanSchema as unknown as FundLoanDatum;
-
-// Repay Loan Redeemer/Datum
-const repayLoanSchema = Data.Object({
-    borrowerPKH: Data.Bytes(),
-    loanAmount: Data.Integer(),
-    interest: Data.Integer(),
-    deadline: Data.Integer(),
-});
-type RepayLoanDatum = Data.Static<typeof repayLoanSchema>;
-const RepayLoanDatum = repayLoanSchema as unknown as RepayLoanDatum;
-
 const LoansIRepaid: React.FC = () => {
-    const [wallets, setWallets] = useState<Wallet[]>([]);
-    const [connection, setConnection] = useState<Connection | null>(null);
-    const [isConnecting, setIsConnecting] = useState<boolean>(false);
+    const { wallets, connection, isConnecting, connectWallet } = useWallet();
     const [repaidLoans, setRepaidLoans] = useState<RepaidLoan[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Function to get available wallets
-    useEffect(() => {
-        function getWallets(): Wallet[] {
-            const wallets: Wallet[] = [];
-            const { cardano } = window as any;
-
-            if (!cardano) {
-                console.error("Cardano object not found. Please install a wallet extension.");
-                return wallets;
-            }
-
-            for (const c in cardano) {
-                const wallet = cardano[c];
-                if (!wallet.apiVersion) continue;
-                wallets.push(wallet);
-            }
-
-            return wallets.sort((l, r) => {
-                return l.name.toUpperCase() < r.name.toUpperCase() ? -1 : 1;
-            });
-        }
-
-        setWallets(getWallets());
-    }, []);
-
-    // Connect wallet function
-    async function connectWallet(wallet: Wallet): Promise<void> {
-        try {
-            setIsConnecting(true);
-            const api = await wallet.enable();
-            const lucid = await Lucid(new Blockfrost("https://cardano-preprod.blockfrost.io/api/v0", "preprodtJBS315srwdKRJldwtHxMqPJZplLRkCh"), "Preprod");
-            lucid.selectWallet.fromAPI(api);
-
-            const address = await lucid.wallet().address();
-            const pkh = paymentCredentialOf(address).hash;
-
-            const conn = { api, lucid, address, pkh };
-            setConnection(conn);
-            
-            // After connection, fetch repaid loans
-            await fetchRepaidLoans(lucid, pkh);
-        } catch (error) {
-            console.error("Error connecting wallet:", error);
-            setError("Failed to connect wallet. Please try again.");
-        } finally {
-            setIsConnecting(false);
-        }
-    }
-
-    // Function to fetch repaid loans from the blockchain
-    async function fetchRepaidLoans(lucidInstance: LucidEvolution, borrowerPKH: string): Promise<void> {
+   
+    function loadRepaymentHistory(userPkh: string): void {
         try {
             setIsLoading(true);
             setError(null);
             
-            // Fetch transactions at the repay loan address
-            const repaidLoanUtxos: UTxO[] = await lucidInstance.utxosAt(RepayLoanAddress);
-            console.log("UTxOs at repay loan address:", repaidLoanUtxos);
+            const repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
+            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
+        
+            const history: RepaidLoan[] = [];
             
-            // Get fund loan transactions to cross-reference lender details
-            const fundedLoanUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
-            console.log("UTxOs at fund loan address:", fundedLoanUtxos);
-            
-            // Create a map of loan amounts to lender PKHs
-            const loanToLenderMap = new Map<string, string>();
-            for (const utxo of fundedLoanUtxos) {
-                if (!utxo.datum) continue;
+            for (const [fundedLoanId, repaymentData] of Object.entries(repaidLoansTracking)) {
+                const repaymentInfo = repaymentData as any;
                 
-                try {
-                    const datumObject = Data.from(utxo.datum, FundLoanDatum);
-                    loanToLenderMap.set(datumObject.loanAmount?.toString(), datumObject.lenderPKH);
-                } catch (error) {
-                    console.error("Error parsing fund loan datum:", error);
+                // Find the loan tracking info
+                const loanInfo = Object.values(fundedLoansTracking).find(
+                    (info: any) => info.fundedLoanId === fundedLoanId
+                ) as any;
+                
+                if (loanInfo && loanInfo.borrowerPKH === userPkh) {
+                    history.push({
+                        id: fundedLoanId,
+                        data: {
+                            ...repaymentInfo,
+                            lenderPKH: loanInfo.lenderPKH,
+                            borrowerPKH: loanInfo.borrowerPKH,
+                            loanAmount: repaymentInfo.loanAmount || loanInfo.loanAmount,
+                            interest: repaymentInfo.interest || loanInfo.interest
+                        }
+                    });
                 }
             }
             
-            const loans: RepaidLoan[] = [];
+            // Sort by repayment date (newest first)
+            history.sort((a, b) => b.data.repaidAt - a.data.repaidAt);
             
-            for (const utxo of repaidLoanUtxos) {
-                if (!utxo.datum) continue;
-                
-                try {
-                    const datumObject = Data.from(utxo.datum, RepayLoanDatum);
-                    
-                    // Only add loans where the connected user is the borrower
-                    if (datumObject.borrowerPKH === borrowerPKH) {
-                        // Calculate total repaid
-                        const totalRepaid = datumObject.loanAmount + datumObject.interest;
-                        
-                        // Get lender PKH from map
-                        const lenderPKH = loanToLenderMap.get(datumObject.loanAmount?.toString()) || "Unknown";
-                        
-                        // Get the repayment date from the transaction
-                        const repaymentDate = new Date();
-                        
-                        loans.push({
-                            txId: utxo.txHash,
-                            loanAmount: datumObject.loanAmount,
-                            interest: datumObject.interest,
-                            totalRepaid: totalRepaid,
-                            lenderPKH: lenderPKH,
-                            datumObject,
-                            repaymentDate
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error parsing repaid loan datum:", error);
-                }
-            }
+            setRepaidLoans(history);
             
-            // Sort loans by repayment date (most recent first)
-            loans.sort((a, b) => b.repaymentDate.getTime() - a.repaymentDate.getTime());
-            
-            setRepaidLoans(loans);
-            
-            if (loans.length === 0) {
+            if (history.length === 0) {
                 console.log("No repaid loans found for this user");
             }
         } catch (error) {
-            console.error("Error fetching repaid loans:", error);
-            setError("Failed to fetch repaid loans. Please try again.");
+            console.error("Error loading repayment history:", error);
+            setError("Failed to load repayment history. Please try again.");
         } finally {
             setIsLoading(false);
         }
     }
     
+    // Load repayment history when a wallet is connected
+    useEffect(() => {
+        if (connection && connection.pkh) {
+            loadRepaymentHistory(connection.pkh);
+        }
+    }, [connection]);
+    
+    // Handle wallet connection
+    const handleConnectWallet = async (wallet: any) => {
+        try {
+            setError(null);
+            await connectWallet(wallet);
+        } catch (error) {
+            console.error("Error connecting wallet:", error);
+            setError("Failed to connect wallet. Please try again.");
+        }
+    };
+    
     // Format lovelace to ADA
-    function lovelaceToAda(lovelace: bigint): string {
+    function lovelaceToAda(lovelace: string): string {
         return (Number(lovelace) / 1_000_000).toFixed(6);
+    }
+    
+    // Format date
+    function formatDate(timestamp: number): string {
+        return new Date(timestamp).toLocaleString();
     }
     
     // Function to copy text to clipboard
@@ -224,25 +127,6 @@ const LoansIRepaid: React.FC = () => {
             .catch((err) => {
                 console.error("Failed to copy text: ", err);
             });
-    }
-    
-    // Format full transaction hash for display
-    function formatTxHashForDisplay(txHash: string) {
-        return (
-            <div className="flex items-center">
-                <span className="mr-2">{txHash.substring(0, 8)}...{txHash.substring(txHash.length - 8)}</span>
-                <button 
-                    onClick={() => copyToClipboard(txHash)}
-                    className="text-blue-600 hover:text-blue-800"
-                    title="Copy transaction hash"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
-                </button>
-            </div>
-        );
     }
 
     return (
@@ -257,7 +141,7 @@ const LoansIRepaid: React.FC = () => {
                         {wallets.map((wallet) => (
                             <button
                                 key={wallet.name}
-                                onClick={() => connectWallet(wallet)}
+                                onClick={() => handleConnectWallet(wallet)}
                                 disabled={isConnecting}
                                 className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
                             >
@@ -302,6 +186,9 @@ const LoansIRepaid: React.FC = () => {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Repaid On
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Lender
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -314,47 +201,61 @@ const LoansIRepaid: React.FC = () => {
                                         Total Repaid
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Repayment Transaction
+                                        Transaction
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        View Details
+                                        Loan ID
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {repaidLoans.map((loan, index) => (
-                                    <tr key={index} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {loan.lenderPKH.substring(0, 8)}...{loan.lenderPKH.substring(loan.lenderPKH.length - 8)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.loanAmount)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.interest)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {lovelaceToAda(loan.totalRepaid)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {formatTxHashForDisplay(loan.txId)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a 
-                                                href={`https://preprod.cexplorer.io/tx/${loan.txId}`} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-800 flex items-center"
-                                            >
-                                                <span>View on Explorer</span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                                                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {repaidLoans.map((repayment) => {
+                                    const loanAmount = repayment.data.loanAmount;
+                                    const interest = repayment.data.interest;
+                                    const totalRepaid = (Number(loanAmount) + Number(interest)).toString();
+                                    
+                                    return (
+                                        <tr key={repayment.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {formatDate(repayment.data.repaidAt)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {repayment.data.lenderPKH.substring(0, 8)}...{repayment.data.lenderPKH.substring(repayment.data.lenderPKH.length - 8)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {lovelaceToAda(loanAmount)} ADA
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {lovelaceToAda(interest)} ADA
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {lovelaceToAda(totalRepaid)} ADA
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                                                <a 
+                                                    href={`https://preprod.cardanoscan.io/transaction/${repayment.data.repaymentTxHash}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="hover:underline flex items-center"
+                                                >
+                                                    <span>{repayment.data.repaymentTxHash.substring(0, 8)}...</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                                {repayment.id.substring(0, 8)}...
+                                                {repayment.data.originalLoanId && (
+                                                    <div className="mt-1 text-xs text-gray-400">
+                                                        From loan: {repayment.data.originalLoanId.substring(0, 8)}...
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

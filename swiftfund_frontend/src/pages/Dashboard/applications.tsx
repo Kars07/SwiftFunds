@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Address, Blockfrost, Lucid, LucidEvolution, paymentCredentialOf, WalletApi, validatorToAddress, getAddressDetails, PaymentKeyHash, SpendingValidator, UTxO, Datum, Redeemer, Data, datumToHash, TxHash, Constr, credentialToAddress } from "@lucid-evolution/lucid";
+import { Address, LucidEvolution, validatorToAddress, SpendingValidator, UTxO, Datum, Redeemer, Data, credentialToAddress } from "@lucid-evolution/lucid";
+import { useWallet } from "./Dashboard";
 
-// Import validator scripts from loan.ts
 const loanRequestValidatorScript: SpendingValidator = {
     type: "PlutusV2",
     script: "59030501010029800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cc0200092225980099b8748008c01cdd500144ca60026018003300c300d0019b87480012223322598009801800c566002601c6ea802600516403d15980099b874800800626464653001375a6028003375a6028007375a60280049112cc004c06001201116405430140013013001300e37540131640308060566002600260166ea800a33001300f300c37540052301030113011301130113011301130113011001911919800800801912cc00400629422b30013371e6eb8c04c00400e2946266004004602800280710112444b30013004300e375401513300137586004601e6ea8020dd7180918079baa0038999119912cc004c020c048dd5000c4cc88cc88c966002601a602e6ea8006264b30013370e9002180c1baa0018992cc004c03cc064dd5000c4c8c8c8ca60026eb4c0840066eb8c0840126eb4c08400e6eb4c0840092222598009813002c56600266e3cdd7181298111baa009375c604a60446ea805a2b30013370e6eb4c038c088dd50049bad30250138acc004cdc39bad300c302237540126eb4c0940462b30013370e6eb4c094c098c098c098c088dd50049bad3025302601189980a1bac3015302237540366eb8c094c088dd500b452820408a50408114a0810229410204590230c084004c080004c07c004c068dd5000c59018180e180c9baa0018b202e300230183754603660306ea80062c80b0cc01cdd61800980b9baa01025980099baf301b30183754603660306ea800400e266ebcc010c060dd50009802180c1baa30043018375400b14a080b0c060c054dd5180c180a9baa3001301537540044603260346034002602c60266ea80048c05cc0600062c8088c054008cc004dd6180a18089baa00a23375e602a60246ea8004024c03cdd5005111919800800801912cc0040062980103d87a80008992cc004c010006266e952000330160014bd7044cc00c00cc060009012180b000a02840348b2014300b375400e30083754005164018300800130033754011149a26cac80081"
@@ -11,25 +11,9 @@ const FundRequestValidatorScript: SpendingValidator = {
     type: "PlutusV2",
     script: "59028801010029800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cdc3a400530080024888966002600460106ea800e2653001300d00198069807000cdc3a40009112cc004c004c030dd500444c8c8cc8966002602a00713259800980318089baa0018acc004c018c044dd5003c4ca60026eb8c0580064602e60300033016301337540109112cc006600266e3c00cdd7180c980b1baa001a50a51405115980099b87375a603260340086eb4c008c058dd5000c5660026644b30013232598009807000c528c566002602600313259800980a180d1baa3007301b3754603c60366ea8016266e24004012266e200040110191bad301d301a375400514a080c1018180c1baa001301b30183754603660306ea800a26464b3001300e0018a508acc004c04c006264b30013014301a3754600e60366ea8c01cc06cdd5002c4cdc4802000c4cdc4002000a032375a603a60346ea800a2945018203030183754002603660306ea8c010c060dd50014528202c3019301a301a301a301a301a301a301a3016375401c6eb4c064c068c068c068c058dd5000c56600264660020026eb0c068c06cc06cc06cc06cc06cc06cc06cc06cc05cdd5007912cc00400629422b30013371e6eb8c06c0040162946266004004603800280b101944cdd7980c980b1baa30193016375400a01914a080a22941014452820288a5040503012375401b16404116404064660020026eb0c054c048dd5005112cc004006298103d87a80008992cc004cdd7980b980a1baa00100a899ba548000cc0580052f5c113300300330180024048602c00280a22c8090dd698090009bae30120023012001300d375401116402c3009375400716401c300800130033754011149a26cac80081"
 };
-
 const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestValidatorScript);
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
-// Define types
-type Wallet = {
-    name: string;
-    icon: string;
-    apiVersion: string;
-    enable(): Promise<WalletApi>;
-    isEnabled(): Promise<boolean>;
-};
-
-type Connection = {
-    api: WalletApi;
-    lucid: LucidEvolution;
-    address: Address;
-    pkh: PaymentKeyHash;
-};
 
 type LoanRequest = {
     txId: string;
@@ -40,6 +24,7 @@ type LoanRequest = {
     deadline: bigint;
     datumObject: any;
     utxo: UTxO;
+    uniqueId: string; // Unique identifier for this specific loan request UTXO
 };
 
 type FundedLoan = {
@@ -47,10 +32,15 @@ type FundedLoan = {
     outputIndex: number;
     lenderPKH: string;
     loanAmount: bigint;
+    borrowerPKH?: string;
+    interest?: bigint;
+    deadline?: bigint;
     utxo: UTxO;
+    fundedLoanId: string; // Unique identifier for this specific funded loan UTXO
+    originalLoanId?: string; // Reference to the original loan request UTXO ID
 };
 
-// Define data schemas
+
 const loanRequestSchema = Data.Object({
     borrowerPKH: Data.Bytes(),
     loanAmount: Data.Integer(),
@@ -68,9 +58,7 @@ type redeemerType = Data.Static<typeof fundloanredeemerschema>;
 const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
 const Applications: React.FC = () => {
-    const [wallets, setWallets] = useState<Wallet[]>([]);
-    const [connection, setConnection] = useState<Connection | null>(null);
-    const [isConnecting, setIsConnecting] = useState<boolean>(false);
+    const { connection, wallets, connectWallet, isConnecting } = useWallet();
     const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
     const [fundedLoans, setFundedLoans] = useState<FundedLoan[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -84,53 +72,16 @@ const Applications: React.FC = () => {
     const [txHash, setTxHash] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     
-    // Function to get available wallets
+    // Fetch loan data when connection changes
     useEffect(() => {
-        function getWallets(): Wallet[] {
-            const wallets: Wallet[] = [];
-            const { cardano } = window as any;
-
-            if (!cardano) {
-                console.error("Cardano object not found. Please install a wallet extension.");
-                return wallets;
-            }
-
-            for (const c in cardano) {
-                const wallet = cardano[c];
-                if (!wallet.apiVersion) continue;
-                wallets.push(wallet);
-            }
-
-            return wallets.sort((l, r) => {
-                return l.name.toUpperCase() < r.name.toUpperCase() ? -1 : 1;
-            });
+        if (connection) {
+            fetchLoanData(connection.lucid);
         }
+    }, [connection]);
 
-        setWallets(getWallets());
-    }, []);
-
-    // Connect wallet function
-    async function connectWallet(wallet: Wallet): Promise<void> {
-        try {
-            setIsConnecting(true);
-            const api = await wallet.enable();
-            const lucid = await Lucid(new Blockfrost("https://cardano-preprod.blockfrost.io/api/v0", "preprodtJBS315srwdKRJldwtHxMqPJZplLRkCh"), "Preprod");
-            lucid.selectWallet.fromAPI(api);
-
-            const address = await lucid.wallet().address();
-            const pkh = paymentCredentialOf(address).hash;
-
-            const conn = { api, lucid, address, pkh };
-            setConnection(conn);
-            
-            // After connection, fetch loan requests and funded loans
-            await fetchLoanData(lucid);
-        } catch (error) {
-            console.error("Error connecting wallet:", error);
-            setError("Failed to connect wallet. Please try again.");
-        } finally {
-            setIsConnecting(false);
-        }
+    // Create a unique identifier for a specific UTxO
+    function createUtxoId(txId: string, outputIndex: number): string {
+        return `${txId}-${outputIndex}`;
     }
 
     // Fetch loan data (both requests and funded loans)
@@ -152,24 +103,44 @@ const Applications: React.FC = () => {
         }
     }
 
-    // Fetch funded loans from the blockchain
     async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
         const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
         console.log("UTXOs at fund loan address:", fundedUtxos);
         
         const fundedLoans: FundedLoan[] = [];
         
+        // Get funded loans tracking from localStorage
+        const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
+        
         for (const utxo of fundedUtxos) {
             if (!utxo.datum) continue;
             
             try {
                 const datumObject = Data.from(utxo.datum, redeemerType);
+                
+                // Create unique identifier for this funded loan UTXO
+                const fundedLoanId = createUtxoId(utxo.txHash, utxo.outputIndex);
+                
+                // Try to find the original loan ID this funded loan is associated with
+                let originalLoanId = undefined;
+                
+                // Look through the tracking data to find a match
+                for (const [loanId, trackingInfo] of Object.entries(fundedLoansTracking)) {
+                    const tracking = trackingInfo as any;
+                    if (tracking.txHash === utxo.txHash) {
+                        originalLoanId = loanId;
+                        break;
+                    }
+                }
+                
                 fundedLoans.push({
                     txId: utxo.txHash,
                     outputIndex: utxo.outputIndex,
                     lenderPKH: datumObject.lenderPKH,
                     loanAmount: datumObject.loanAmount,
-                    utxo
+                    utxo,
+                    fundedLoanId,
+                    originalLoanId
                 });
             } catch (error) {
                 console.error("Error parsing funded loan datum:", error, "UTxO:", utxo);
@@ -179,17 +150,27 @@ const Applications: React.FC = () => {
         return fundedLoans;
     }
 
-    // Fetch loan requests from the blockchain and filter out funded ones AND expired ones
     async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData: FundedLoan[]): Promise<void> {
         try {
             const utxosAtScript: UTxO[] = await lucidInstance.utxosAt(LoanRequestAddress);
             console.log("UTxOs at loan request address:", utxosAtScript);
 
             const requests: LoanRequest[] = [];
-            
-            // Create a set of funded loan amounts for efficient lookup
-            const fundedLoanAmounts = new Set(fundedLoansData.map(loan => loan.loanAmount.toString()));
             const currentTime = Date.now();
+            
+            // Track funded loans in localStorage
+            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
+            
+            // Get repaid loans tracking from localStorage
+            const repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
+            
+            // Create a map of original loan IDs that have funded loans
+            const fundedLoanOriginalIds = new Set<string>();
+            fundedLoansData.forEach(fl => {
+                if (fl.originalLoanId) {
+                    fundedLoanOriginalIds.add(fl.originalLoanId);
+                }
+            });
 
             for (const utxo of utxosAtScript) {
                 if (!utxo.datum) continue;
@@ -197,18 +178,21 @@ const Applications: React.FC = () => {
                 try {
                     const datumObject = Data.from(utxo.datum, BorrowerDatum);
                     
-                    // Skip this loan request if it has already been funded
-                    if (fundedLoanAmounts.has(datumObject.loanAmount.toString())) {
-                        console.log(`Loan request with amount ${datumObject.loanAmount} has been funded, skipping`);
-                        continue;
-                    }
-                    
                     // Skip expired loan requests
                     if (Number(datumObject.deadline) < currentTime) {
                         console.log(`Loan request with deadline ${new Date(Number(datumObject.deadline)).toLocaleString()} has expired, skipping`);
                         continue;
                     }
                     
+                    // Create a unique identifier for this loan request UTXO
+                    const loanId = createUtxoId(utxo.txHash, utxo.outputIndex);
+                    
+                    // Check if this specific loan request has been funded
+                    if (fundedLoanOriginalIds.has(loanId) || fundedLoansTracking[loanId]) {
+                        console.log(`Loan request ${loanId} has been funded, skipping`);
+                        continue;
+                    }
+
                     requests.push({
                         txId: utxo.txHash,
                         outputIndex: utxo.outputIndex,
@@ -217,7 +201,8 @@ const Applications: React.FC = () => {
                         interest: datumObject.interest,
                         deadline: datumObject.deadline,
                         datumObject,
-                        utxo
+                        utxo,
+                        uniqueId: loanId
                     });
                 } catch (error) {
                     console.error("Error parsing datum:", error, "UTxO:", utxo);
@@ -275,7 +260,7 @@ const Applications: React.FC = () => {
             // Wait for a moment and then refresh the loan data
             setTimeout(() => {
                 fetchLoanData(lucid);
-            }, 10000);
+            }, 25000);
             
         } catch (error) {
             console.error("Error creating loan request:", error);
@@ -344,6 +329,44 @@ const Applications: React.FC = () => {
             
             console.log("Loan funded successfully. Transaction hash:", txHash);
             setTxHash(txHash);
+
+            // Get funding UTXO details
+            const fundingTx = await lucid.awaitTx(txHash);
+            console.log("Funding transaction confirmed:", fundingTx);
+            
+            // Find the output index of the funding at the FundLoanAddress
+            let fundedOutputIndex = -1;
+            const txOutputs = await lucid.utxosAt(FundLoanAddress);
+            for (let i = 0; i < txOutputs.length; i++) {
+                if (txOutputs[i].txHash === txHash) {
+                    fundedOutputIndex = txOutputs[i].outputIndex;
+                    break;
+                }
+            }
+
+            // After successful funding, track it in localStorage
+            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
+            const loanId = loanRequest.uniqueId;
+            
+            // Create unique funded loan identifier using the specific funding transaction
+            const fundedLoanId = createUtxoId(txHash, fundedOutputIndex >= 0 ? fundedOutputIndex : 0);
+            
+            fundedLoansTracking[loanId] = {
+                fundedAt: Date.now(),
+                lenderPKH: pkh,
+                txHash: txHash,
+                fundedLoanId: fundedLoanId,
+                loanAmount: loanRequest.loanAmount.toString(),
+                interest: loanRequest.interest.toString(),
+                deadline: loanRequest.deadline.toString(),
+                borrowerPKH: loanRequest.borrowerPKH,
+                // Store the funding UTXO details for reference
+                fundedWith: [{
+                    txHash: txHash,
+                    outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
+                }]
+            };
+            localStorage.setItem('fundedLoans', JSON.stringify(fundedLoansTracking));
             
             // Wait for a moment and then refresh the loan data
             setTimeout(() => {
@@ -380,7 +403,7 @@ const Applications: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-6">
             <h1 className="text-2xl font-bold mb-6">Loan Applications</h1>
             
-            {/* Wallet Connection */}
+            {/* Wallet Connection Status */}
             {!connection ? (
                 <div className="mb-6 p-4 bg-gray-100 rounded-lg">
                     <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
@@ -513,13 +536,16 @@ const Applications: React.FC = () => {
                                         Deadline
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Loan ID
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {loanRequests.map((loan) => (
-                                    <tr key={`${loan.txId}-${loan.outputIndex}`}>
+                                    <tr key={loan.uniqueId}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
                                             {connection && loan.borrowerPKH === connection.pkh && (
@@ -540,6 +566,9 @@ const Applications: React.FC = () => {
                                             <span className="text-green-600">
                                                 {daysRemaining(loan.deadline)} days remaining
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                            {loan.uniqueId.substring(0, 8)}...
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             {connection && loan.borrowerPKH === connection.pkh ? (
