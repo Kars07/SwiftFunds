@@ -316,23 +316,24 @@ const LoanToBeRepaid: React.FC = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <h1 className="text-2xl font-bold mb-6">Loans to Repay</h1>
-            
-            {/* Wallet Connection Status */}
-            {!connection ? (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Connect your wallet to view loans</h2>
-                    <p className="text-gray-600 mb-3">Please connect your wallet in the sidebar to view and manage your loans.</p>
-                </div>
-            ) : (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">
-                        <span className="font-semibold">Connected with:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                    </p>
-                </div>
-            )}
-            
+        <div className="p-4 pt-10">
+            <div className="flex justify-between">
+                <h1 className="text-3xl font-medium mb-6">Loans to Repay</h1>
+                
+                {/* Wallet Connection Status */}
+                {!connection ? (
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Connect your wallet to view loans</h2>
+                        <p className="text-gray-600 mb-3">Please connect your wallet in the sidebar to view and manage your loans.</p>
+                    </div>
+                ) : (
+                    <div className="mb-6 p-4 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="text-zinc-800">
+                            <span className="font-semibold">Connected with:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                        </p>
+                    </div>
+                )}
+            </div> 
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -350,7 +351,7 @@ const LoanToBeRepaid: React.FC = () => {
             )}
             
             {/* Loans to Repay List */}
-            <div className="mb-8">
+            <div className="mb-10 p-9 bg-white rounded-2xl mt-10 shadow-2xl">
                 <h2 className="text-xl font-semibold mb-4">Your Active Loans to Repay</h2>
                 
                 {!connection ? (

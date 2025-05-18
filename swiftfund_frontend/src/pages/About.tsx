@@ -42,14 +42,14 @@ const About: React.FC = () => {
 
   return (
     <div className="w-full h-full text-white overflow-hidden">
-      <div className="absolute lg:block hidden left-30 pl-8 rotate-z-65 translate-y-[-10px]">
+      <div className="absolute lg:block hidden left-10 pl-8 rotate-z-65 translate-y-[-10px]">
         <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
       </div>
       <h1 className="text-4xl text-center pt-30 font-bold text-gray-900">MEET OUR DEVELOPERS</h1>
       <div className='justify-center pt-3 flex lg:hidden '>
         <div className='border border-orange-600 w-50 block rounded-2xl h-3 bg-orange-600 items-center'></div>
       </div>
-      <div className="absolute lg:block hidden right-30 pl-8 rotate-z-125 translate-y-[-170px]">
+      <div className="absolute lg:block hidden right-10 pl-8 rotate-z-125 translate-y-[-170px]">
         <img src={zigzag} alt="Logo" className="w-[500px] h-auto" />
       </div>
       <div className="relative lg:block hidden">

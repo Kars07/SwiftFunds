@@ -1,5 +1,7 @@
 import React, { useState, useEffect, ReactNode } from "react";
 import logo from "../assets/logo.png";
+import arrow from "../assets/arrow.png";
+import { div } from "framer-motion/client";
 
 interface SectionProps {
   id: string;
@@ -41,7 +43,7 @@ const StampNetDocs: React.FC = () => {
       {isMobile && !menuOpen && (
         <button
           onClick={toggleMenu}
-          className="fixed top-4 left-4 z-50 text-gray-900 text-2xl border-2 border-gray-900 bg-opacity-20 backdrop-blur-md px-2 py-1"
+          className="fixed top-4 left-4 z-50 text-gray-900 text-2xl bg-opacity-20 backdrop-blur-md px-2 py-1"
         >
           ☰
         </button>
@@ -49,7 +51,7 @@ const StampNetDocs: React.FC = () => {
 
       {/* Sidebar */}
       <nav
-        className={`fixed top-0 left-0 h-full w-80 backdrop-blur-lg bg-gray-800 text-white p-5 overflow-y-auto transform transition-transform duration-300 z-40 ${
+        className={`fixed top-0 left-0 h-full w-80 backdrop-blur-lg bg-zinc-800 text-white p-5 overflow-y-auto transform transition-transform duration-300 z-40 ${
           menuOpen || !isMobile ? "translate-x-0" : "-translate-x-full"
         } ${isMobile ? "bg-opacity-70 backdrop-blur-md w-2/3" : ""}`}
       >
@@ -63,13 +65,13 @@ const StampNetDocs: React.FC = () => {
         )}
         <div className="mb-6 flex gap-3">
           <a href="/">
-            <img src={logo} alt="Logo" className="w-10" />
+            <img src={logo} alt="Logo" className="w-6" />
           </a>
           <div className="flex justify-center items-center">
-            <span className="text-white font-bold text-2xl">SWIFTFUND</span>
+            <span className="text-white font-bold text-xl">SWIFTFUND</span>
           </div>
         </div>
-        <ul className="space-y-6 py-10 px-4">
+        <ul className="space-y-6 pt-4 px-4 ">
           {[
             { id: "introduction", label: "Introduction" },
             { id: "authentication", label: "User Authentication" },
@@ -82,9 +84,13 @@ const StampNetDocs: React.FC = () => {
             <li
               key={id}
               onClick={() => scrollToSection(id)}
-              className="cursor-pointer hover:text-orange-600"
             >
-              {label}
+              <div  className="cursor-pointer hover:text-orange-600 px-2  transition transform hover:delay-100 hover:duration-200 hover:scale-x-105" >
+               {label}
+              </div>
+              <div className="py-2 text-gray-500 ">
+               <hr />
+              </div>
             </li>
           ))}
         </ul>
@@ -92,7 +98,12 @@ const StampNetDocs: React.FC = () => {
 
       {/* Content */}
       <div className={`p-5 max-w-4xl ${isMobile ? "mt-20" : "ml-96"}`}>
-        <h1 className="text-center text-3xl font-bold text-orange-600 py-6">
+        <div className="rotate-90 fixed border-2 border-black shadow-2xl top-0 mt-5 transition-transform duration-500 hover:bg-amber-600 delay-500 cursor-pointer  rounded-full p-2 right-0 mx-10">
+          <a href="/">
+           <img src={arrow} alt="" className="w-5 transition-transform duration-500  hover:rotate-[360deg] " style={{ filter: "brightness(0)" }}  />
+          </a>
+        </div>
+        <h1 className="text-center text-3xl font-bold text-orange-600 py-6 pt-10">
           SwiftFund Documentation
         </h1>
         <p className="text-center mb-6">

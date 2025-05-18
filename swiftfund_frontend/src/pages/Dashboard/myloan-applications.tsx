@@ -183,42 +183,44 @@ const MyLoanApplications: React.FC = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <h1 className="text-2xl font-bold mb-6">My Loan Applications</h1>
-            
-            {/* Wallet Status */}
-            {!connection ? (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Wallet connection required</h2>
-                    <p className="text-gray-600">Please connect your wallet from the sidebar to view your loan applications.</p>
-                </div>
-            ) : (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">
-                        <span className="font-semibold">Wallet connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                    </p>
-                    <div className="mt-2">
-                        <button 
-                            onClick={refreshLoanData}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Refresh Loan Data
-                        </button>
+        <div className=" p-4 pt-10">
+            <div className="flex  justify-between">
+                <h1 className="text-3xl font-medium mb-6">My Loan Applications</h1>
+                
+                {/* Wallet Status */}
+                {!connection ? (
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Wallet connection required</h2>
+                        <p className="text-gray-600">Please connect your wallet from the sidebar to view your loan applications.</p>
                     </div>
-                </div>
-            )}
-            
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
-                </div>
-            )}
+                ) : (
+                    <div className="mb-6 p-4 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="text-zinc-800">
+                            <span className="font-semibold">Wallet connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                        </p>
+                        <div className="">
+                            <button 
+                                onClick={refreshLoanData}
+                                className="text-green-600 hover:text-green-700 cursor-pointer text-sm font-medium flex items-center"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Refresh Loan Data
+                            </button>
+                        </div>
+                    </div>
+                )}
+                
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                        {error}
+                    </div>
+                )}
+            </div>
             
             {/* My Loan Requests List */}
-            <div className="mb-8">
+            <div className="mb-10 p-9 mt-10  bg-white rounded-2xl shadow-2xl">
                 <h2 className="text-xl font-semibold mb-4">Your Loan Requests</h2>
                 
                 {isLoading ? (
@@ -312,7 +314,7 @@ const MyLoanApplications: React.FC = () => {
             
             {/* Summary Stats */}
             {connection && myLoanRequests.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50 rounded-2xl shadow-2xl p-6 h-[200px]">
                     <h3 className="text-lg font-semibold mb-3">Summary</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white p-4 rounded-lg border border-gray-200">

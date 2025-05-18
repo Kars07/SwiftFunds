@@ -223,15 +223,51 @@ const Dashboard: React.FC = () => {
     connectWallet,
     disconnectWallet
   };
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+  
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(
+      typeof window !== "undefined" && window.innerWidth < 768
+    );
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
+ 
   return (
     <WalletContext.Provider value={walletContextValue}>
-      <div className="flex flex-row h-screen bg-gray-100">
+      <div className="flex flex-row  bg-gray-100">
+        {isMobile && !menuOpen && (
+          <button
+            onClick={toggleMenu}
+            className="fixed top-4 left-4 z-50 text-gray-900 text-2xl bg-opacity-20 backdrop-blur-md px-2 py-1"
+          >
+            ☰
+          </button>
+        )}
         {/* Sidebar */}
-        <aside className="w-1/5 bg-white text-white p-3 flex flex-col justify-between h-full overflow-hidden">
-          <div>
+        <aside className={`w-[70vw]  md:w-1/5 z-10 bg-white text-white p-3 flex flex-col justify-between h-full overflow-hidden fixed   transform transition-transform duration-300 md:static ${
+          isMobile ? "w-2/3 bg-white backdrop-blur-md" : "w-1/5"}
+         ${menuOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}`}
+        >
+         {isMobile && (
+            <button
+              onClick={toggleMenu}
+              className="absolute top-4 pl-3 right-2 text-xl"
+            >
+               ✖
+            </button>
+          )}
+
+          <div className="">
             <div className="flex items-center space-x-2 mb-10">
-              <img src={logo} alt="Swiftfund Logo" className="w-10 h-auto" />
+              <img src={logo} alt="Swiftfund Logo" className="w-7 h-auto" />
               <div className="text-2xl font-bold">
                 <span className="text-black">SWIFTFUND</span>
               </div>
@@ -259,7 +295,7 @@ const Dashboard: React.FC = () => {
                   <button
                     onClick={toggleWalletDropdown}
                     disabled={isConnecting}
-                    className="w-full text-xs px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition flex items-center justify-between"
+                    className="w-full text-xs px-2 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md transition flex items-center justify-between"
                   >
                     <span>{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
                     <i className={`bx bx-chevron-${showWalletDropdown ? "up" : "down"} text-sm`}></i>
@@ -295,20 +331,20 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            <nav>
-              <ul className="space-y-6 cursor-pointer">
+            <nav className="">
+              <ul className="space-y-6 scroll-auto cursor-pointer">
                 <li
-                  className="flex items-center space-x-2 bg-orange-500 text-white py-2 px-3 rounded-md"
+                  className="flex items-center  space-x-2 w-[200px] bg-orange-500 text-white py-3 px-6 rounded-full"
                   onClick={() => navigate("/dashboard")}
                 >
-                  <i className="bx bx-home text-lg"></i>
-                  <span>Home</span>
+                  <i className="bx bx-home text-xl font-bold"></i>
+                  <span className="">Home</span>
                 </li>
                 <li
-                  className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600"
+                  className="flex items-center space-x-2 py-2 px-6 text-gray-700 hover:text-orange-600"
                   onClick={() => navigate("/dashboard/applications")}
                 >
-                  <i className="bx bx-folder text-lg"></i>
+                  <i className="bx bx-folder text-xl font-bold"></i>
                   <span>Applications</span>
                 </li>
                 {/* <li
@@ -322,11 +358,11 @@ const Dashboard: React.FC = () => {
                 {/* Loan Actions */}
                 <li className="relative">
                   <div
-                    className="flex items-center justify-between py-2 text-gray-700 px-3 hover:text-orange-600 rounded-md cursor-pointer w-full"
+                    className="flex items-center justify-between py-2 text-gray-700 px-6 hover:text-orange-600 rounded-md cursor-pointer w-full"
                     onClick={toggleLoanActions}
                   >
                     <div className="flex items-center space-x-2">
-                      <i className="bx bx-money text-lg"></i>
+                      <i className="bx bx-money text-xl font-bold"></i>
                       <span>Loan Actions</span>
                     </div>
                     <i
@@ -364,17 +400,17 @@ const Dashboard: React.FC = () => {
 
                 {/* Other Items */}
                 <li
-                  className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
+                  className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
                   onClick={() => navigate("/dashboard/loanstoberepaid")}
                 >
-                  <i className="bx bx-transfer text-lg"></i>
+                  <i className="bx bx-transfer text-xl font-bold"></i>
                   <span>Loans To Repay</span>
                 </li>
                 <li
-                  className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
+                  className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
                   onClick={() => navigate("/dashboard/settings")}
                 >
-                  <i className="bx bx-cog text-lg"></i>
+                  <i className="bx bx-cog text-xl font-bold"></i>
                   <span>Settings</span>
                 </li>
               </ul>
@@ -382,7 +418,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Sign Out */}
-          <div className="mt-2 flex items-center py-2 px-3">
+          <div className="mt-2 flex pt-30 items-center py-2 px-3">
             <img
               src={default_profile}
               alt="User Avatar"

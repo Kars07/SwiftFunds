@@ -61,7 +61,7 @@ export const WhyChoose: React.FC = () => {
     <div className="align-middle">
       <div className="pt-20 text-white text-center">
         <h1 className="pb-3 text-4xl font-bold text-black">WHY CHOOSE SWIFTFUND</h1>
-        <h2 className="text-black max-w-4xl mx-auto leading-relaxed">
+        <h2 className="text-black max-w-4xl mx-auto px-4 leading-relaxed">
           At SwiftFund, we believe financial freedom should be accessible to everyone. That’s why we’ve
           built a community-first platform where borrowers and lenders connect directly. 
         </h2>

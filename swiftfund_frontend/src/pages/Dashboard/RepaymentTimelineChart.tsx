@@ -108,9 +108,9 @@ const RepaymentTimelineChart: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
+        <div className="bg-white  p-4 border border-gray-200 rounded shadow-lg">
           <p className="font-medium">{label}</p>
-          <p className="text-blue-600">
+          <p className="text-green-600">
             Amount Repaid: {payload[0].value.toFixed(6)} ADA
           </p>
         </div>
@@ -123,7 +123,7 @@ const RepaymentTimelineChart: React.FC = () => {
     return (
       <div className="w-full h-[300px] bg-white p-4 rounded-2xl shadow-md flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
           <p className="mt-2 text-gray-600">Loading repayment data...</p>
         </div>
       </div>
@@ -142,8 +142,8 @@ const RepaymentTimelineChart: React.FC = () => {
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-[300px] bg-white p-4 rounded-2xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Repayment Timeline</h2>
+      <div className="w-full h-[300px] bg-white p-6  rounded-2xl shadow-md">
+        <h2 className="text-xl font-semibold mb-4 py-9 text-gray-800">Repayment Timeline</h2>
         <div className="h-full flex items-center justify-center">
           <p className="text-gray-500">No repayment data available. Repay a loan to see your timeline.</p>
         </div>
@@ -152,19 +152,19 @@ const RepaymentTimelineChart: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-[300px] bg-white p-4 rounded-2xl shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Repayment Timeline</h2>
+    <div className="w-full h-[400px] bg-white p-6 pb-25 rounded-2xl shadow-md">
+      <h2 className="text-xl font-semibold mb-13 text-gray-800">Repayment Timeline</h2>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="date" 
             tick={{ fontSize: 12 }}
-            label={{ value: 'Repayment Date', position: 'insideBottom', offset: 8 }}
+            label={{ value: 'Repayment Date', position: 'insideBottom', offset: -4 }}
           />
           <YAxis 
             tick={{ fontSize: 12 }}
-            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' }}
+            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' , offset: 10 , dy:50}}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
@@ -172,7 +172,7 @@ const RepaymentTimelineChart: React.FC = () => {
             name="Amount Repaid (ADA)" 
             type="monotone" 
             dataKey="amountRepaid" 
-            stroke="#2563eb" 
+            stroke="#22c55e"
             strokeWidth={3} 
             dot={{ r: 5, fill: "#2563eb" }} 
             activeDot={{ r: 8 }}

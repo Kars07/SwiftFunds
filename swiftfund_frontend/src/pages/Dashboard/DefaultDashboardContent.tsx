@@ -255,57 +255,59 @@ const DefaultDashboardContent: React.FC = () => {
     <div className="flex items-center justify-between mb-3 mt-3">
       {/* Welcome Section */}
       <div>
-        <h1 className="text-2xl font-bold mb-2">Welcome, {userName} 👋</h1>
-        <p className="text-gray-600">Your personal loan management dashboard</p>
+        <h1 className="text-2xl font-bold mb-2 pt-5">Welcome, {userName} 👋</h1>
+        <p className="text-gray-600 pb-8">Your personal loan management dashboard</p>
       </div>
 
       {/* User Actions Section */}
-      <div className="flex items-center space-x-6">
-        {/* Notification Icon */}
-        <button className="relative text-gray-600 hover:text-gray-800">
-          <i className="bx bx-bell text-2xl"></i>
-          <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+      <div className="">
+        <div className="flex items-center absolute  right-0 mx-6 my-5  top-0 space-x-6">
+          {/* Notification Icon */}
+          <button className="relative text-gray-600 hover:text-gray-800">
+            <i className="bx bx-bell text-2xl"></i>
+            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
 
-        {/* Settings Icon */}
-        <button className="text-gray-600 hover:text-gray-800">
-          <i className="bx bx-cog text-2xl"></i>
-        </button>
+          {/* Settings Icon */}
+          <button className="text-gray-600 hover:text-gray-800">
+            <i className="bx bx-cog text-2xl"></i>
+          </button>
 
-        {/* User Avatar */}
-        <div className="relative inline-block text-left" ref={dropdownRef}>
-          <div className="flex items-center space-x-2">
-            <img
-              src={default_profile}
-              alt="User Avatar"
-              className="w-8 h-8 rounded-full"
-            />
-            <button
-              className="text-gray-600 hover:text-gray-900"
-              onClick={() => setShowDropdown((prev) => !prev)}
-            >
-              ▼
-            </button>
+          {/* User Avatar */}
+          <div className="relative inline-block text-left" ref={dropdownRef}>
+            <div className="flex items-center space-x-2">
+              <img
+                src={default_profile}
+                alt="User Avatar"
+                className="w-8 h-8 rounded-full"
+              />
+              <button
+                className="text-gray-600 hover:text-gray-900"
+                onClick={() => setShowDropdown((prev) => !prev)}
+              >
+                ▼
+              </button>
+            </div>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-50 p-4">
+              <p className="text-sm text-gray-600">Signed in as</p>
+              <p className="font-medium">{userName || "User"}</p>
+            
+              {connection?.address && (
+                <>
+                  <hr className="my-2 border-gray-300" />
+                  <p className="text-sm text-gray-600">Wallet Address:</p>
+                  <p className="text-xs font-mono break-all text-blue-600">
+                    {shortenAddress(connection.address)}
+                  </p>
+                </>
+              )}
+            </div>  
+            )}
           </div>
 
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-50 p-4">
-            <p className="text-sm text-gray-600">Signed in as</p>
-            <p className="font-medium">{userName || "User"}</p>
-          
-            {connection?.address && (
-              <>
-                <hr className="my-2 border-gray-300" />
-                <p className="text-sm text-gray-600">Wallet Address:</p>
-                <p className="text-xs font-mono break-all text-blue-600">
-                  {shortenAddress(connection.address)}
-                </p>
-              </>
-            )}
-          </div>  
-          )}
         </div>
-
       </div>
     </div>
     
@@ -368,17 +370,19 @@ const DefaultDashboardContent: React.FC = () => {
     </div>
 
     {/* Wallet Balance Section */}
-    <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-lg shadow-lg p-6 mb-6 mt-6 max-w-3xl"> 
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-lg font-semibold text-black">Wallet Balance</h2>
+    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-6 mb-6 mt-9 max-w-3xl"> 
+      <div className="flex justify-between items-center mb-6">
+        <div>
+         <h2 className="text-lg font-semibold text-black">Wallet Balance</h2> <div className=" flex justify-center items-center flex-col text-black"><hr className="w-30 h-1 border-2 rounded-2xl bg-black"/></div>
+        </div>
         {!connection ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex w-full justify-end flex-wrap gap-1">
             {wallets.map((wallet) => (
               <button
                 key={wallet.name}
                 onClick={() => connectWallet(wallet)}
                 disabled={isConnecting}
-                className="flex items-center bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md text-xl transition" 
+                className="flex items-center bg-black text-[13px]  delay-100  hover:text-orange-400 duration-200 cursor-pointer text-white px-4 py-1.5 rounded-2xl transition" 
               >
                 {wallet.icon && (
                   <img src={wallet.icon} alt={wallet.name} className="w-4 h-4 mr-1" /> 
@@ -388,21 +392,23 @@ const DefaultDashboardContent: React.FC = () => {
             ))}
           </div>
         ) : null}
-      </div>
+      
 
-      {connection && (
-        <div className="text-white mb-3">
-          <p>
-            <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
-          </p>
-        </div>
-      )}
-
+        <div>
+          {connection && (
+            <div className="text-zinc-800 mb-3">
+              <p>
+                <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
+              </p>
+            </div>
+          )}
+       </div>
+     </div>
       <div className="grid grid-cols-2 gap-0">
         <div className="p-3 ">
           <p className="text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
           <h3 className="text-xl font-bold text-black">
-            {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
+          ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
           </h3>
         </div>
 
@@ -424,7 +430,7 @@ const DefaultDashboardContent: React.FC = () => {
       </div>
 
       {/* Verification Status Section */}
-      <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6">
+      <div className="md:col-span-1 bg-white rounded-lg mt-4 shadow-lg p-6">
         <h2 className="text-lg font-semibold text-gray-700 mb-4">Verification Status</h2>
 
         {/* KYC Level Progress */}
@@ -452,13 +458,13 @@ const DefaultDashboardContent: React.FC = () => {
           </div>
           <div className="bg-green-100 text-green-800 text-sm p-2 mt-2 rounded-md shadow">
             <p className="font-medium">Good credit score</p>
-            <p>You qualify for loans up to $25,000 with competitive interest rates.</p>
+            <p>You qualify for loans up to $20 with competitive interest rates.</p>
           </div>
         </div>
 
         {/* Verification Button for New Users */}
-        <button className="bg-orange-500 text-white w-full py-2 mt-4 rounded-md hover:bg-orange-600 transition">
-          Verify Yourself
+        <button className="bg-orange-500 text-white w-full py-3 mt-4 rounded-full hover:scale-105 cursor-pointer duration-300 hover:bg-orange-600 transition">
+          Verify Your Account
         </button>
       </div>
     </div>

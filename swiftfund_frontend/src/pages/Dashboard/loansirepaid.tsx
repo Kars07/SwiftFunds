@@ -130,37 +130,38 @@ const LoansIRepaid: React.FC = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <h1 className="text-2xl font-bold mb-6">Loans I Have Repaid</h1>
-            
-            {/* Wallet Connection */}
-            {!connection ? (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {wallets.map((wallet) => (
-                            <button
-                                key={wallet.name}
-                                onClick={() => handleConnectWallet(wallet)}
-                                disabled={isConnecting}
-                                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
-                            >
-                                {wallet.icon && (
-                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
-                                )}
-                                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-                            </button>
-                        ))}
+        <div className=" p-4 pt-10">
+            <div className="flex justify-between">
+                <h1 className="text-3xl font-medium mb-6">Loans I Have Repaid</h1>
+                
+                {/* Wallet Connection */}
+                {!connection ? (
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {wallets.map((wallet) => (
+                                <button
+                                    key={wallet.name}
+                                    onClick={() => handleConnectWallet(wallet)}
+                                    disabled={isConnecting}
+                                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+                                >
+                                    {wallet.icon && (
+                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
+                                    )}
+                                    {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">
-                        <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                    </p>
-                </div>
-            )}
-            
+                ) : (
+                    <div className="mb-6 p-4 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="text-zinc-800">
+                            <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                        </p>
+                    </div>
+                )}
+            </div>    
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -168,7 +169,7 @@ const LoansIRepaid: React.FC = () => {
             )}
             
             {/* Repaid Loans List */}
-            <div>
+            <div className="mb-10 p-9 mt-10  bg-white rounded-2xl shadow-2xl">
                 <h2 className="text-xl font-semibold mb-4">Your Repaid Loans</h2>
                 
                 {isLoading ? (

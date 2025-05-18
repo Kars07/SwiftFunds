@@ -40,7 +40,7 @@ const App: React.FC = () => {
             <Route path="/" element={<PageWrapper><HeaderSection /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
-            <Route path="*" element={<NotFound />} /> {/* ✅ Added */}
+            <Route path="" element={<NotFound />} /> 
           </Routes>
         </AnimatePresence>
       ) : (
@@ -69,7 +69,7 @@ const App: React.FC = () => {
             <Route path="transactions" element={<Transaction />} />
             <Route path="settings" element={<Settings />} />
           </Route>
-          <Route path="*" element={<NotFound />} /> {/* Added */}
+          <Route path="" element={<NotFound />} /> 
         </Routes>
       )}
 

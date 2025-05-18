@@ -400,37 +400,38 @@ const Applications: React.FC = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <h1 className="text-2xl font-bold mb-6">Loan Applications</h1>
-            
-            {/* Wallet Connection Status */}
-            {!connection ? (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {wallets.map((wallet) => (
-                            <button
-                                key={wallet.name}
-                                onClick={() => connectWallet(wallet)}
-                                disabled={isConnecting}
-                                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
-                            >
-                                {wallet.icon && (
-                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
-                                )}
-                                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-                            </button>
-                        ))}
+        <div className="p-4 pt-10">
+            <div className="flex justify-between ">
+                <h1 className="text-3xl font-medium mb-6">Loan Applications</h1>
+                
+                {/* Wallet Connection Status */}
+                {!connection ? (
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Connect your wallet :</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {wallets.map((wallet) => (
+                                <button
+                                    key={wallet.name}
+                                    onClick={() => connectWallet(wallet)}
+                                    disabled={isConnecting}
+                                    className="flex items-center bg-black text-[13px] delay-100  hover:bg-orange-500 duration-200 cursor-pointer text-white px-4 py-2 rounded-2xl transition"
+                                >
+                                    {wallet.icon && (
+                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
+                                    )}
+                                    {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">
-                        <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                    </p>
-                </div>
-            )}
-            
+                ) : (
+                    <div className="mb-6 p-4 -translate-y-2 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="text-zinc-800">
+                            <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                        </p>
+                    </div>
+                )}
+            </div>
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -449,7 +450,7 @@ const Applications: React.FC = () => {
             
             {/* Create Loan Request Form */}
             {connection && (
-                <div className="mb-8 p-5 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mb-10 p-9 mt-10  bg-white rounded-2xl shadow-2xl ">
                     <h2 className="text-xl font-semibold mb-4">Create Loan Request</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
@@ -460,9 +461,10 @@ const Applications: React.FC = () => {
                                 type="number"
                                 value={loanAmount}
                                 onChange={(e) => setLoanAmount(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 disabled={isSubmitting}
-                            />
+                           />
+
                             <p className="text-xs text-gray-500 mt-1">
                                 {lovelaceToAda(BigInt(loanAmount))} ADA
                             </p>
@@ -475,7 +477,7 @@ const Applications: React.FC = () => {
                                 type="number"
                                 value={interest}
                                 onChange={(e) => setInterest(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 disabled={isSubmitting}
                             />
                             <p className="text-xs text-gray-500 mt-1">
@@ -490,7 +492,7 @@ const Applications: React.FC = () => {
                                 type="number"
                                 value={deadlineDays}
                                 onChange={(e) => setDeadlineDays(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 disabled={isSubmitting}
                             />
                         </div>
@@ -498,7 +500,7 @@ const Applications: React.FC = () => {
                     <button
                         onClick={createLoanRequest}
                         disabled={isSubmitting}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition disabled:opacity-50"
+                        className="border-2 border-amber-600 text-[15px] cursor-pointer text-orange-600 hover:bg-orange-600 hover:shadow-lg font-medium delay-150 duration-200 hover:text-white px-6 py-3 rounded-3xl transition disabled:opacity-50"
                     >
                         {isSubmitting ? "Submitting..." : "Create Loan Request"}
                     </button>
@@ -506,7 +508,7 @@ const Applications: React.FC = () => {
             )}
             
             {/* Loan Requests List - Now only showing active, non-expired loans */}
-            <div className="mb-8">
+            <div className="mb-8 w-full ">
                 <h2 className="text-xl font-semibold mb-4">Active Loan Requests</h2>
                 
                 {isLoading ? (
@@ -519,7 +521,7 @@ const Applications: React.FC = () => {
                         <p className="text-gray-500">No active loan requests found.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>

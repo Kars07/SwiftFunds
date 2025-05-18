@@ -37,10 +37,10 @@ const Video: React.FC<{ scrollYProgress: any }> = ({ scrollYProgress }) => {
           </h1>
           <h2 className="lg:px-0 px-5">
             Whether you’re a student, small‑business owner, or retiree, SwiftFund
-            lets you borrow or lend in minutes. <br />
+            lets you borrow or lend in minutes. <span className="lg:block hidden">
             With clear, simple terms and the security of Cardano’s smart contracts,
             you get quick approvals <br />
-            and total peace of mind, backed by real community recommendations.
+            and total peace of mind, backed by real community recommendations.</span>
           </h2>
           <div className="flex justify-center">
             <button
