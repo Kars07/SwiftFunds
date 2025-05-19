@@ -46,7 +46,8 @@ const Dashboard: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>("");
 
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
-  const [showLoanActions, setShowLoanActions] = useState<boolean>(false);
+  const [showBorrowerActions, setShowBorrowerActions] = useState<boolean>(false);
+  const [showLenderActions, setShowLenderActions] = useState<boolean>(false);
   const navigate = useNavigate();
 
   // Wallet state
@@ -162,8 +163,12 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const toggleLoanActions = () => {
-    setShowLoanActions(!showLoanActions);
+  const toggleBorrowerActions = () => {
+    setShowBorrowerActions(!showBorrowerActions);
+  };
+
+  const toggleLenderActions = () => {
+    setShowLenderActions(!showLenderActions);
   };
 
   const toggleWalletDropdown = () => {
@@ -333,6 +338,7 @@ const Dashboard: React.FC = () => {
 
             <nav className="">
               <ul className="space-y-6 scroll-auto cursor-pointer">
+                {/* Home */}
                 <li
                   className="flex items-center  space-x-2 w-[200px] bg-orange-500 text-white py-3 px-6 rounded-full"
                   onClick={() => navigate("/dashboard")}
@@ -340,72 +346,101 @@ const Dashboard: React.FC = () => {
                   <i className="bx bx-home text-xl font-bold"></i>
                   <span className="">Home</span>
                 </li>
-                <li
-                  className="flex items-center space-x-2 py-2 px-6 text-gray-700 hover:text-orange-600"
-                  onClick={() => navigate("/dashboard/applications")}
-                >
-                  <i className="bx bx-folder text-xl font-bold"></i>
-                  <span>Applications</span>
-                </li>
-                {/* <li
-                  className="flex items-center space-x-2 py-2 px-3 text-gray-700 hover:text-orange-600 rounded-md"
-                  onClick={() => navigate("/dashboard/transactions")}
-                >
-                  <i className="bx bx-wallet text-lg"></i>
-                  <span>Transactions</span>
-                </li> */}
 
-                {/* Loan Actions */}
+                {/* Borrower Actions */}
                 <li className="relative">
                   <div
                     className="flex items-center justify-between py-2 text-gray-700 px-6 hover:text-orange-600 rounded-md cursor-pointer w-full"
-                    onClick={toggleLoanActions}
+                    onClick={toggleBorrowerActions}
                   >
                     <div className="flex items-center space-x-2">
-                      <i className="bx bx-money text-xl font-bold"></i>
-                      <span>Loan Actions</span>
+                      <i className="bx bx-user text-xl font-bold"></i>
+                      <span>Borrower Actions</span>
                     </div>
                     <i
                       className={`bx bx-chevron-${
-                        showLoanActions ? "up" : "down"
+                        showBorrowerActions ? "up" : "down"
                       } text-lg`}
                     ></i>
                   </div>
-                  {showLoanActions && (
+                  {showBorrowerActions && (
                     <ul className="bg-gray-100 rounded-md overflow-hidden w-full">
+                      <li
+                        className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
+                        onClick={() => navigate("/dashboard/applications")}
+                      >
+                        <i className="bx bx-folder text-lg"></i>
+                        <span>Apply for Loan</span>
+                      </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                         onClick={() => navigate("/dashboard/myloan-applications")}
                       >
                         <i className="bx bx-edit text-lg"></i>
-                        <span>Loan Applications</span>
+                        <span>My Loan Requests</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/loans-funded")}
+                        onClick={() => navigate("/dashboard/loanstoberepaid")}
                       >
-                        <i className="bx bx-dollar-circle text-lg"></i>
-                        <span>Loans Funded</span>
+                        <i className="bx bx-transfer text-lg"></i>
+                        <span>Repay Loan</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                         onClick={() => navigate("/dashboard/loansirepaid")}
                       >
                         <i className="bx bx-refresh text-lg"></i>
-                        <span>Loans Repaid</span>
+                        <span>Repaid Loans</span>
                       </li>
                     </ul>
                   )}
                 </li>
 
-                {/* Other Items */}
-                <li
-                  className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
-                  onClick={() => navigate("/dashboard/loanstoberepaid")}
-                >
-                  <i className="bx bx-transfer text-xl font-bold"></i>
-                  <span>Loans To Repay</span>
+                {/* Lender Actions */}
+                <li className="relative">
+                  <div
+                    className="flex items-center justify-between py-2 text-gray-700 px-6 hover:text-orange-600 rounded-md cursor-pointer w-full"
+                    onClick={toggleLenderActions}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <i className="bx bx-money text-xl font-bold"></i>
+                      <span>Lender Actions</span>
+                    </div>
+                    <i
+                      className={`bx bx-chevron-${
+                        showLenderActions ? "up" : "down"
+                      } text-lg`}
+                    ></i>
+                  </div>
+                  {showLenderActions && (
+                    <ul className="bg-gray-100 rounded-md overflow-hidden w-full">
+                      <li
+                        className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
+                        onClick={() => navigate("/dashboard/fundaloan")}
+                      >
+                        <i className="bx bx-search text-lg"></i>
+                        {/* <span>View Loan Requests</span>
+                      </li>
+                      <li
+                        className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
+                        onClick={() => navigate("/dashboard/fundaloan")}
+                      >
+                        <i className="bx bx-wallet text-lg"></i> */}
+                        <span>Fund a Loan</span>
+                      </li>
+                      <li
+                        className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
+                        onClick={() => navigate("/dashboard/loans-funded")}
+                      >
+                        <i className="bx bx-dollar-circle text-lg"></i>
+                        <span>My Funded Loans</span>
+                      </li>
+                    </ul>
+                  )}
                 </li>
+
+                {/* Settings */}
                 <li
                   className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
                   onClick={() => navigate("/dashboard/settings")}

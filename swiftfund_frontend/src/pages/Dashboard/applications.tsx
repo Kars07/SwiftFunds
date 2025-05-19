@@ -14,6 +14,10 @@ const FundRequestValidatorScript: SpendingValidator = {
 const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestValidatorScript);
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
+// Define loan request fee constants (in lovelace)
+const STANDARD_LOAN_FEE = BigInt(5_000_000); // 5 ADA in lovelace
+const PREMIUM_LOAN_FEE = BigInt(10_000_000); // 10 ADA in lovelace
+const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
 
 type LoanRequest = {
     txId: string;
@@ -64,155 +68,127 @@ const Applications: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingFund, setLoadingFund] = useState<string | null>(null);
     
-    // Loan request form state
-    const [loanAmount, setLoanAmount] = useState<number>(1350000);
-    const [interest, setInterest] = useState<number>(350000);
+    // Exchange rate state
+    const [adaToNgnRate, setAdaToNgnRate] = useState<number>(0);
+    
+    // Loan request form state - now in Naira
+    const [loanAmountNaira, setLoanAmountNaira] = useState<number>(50000);
+    const [interestNaira, setInterestNaira] = useState<number>(10000);
     const [deadlineDays, setDeadlineDays] = useState<number>(7);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [txHash, setTxHash] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [inputError, setInputError] = useState<{
+        loanAmount?: string;
+        interest?: string;
+        deadline?: string;
+    }>({});
     
-    // Fetch loan data when connection changes
+    // Fetch exchange rates
     useEffect(() => {
-        if (connection) {
-            fetchLoanData(connection.lucid);
-        }
-    }, [connection]);
+        const fetchExchangeRate = async () => {
+            try {
+                // Fetch ADA to NGN rate
+                const response = await fetch(
+                    "https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=ngn"
+                );
+                const data = await response.json();
+                const rate = data.cardano.ngn;
+                setAdaToNgnRate(rate);
+            } catch (error) {
+                console.error("Error fetching exchange rate", error);
+                // Set a fallback rate if API fails (this should be updated with current rate)
+                setAdaToNgnRate(400); // Fallback rate
+            }
+        };
 
+        fetchExchangeRate();
+        
+        // Fetch exchange rate every 5 minutes
+        const interval = setInterval(fetchExchangeRate, 5 * 60 * 1000);
+        
+        return () => clearInterval(interval);
+    }, []);
+    
     // Create a unique identifier for a specific UTxO
     function createUtxoId(txId: string, outputIndex: number): string {
         return `${txId}-${outputIndex}`;
     }
 
-    // Fetch loan data (both requests and funded loans)
-    async function fetchLoanData(lucidInstance: LucidEvolution): Promise<void> {
-        try {
-            setIsLoading(true);
-            
-            // First, fetch funded loans
-            const fundedLoansData = await fetchFundedLoans(lucidInstance);
-            setFundedLoans(fundedLoansData);
-            
-            // Then fetch loan requests and filter out the funded ones
-            await fetchLoanRequests(lucidInstance, fundedLoansData);
-        } catch (error) {
-            console.error("Error fetching loan data:", error);
-            setError("Failed to fetch loan data. Please try again.");
-        } finally {
-            setIsLoading(false);
+    // Convert Naira to ADA
+    function nairaToAda(naira: number): number {
+        if (adaToNgnRate === 0) return 0;
+        return naira / adaToNgnRate;
+    }
+    
+    // Convert Naira to lovelace
+    function nairaToLovelace(naira: number): bigint {
+        const ada = nairaToAda(naira);
+        return BigInt(Math.round(ada * 1_000_000));
+    }
+    
+    // Convert lovelace to ADA
+    function lovelaceToAda(lovelace: bigint): number {
+        return Number(lovelace) / 1_000_000;
+    }
+    
+    // Convert lovelace to Naira
+    function lovelaceToNaira(lovelace: bigint): number {
+        const ada = lovelaceToAda(lovelace);
+        return ada * adaToNgnRate;
+    }
+    
+    // Format Naira currency
+    function formatNaira(amount: number): string {
+        return amount.toLocaleString('en-NG', {
+            style: 'currency',
+            currency: 'NGN',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
+    
+    // Format ADA
+    function formatAda(ada: number): string {
+        return `${ada.toFixed(6)} ADA`;
+    }
+
+    // Determine loan request fee based on loan amount
+    function getLoanRequestFee(loanAmountNaira: number): bigint {
+        if (loanAmountNaira <= 100000) {
+            return STANDARD_LOAN_FEE; // 5 ADA for Standard Loan
+        } else if (loanAmountNaira <= 500000) {
+            return PREMIUM_LOAN_FEE; // 10 ADA for Premium Loan
+        } else {
+            // This should not happen as we'll validate the amount in the UI
+            throw new Error("Loan amount exceeds maximum allowed");
         }
     }
 
-    async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
-        const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
-        console.log("UTXOs at fund loan address:", fundedUtxos);
-        
-        const fundedLoans: FundedLoan[] = [];
-        
-        // Get funded loans tracking from localStorage
-        const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-        
-        for (const utxo of fundedUtxos) {
-            if (!utxo.datum) continue;
-            
-            try {
-                const datumObject = Data.from(utxo.datum, redeemerType);
-                
-                // Create unique identifier for this funded loan UTXO
-                const fundedLoanId = createUtxoId(utxo.txHash, utxo.outputIndex);
-                
-                // Try to find the original loan ID this funded loan is associated with
-                let originalLoanId = undefined;
-                
-                // Look through the tracking data to find a match
-                for (const [loanId, trackingInfo] of Object.entries(fundedLoansTracking)) {
-                    const tracking = trackingInfo as any;
-                    if (tracking.txHash === utxo.txHash) {
-                        originalLoanId = loanId;
-                        break;
-                    }
-                }
-                
-                fundedLoans.push({
-                    txId: utxo.txHash,
-                    outputIndex: utxo.outputIndex,
-                    lenderPKH: datumObject.lenderPKH,
-                    loanAmount: datumObject.loanAmount,
-                    utxo,
-                    fundedLoanId,
-                    originalLoanId
-                });
-            } catch (error) {
-                console.error("Error parsing funded loan datum:", error, "UTxO:", utxo);
-            }
+    // Get loan type name based on amount
+    function getLoanTypeName(loanAmountNaira: number): string {
+        if (loanAmountNaira <= 100000) {
+            return "Standard Loan";
+        } else {
+            return "Premium Loan";
         }
-        
-        return fundedLoans;
     }
 
-    async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData: FundedLoan[]): Promise<void> {
-        try {
-            const utxosAtScript: UTxO[] = await lucidInstance.utxosAt(LoanRequestAddress);
-            console.log("UTxOs at loan request address:", utxosAtScript);
-
-            const requests: LoanRequest[] = [];
-            const currentTime = Date.now();
-            
-            // Track funded loans in localStorage
-            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-            
-            // Get repaid loans tracking from localStorage
-            const repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
-            
-            // Create a map of original loan IDs that have funded loans
-            const fundedLoanOriginalIds = new Set<string>();
-            fundedLoansData.forEach(fl => {
-                if (fl.originalLoanId) {
-                    fundedLoanOriginalIds.add(fl.originalLoanId);
-                }
-            });
-
-            for (const utxo of utxosAtScript) {
-                if (!utxo.datum) continue;
-                
-                try {
-                    const datumObject = Data.from(utxo.datum, BorrowerDatum);
-                    
-                    // Skip expired loan requests
-                    if (Number(datumObject.deadline) < currentTime) {
-                        console.log(`Loan request with deadline ${new Date(Number(datumObject.deadline)).toLocaleString()} has expired, skipping`);
-                        continue;
-                    }
-                    
-                    // Create a unique identifier for this loan request UTXO
-                    const loanId = createUtxoId(utxo.txHash, utxo.outputIndex);
-                    
-                    // Check if this specific loan request has been funded
-                    if (fundedLoanOriginalIds.has(loanId) || fundedLoansTracking[loanId]) {
-                        console.log(`Loan request ${loanId} has been funded, skipping`);
-                        continue;
-                    }
-
-                    requests.push({
-                        txId: utxo.txHash,
-                        outputIndex: utxo.outputIndex,
-                        borrowerPKH: datumObject.borrowerPKH,
-                        loanAmount: datumObject.loanAmount,
-                        interest: datumObject.interest,
-                        deadline: datumObject.deadline,
-                        datumObject,
-                        utxo,
-                        uniqueId: loanId
-                    });
-                } catch (error) {
-                    console.error("Error parsing datum:", error, "UTxO:", utxo);
-                }
-            }
-
-            setLoanRequests(requests);
-        } catch (error) {
-            console.error("Error fetching loan requests:", error);
-            setError("Failed to fetch loan requests. Please try again.");
+    // Handle loan amount change with validation
+    function handleLoanAmountChange(value: number): void {
+        // Clear previous input error
+        setInputError(prev => ({ ...prev, loanAmount: undefined }));
+        
+        // Enforce maximum limit
+        if (value > MAX_LOAN_AMOUNT) {
+            setInputError(prev => ({ 
+                ...prev, 
+                loanAmount: `Maximum loan amount is ${formatNaira(MAX_LOAN_AMOUNT)}`
+            }));
+            // Still update the value to show user what they typed
+            setLoanAmountNaira(value);
+        } else {
+            setLoanAmountNaira(value);
         }
     }
 
@@ -223,6 +199,23 @@ const Applications: React.FC = () => {
             return;
         }
 
+        if (adaToNgnRate === 0) {
+            setError("Exchange rate not loaded. Please wait a moment and try again.");
+            return;
+        }
+
+        // Validate loan amount
+        if (loanAmountNaira <= 0) {
+            setError("Loan amount must be greater than zero");
+            return;
+        }
+
+        // Check if loan amount exceeds maximum
+        if (loanAmountNaira > MAX_LOAN_AMOUNT) {
+            setError(`Loan amount cannot exceed ${formatNaira(MAX_LOAN_AMOUNT)}`);
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             setError(null);
@@ -230,24 +223,32 @@ const Applications: React.FC = () => {
             
             const { lucid, pkh } = connection;
             
+            // Convert Naira amounts to lovelace
+            const loanAmountLovelace = nairaToLovelace(loanAmountNaira);
+            const interestLovelace = nairaToLovelace(interestNaira);
+            
+            // Get the appropriate loan request fee
+            const LOAN_REQUEST_FEE = getLoanRequestFee(loanAmountNaira);
+            
             // Create the deadline date
             const deadline: Date = new Date(Date.now() + 1000 * 60 * 60 * 24 * deadlineDays);
             
             // Create the datum
             const datum: BorrowerDatum = {
                 borrowerPKH: pkh,
-                loanAmount: BigInt(loanAmount),
-                interest: BigInt(interest),
+                loanAmount: loanAmountLovelace,
+                interest: interestLovelace,
                 deadline: BigInt(deadline.getTime()),
             };
             
             const dtm: Datum = Data.to<BorrowerDatum>(datum, BorrowerDatum);
-            
+            const SWIFTFUND_ADDRRESS = "addr_test1qrthkqeq2v9vkstw2mwkw6z97fvgvrq2gqj4hjvp5776fu5ly6hkduuy05uj2n0ww68x43z0cxpqqgfx38wclr45zt3q8kwyxs"
             // Create and submit the transaction
             const tx = await lucid
                 .newTx()
                 .attach.SpendingValidator(loanRequestValidatorScript)
                 .pay.ToContract(LoanRequestAddress, { kind: "inline", value: dtm})
+                .pay.ToAddress(SWIFTFUND_ADDRRESS, {lovelace: LOAN_REQUEST_FEE})
                 .validFrom(Date.now() - 2592000)
                 .complete();
                 
@@ -257,11 +258,6 @@ const Applications: React.FC = () => {
             console.log("Loan request submitted. Transaction hash:", txHash);
             setTxHash(txHash);
             
-            // Wait for a moment and then refresh the loan data
-            setTimeout(() => {
-                fetchLoanData(lucid);
-            }, 25000);
-            
         } catch (error) {
             console.error("Error creating loan request:", error);
             setError("Failed to create loan request. Please try again.");
@@ -269,126 +265,10 @@ const Applications: React.FC = () => {
             setIsSubmitting(false);
         }
     }
-
-    // Fund loan function
-    async function fundLoan(loanRequest: LoanRequest): Promise<void> {
-        if (!connection) {
-            setError("Please connect your wallet first");
-            return;
-        }
-
-        try {
-            setError(null);
-            setTxHash(null);
-            
-            if (connection.pkh === loanRequest.borrowerPKH) {
-                setError("You cannot fund your own loan request");
-                return;
-            }
-
-            setLoadingFund(loanRequest.txId);
-            const { lucid, pkh } = connection;
-            
-            // Create the redeemer
-            const FundRedeemer: redeemerType = {
-                lenderPKH: pkh,
-                loanAmount: loanRequest.loanAmount
-            };
-            
-            const fundredeem: Redeemer = Data.to<redeemerType>(FundRedeemer, redeemerType);
-            
-            // Get the borrower address from PKH
-            const borrowerAddressDetails = {
-                paymentCredential: {
-                    hash: loanRequest.borrowerPKH,
-                    type: "Key" as const
-                },
-                stakeCredential: undefined,
-                network: "Preprod" as const
-            };
-            
-            const BorrowerAddress = credentialToAddress("Preprod", borrowerAddressDetails.paymentCredential);
-            
-            console.log("Borrower Address:", BorrowerAddress);
-            console.log("Loan Request UTXO:", loanRequest.utxo);
-            
-            // Create and submit the transaction
-            const tx = await lucid
-                .newTx()
-                .readFrom([loanRequest.utxo])
-                .addSignerKey(pkh)
-                .attach.SpendingValidator(loanRequestValidatorScript)
-                .attach.SpendingValidator(FundRequestValidatorScript)
-                .pay.ToAddress(BorrowerAddress, { lovelace: loanRequest.loanAmount })
-                .pay.ToContract(FundLoanAddress, { kind: "inline", value: fundredeem })
-                .validFrom(Date.now() - 1000000)
-                .complete();
-            
-            const signedTx = await tx.sign.withWallet().complete();
-            const txHash = await signedTx.submit();
-            
-            console.log("Loan funded successfully. Transaction hash:", txHash);
-            setTxHash(txHash);
-
-            // Get funding UTXO details
-            const fundingTx = await lucid.awaitTx(txHash);
-            console.log("Funding transaction confirmed:", fundingTx);
-            
-            // Find the output index of the funding at the FundLoanAddress
-            let fundedOutputIndex = -1;
-            const txOutputs = await lucid.utxosAt(FundLoanAddress);
-            for (let i = 0; i < txOutputs.length; i++) {
-                if (txOutputs[i].txHash === txHash) {
-                    fundedOutputIndex = txOutputs[i].outputIndex;
-                    break;
-                }
-            }
-
-            // After successful funding, track it in localStorage
-            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-            const loanId = loanRequest.uniqueId;
-            
-            // Create unique funded loan identifier using the specific funding transaction
-            const fundedLoanId = createUtxoId(txHash, fundedOutputIndex >= 0 ? fundedOutputIndex : 0);
-            
-            fundedLoansTracking[loanId] = {
-                fundedAt: Date.now(),
-                lenderPKH: pkh,
-                txHash: txHash,
-                fundedLoanId: fundedLoanId,
-                loanAmount: loanRequest.loanAmount.toString(),
-                interest: loanRequest.interest.toString(),
-                deadline: loanRequest.deadline.toString(),
-                borrowerPKH: loanRequest.borrowerPKH,
-                // Store the funding UTXO details for reference
-                fundedWith: [{
-                    txHash: txHash,
-                    outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
-                }]
-            };
-            localStorage.setItem('fundedLoans', JSON.stringify(fundedLoansTracking));
-            
-            // Wait for a moment and then refresh the loan data
-            setTimeout(() => {
-                fetchLoanData(lucid);
-            }, 10000);
-            
-        } catch (error) {
-            console.error("Error funding loan:", error);
-            setError(`Failed to fund loan: ${error instanceof Error ? error.message : String(error)}`);
-        } finally {
-            setLoadingFund(null);
-        }
-    }
     
     // Format date
     function formatDate(timestamp: bigint): string {
         return new Date(Number(timestamp)).toLocaleString();
-    }
-    
-    // Format lovelace to ADA
-    function lovelaceToAda(lovelace: bigint): string {
-        return (Number(lovelace) / 1_000_000).toFixed(6);
     }
     
     // Calculate days remaining until deadline
@@ -401,37 +281,45 @@ const Applications: React.FC = () => {
 
     return (
         <div className="p-4 pt-10">
-            <div className="flex justify-between ">
+            <div className="flex justify-between items-start">
                 <h1 className="text-3xl font-medium mb-6">Loan Applications</h1>
                 
-                {/* Wallet Connection Status */}
-                {!connection ? (
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Connect your wallet :</h2>
-                        <div className="flex flex-wrap gap-2">
-                            {wallets.map((wallet) => (
-                                <button
-                                    key={wallet.name}
-                                    onClick={() => connectWallet(wallet)}
-                                    disabled={isConnecting}
-                                    className="flex items-center bg-black text-[13px] delay-100  hover:bg-orange-500 duration-200 cursor-pointer text-white px-4 py-2 rounded-2xl transition"
-                                >
-                                    {wallet.icon && (
-                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
-                                    )}
-                                    {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="mb-6 p-4 -translate-y-2 bg-orange-50 border border-orange-200 rounded-lg">
-                        <p className="text-zinc-800">
-                            <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                        </p>
+                {/* Exchange Rate Display */}
+                {adaToNgnRate > 0 && (
+                    <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                        <span className="font-medium">Current ADA Rate:</span> {formatNaira(adaToNgnRate)}
                     </div>
                 )}
             </div>
+
+            {/* Wallet Connection Status */}
+            {!connection ? (
+                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                    <h2 className="text-lg font-semibold mb-3">Connect your wallet :</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {wallets.map((wallet) => (
+                            <button
+                                key={wallet.name}
+                                onClick={() => connectWallet(wallet)}
+                                disabled={isConnecting}
+                                className="flex items-center bg-black text-[13px] delay-100  hover:bg-orange-500 duration-200 cursor-pointer text-white px-4 py-2 rounded-2xl transition"
+                            >
+                                {wallet.icon && (
+                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
+                                )}
+                                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-zinc-800">
+                        <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                    </p>
+                </div>
+            )}
+
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -448,41 +336,73 @@ const Applications: React.FC = () => {
                 </div>
             )}
             
+            {/* Loading exchange rate indicator */}
+            {adaToNgnRate === 0 && (
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800">
+                        <span className="font-semibold">Loading exchange rates...</span>
+                        <br />
+                        Please wait while we fetch the current ADA to Naira exchange rate.
+                    </p>
+                </div>
+            )}
+            
             {/* Create Loan Request Form */}
             {connection && (
-                <div className="mb-10 p-9 mt-10  bg-white rounded-2xl shadow-2xl ">
+                <div className="mb-10 p-9 mt-10 bg-white rounded-2xl shadow-2xl">
                     <h2 className="text-xl font-semibold mb-4">Create Loan Request</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Loan Amount (Lovelace)
+                                Loan Amount (Naira)
                             </label>
-                            <input
-                                type="number"
-                                value={loanAmount}
-                                onChange={(e) => setLoanAmount(Number(e.target.value))}
-                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                disabled={isSubmitting}
-                           />
-
-                            <p className="text-xs text-gray-500 mt-1">
-                                {lovelaceToAda(BigInt(loanAmount))} ADA
-                            </p>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+                                <input
+                                    type="number"
+                                    value={loanAmountNaira}
+                                    onChange={(e) => handleLoanAmountChange(Number(e.target.value))}
+                                    className={`w-full pl-8 pr-3 py-2 border ${
+                                        inputError.loanAmount ? 'border-red-500' : 'border-gray-300'
+                                    } rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                                    disabled={isSubmitting || adaToNgnRate === 0}
+                                    min="0"
+                                    max={MAX_LOAN_AMOUNT}
+                                    step="1000"
+                                />
+                            </div>
+                            {adaToNgnRate > 0 && (
+                                <div className="mt-1">
+                                    <div className="text-xs text-gray-500">≈ {formatAda(nairaToAda(loanAmountNaira))}</div>
+                                    {inputError.loanAmount && (
+                                        <div className="text-red-500 text-sm font-medium mt-1">
+                                            {inputError.loanAmount}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Interest (Lovelace)
+                                Interest (Naira)
                             </label>
-                            <input
-                                type="number"
-                                value={interest}
-                                onChange={(e) => setInterest(Number(e.target.value))}
-                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                disabled={isSubmitting}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                {lovelaceToAda(BigInt(interest))} ADA
-                            </p>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+                                <input
+                                    type="number"
+                                    value={interestNaira}
+                                    onChange={(e) => setInterestNaira(Number(e.target.value))}
+                                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    disabled={isSubmitting || adaToNgnRate === 0}
+                                    min="0"
+                                    step="1000"
+                                />
+                            </div>
+                            {adaToNgnRate > 0 && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                    <div>≈ {formatAda(nairaToAda(interestNaira))}</div>
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -492,112 +412,70 @@ const Applications: React.FC = () => {
                                 type="number"
                                 value={deadlineDays}
                                 onChange={(e) => setDeadlineDays(Number(e.target.value))}
-                                className="w-full px-3 my-2 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 disabled={isSubmitting}
+                                min="1"
+                                max="365"
                             />
                         </div>
                     </div>
+                    
+                    {/* Loan Summary */}
+                    {adaToNgnRate > 0 && (
+                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Loan Summary</h3>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span>Loan Amount:</span>
+                                    <span className="font-medium">{formatNaira(loanAmountNaira)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Interest:</span>
+                                    <span className="font-medium">{formatNaira(interestNaira)}</span>
+                                </div>
+                                <div className="flex justify-between border-t pt-2">
+                                    <span className="font-medium">Total to Repay:</span>
+                                    <span className="font-bold text-lg">{formatNaira(loanAmountNaira + interestNaira)}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-600">
+                                    <span>Interest Rate:</span>
+                                    <span>{loanAmountNaira > 0 ? ((interestNaira / loanAmountNaira) * 100).toFixed(1) : 0}%</span>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-2">
+                                    <div>Total ADA equivalent: ≈ {formatAda(nairaToAda(loanAmountNaira + interestNaira))}</div>
+                                </div>
+                                
+                                {/* Loan Type and Fee Information */}
+                                <div className="mt-3 pt-2 border-t border-gray-200">
+                                    <div className="flex justify-between">
+                                        <span>Loan Type:</span>
+                                        <span className="font-medium">
+                                            {getLoanTypeName(Math.min(loanAmountNaira, MAX_LOAN_AMOUNT))}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Application Fee:</span>
+                                        <span className="font-medium">
+                                            {formatAda(lovelaceToAda(getLoanRequestFee(Math.min(loanAmountNaira, MAX_LOAN_AMOUNT))))}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     <button
                         onClick={createLoanRequest}
-                        disabled={isSubmitting}
-                        className="border-2 border-amber-600 text-[15px] cursor-pointer text-orange-600 hover:bg-orange-600 hover:shadow-lg font-medium delay-150 duration-200 hover:text-white px-6 py-3 rounded-3xl transition disabled:opacity-50"
+                        disabled={isSubmitting || adaToNgnRate === 0 || loanAmountNaira > MAX_LOAN_AMOUNT}
+                        className="border-2 border-amber-600 text-[15px] cursor-pointer text-orange-600 hover:bg-orange-600 hover:shadow-lg font-medium delay-150 duration-200 hover:text-white px-6 py-3 rounded-3xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? "Submitting..." : "Create Loan Request"}
+                        {isSubmitting ? "Submitting..." : 
+                         adaToNgnRate === 0 ? "Loading rates..." : 
+                         loanAmountNaira > MAX_LOAN_AMOUNT ? "Loan amount too high" :
+                         "Create Loan Request"}
                     </button>
                 </div>
             )}
-            
-            {/* Loan Requests List - Now only showing active, non-expired loans */}
-            <div className="mb-8 w-full ">
-                <h2 className="text-xl font-semibold mb-4">Active Loan Requests</h2>
-                
-                {isLoading ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                        <p className="mt-2 text-gray-600">Loading loan requests...</p>
-                    </div>
-                ) : loanRequests.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">No active loan requests found.</p>
-                    </div>
-                ) : (
-                    <div className="">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Borrower
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Interest
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Deadline
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {loanRequests.map((loan) => (
-                                    <tr key={loan.uniqueId}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
-                                            {connection && loan.borrowerPKH === connection.pkh && (
-                                                <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                    You
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.loanAmount)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.interest)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {formatDate(loan.deadline)}
-                                            <br />
-                                            <span className="text-green-600">
-                                                {daysRemaining(loan.deadline)} days remaining
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                            {loan.uniqueId.substring(0, 8)}...
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {connection && loan.borrowerPKH === connection.pkh ? (
-                                                <button
-                                                    disabled
-                                                    className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
-                                                    title="You cannot fund your own loan"
-                                                >
-                                                    Cannot Fund Own Loan
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => fundLoan(loan)}
-                                                    disabled={!connection || loadingFund === loan.txId}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
-                                                >
-                                                    {loadingFund === loan.txId ? "Processing..." : "Fund Loan"}
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };

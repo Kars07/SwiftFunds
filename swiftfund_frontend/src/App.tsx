@@ -22,6 +22,7 @@ import MyLoanApplications from './pages/Dashboard/myloan-applications';
 import LoansFunded from './pages/Dashboard/loans-funded';
 import LoansRepaid from './pages/Dashboard/loansirepaid';
 import Transaction from './pages/Dashboard/transaction'
+import FundLoan from './pages/Dashboard/fundaloan';
 import Settings from './pages/Dashboard/settings';
 import NotFound from './components/NotFound';
 
@@ -62,6 +63,7 @@ const App: React.FC = () => {
             <Route index element={<DefaultDashboardContent />} />
             <Route path="LoansToRepay" element={<LoansToBeRepaid />} />
             <Route path="applications" element={<Applications />} />
+            <Route path="fundaloan" element={<FundLoan />} />
             <Route path="loanstoberepaid" element={<LoansToBeRepaid />} />
             <Route path="myloan-applications" element={<MyLoanApplications />} />
             <Route path="loans-funded" element={<LoansFunded />} />
