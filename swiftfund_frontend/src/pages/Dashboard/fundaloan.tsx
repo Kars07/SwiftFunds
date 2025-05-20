@@ -335,8 +335,8 @@ const FundLoan: React.FC = () => {
     }
 
     return (
-        <div className="p-4 pt-10">
-            <div className="flex justify-between">
+        <div className="md:p-4 pt-10">
+            <div className="md:flexjustify-between">
                 <h1 className="text-3xl font-medium mb-6">Fund Loans</h1>
                 
                 {/* Wallet Connection Status */}

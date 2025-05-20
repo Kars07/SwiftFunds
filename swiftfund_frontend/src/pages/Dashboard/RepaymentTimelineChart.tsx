@@ -164,7 +164,7 @@ const RepaymentTimelineChart: React.FC = () => {
           />
           <YAxis 
             tick={{ fontSize: 12 }}
-            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' , offset: 10 , dy:50}}
+            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' , offset:0 , dy:50}}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />

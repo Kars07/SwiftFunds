@@ -30,10 +30,10 @@ const Settings: React.FC = () => {
 
   return (
     <div className="min-h-screen  bg-gray-100">
-      <div className=" p-8 mx-auto">
+      <div className=" md:p-4 md:pt-5 pt-10 mx-auto">
         <h2 className="text-3xl font-semibold mb-10 text-black">Settings</h2>
         {/* Change Password */}
-        <div className="mb-6 shadow-lg bg-white w-[80%] p-8 rounded-2xl ">
+        <div className="mb-6 shadow-lg bg-white md:w-[80%] p-8 rounded-2xl ">
           <h3 className="text-lg text-black font-medium mb-9">Change Password</h3>
           <div className="space-y-4">
             <input
@@ -72,7 +72,7 @@ const Settings: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex pt-8 w-full space-x-8">
+        <div className="flex md:flex-row flex-col pt-8 w-full space-x-8">
           {/* Notification Settings */}
           <div className="mb-6 w-[300px] h-[200px] bg-white shadow-xl rounded-xl px-5 py-12 ">
             

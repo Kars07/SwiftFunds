@@ -371,8 +371,8 @@ const LoansFunded: React.FC = () => {
     }
 
     return (
-        <div className=" p-4 pt-10">
-            <div className="flex justify-between ">
+        <div className=" md:p-4 pt-10">
+            <div className="md:flex justify-between ">
                 <h1 className="text-3xl font-medium mb-6">Loans I Have Funded</h1>
                 
                 {/* Debug Info - Can be removed in production */}
@@ -384,8 +384,8 @@ const LoansFunded: React.FC = () => {
                 
                 {/* Wallet Connection Status - Simplified to use context */}
                 {!connection ? (
-                    <div className="mb-6 p-4  bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Wallet Connection Required</h2>
+                    <div className="mb-6 p-4 bg-orange-50 border border-orange-200 w-[500px] rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Wallet Connection Required :</h2>
                         <p className="text-gray-600">
                             Please connect your wallet using the sidebar wallet connection panel to view your funded loans.
                         </p>
@@ -428,7 +428,7 @@ const LoansFunded: React.FC = () => {
                     {error}
                 </div>
             )}
-            <div className="mb-10 p-9   bg-white rounded-2xl shadow-2xl ">
+            <div className="mb-10 p-4 md:p-9   bg-white rounded-2xl shadow-2xl ">
                 {/* Summary Stats - Always show, but populate with zeros when not connected */}
                 <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-blue-50 p-4 rounded-lg">

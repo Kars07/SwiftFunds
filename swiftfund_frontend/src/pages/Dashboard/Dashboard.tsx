@@ -242,12 +242,16 @@ const Dashboard: React.FC = () => {
     const [isMobile, setIsMobile] = useState(
       typeof window !== "undefined" && window.innerWidth < 768
     );
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-
+   const toggleMenu = () => setMenuOpen(!menuOpen);
+   const handleNavigation = (path: string) => {
+    navigate(path);
+    if (isMobile) setMenuOpen(false);
+  };
+  
  
   return (
     <WalletContext.Provider value={walletContextValue}>
-      <div className="flex flex-row  bg-gray-100">
+      <div className="flex  flex-row  bg-gray-100">
         {isMobile && !menuOpen && (
           <button
             onClick={toggleMenu}
@@ -257,21 +261,21 @@ const Dashboard: React.FC = () => {
           </button>
         )}
         {/* Sidebar */}
-        <aside className={`w-[70vw]  md:w-1/5 z-10 bg-white text-white p-3 flex flex-col justify-between h-full overflow-hidden fixed   transform transition-transform duration-300 md:static ${
-          isMobile ? "w-2/3 bg-white backdrop-blur-md" : "w-1/5"}
+        <aside className={`w-[100vw] scroll-auto shadow-lg  md:w-1/4 z-10 bg-white text-white p-3 flex flex-col justify-between h-full md:h-[100vh]  overflow-hidden fixed   transform transition-transform duration-300 md:static ${
+          isMobile ? "w-2/3 bg-white backdrop-blur-md " : "w-1/5"}
          ${menuOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}`}
         >
          {isMobile && (
             <button
               onClick={toggleMenu}
-              className="absolute top-4 pl-3 right-2 text-xl"
+              className="absolute top-7 pl-3 right-2 text-xl"
             >
-               ✖
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
             </button>
           )}
 
           <div className="">
-            <div className="flex items-center space-x-2 mb-10">
+            <div className="flex items-center md:pt-0 pt-4 space-x-2 mb-10">
               <img src={logo} alt="Swiftfund Logo" className="w-7 h-auto" />
               <div className="text-2xl font-bold">
                 <span className="text-black">SWIFTFUND</span>
@@ -340,14 +344,14 @@ const Dashboard: React.FC = () => {
               <ul className="space-y-6 scroll-auto cursor-pointer">
                 {/* Home */}
                 <li
-                  className="flex items-center  space-x-2 w-[200px] bg-orange-500 text-white py-3 px-6 rounded-full"
-                  onClick={() => navigate("/dashboard")}
+                  className="flex items-center  space-x-2  bg-orange-500 text-white py-3 px-6 rounded-full"
+                  onClick={() => handleNavigation("/dashboard")}
                 >
                   <i className="bx bx-home text-xl font-bold"></i>
                   <span className="">Home</span>
                 </li>
 
-                {/* Borrower Actions */}
+               {/* Borrower Actions */}
                 <li className="relative">
                   <div
                     className="flex items-center justify-between py-2 text-gray-700 px-6 hover:text-orange-600 rounded-md cursor-pointer w-full"
@@ -358,43 +362,49 @@ const Dashboard: React.FC = () => {
                       <span>Borrower Actions</span>
                     </div>
                     <i
-                      className={`bx bx-chevron-${
-                        showBorrowerActions ? "up" : "down"
-                      } text-lg`}
+                      className={`bx bx-chevron-down text-lg transition-transform duration-300 ${
+                        showBorrowerActions ? "rotate-180" : "rotate-0"
+                      }`}
                     ></i>
                   </div>
-                  {showBorrowerActions && (
-                    <ul className="bg-gray-100 rounded-md overflow-hidden w-full">
+
+                  {/* Dropdown with slide animation */}
+                  <div
+                    className={`transition-[max-height] duration-500 ease-in-out overflow-hidden ${
+                      showBorrowerActions ? "max-h-60" : "max-h-0"
+                    }`}
+                  >
+                    <ul className="bg-gray-100  rounded-md">
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/applications")}
+                        onClick={() => handleNavigation("/dashboard/applications")}
                       >
                         <i className="bx bx-folder text-lg"></i>
                         <span>Apply for Loan</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/myloan-applications")}
+                        onClick={() => handleNavigation("/dashboard/myloan-applications")}
                       >
                         <i className="bx bx-edit text-lg"></i>
                         <span>My Loan Requests</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/loanstoberepaid")}
+                        onClick={() => handleNavigation("/dashboard/loanstoberepaid")}
                       >
                         <i className="bx bx-transfer text-lg"></i>
                         <span>Repay Loan</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/loansirepaid")}
+                        onClick={() => handleNavigation("/dashboard/loansirepaid")}
                       >
                         <i className="bx bx-refresh text-lg"></i>
                         <span>Repaid Loans</span>
                       </li>
                     </ul>
-                  )}
+                  </div>
                 </li>
 
                 {/* Lender Actions */}
@@ -408,42 +418,42 @@ const Dashboard: React.FC = () => {
                       <span>Lender Actions</span>
                     </div>
                     <i
-                      className={`bx bx-chevron-${
-                        showLenderActions ? "up" : "down"
-                      } text-lg`}
+                      className={`bx bx-chevron-down text-lg transition-transform duration-300 ${
+                        showLenderActions ? "rotate-180" : "rotate-0"
+                      }`}
                     ></i>
                   </div>
-                  {showLenderActions && (
-                    <ul className="bg-gray-100 rounded-md overflow-hidden w-full">
+
+                  {/* Dropdown with transition */}
+                  <div
+                    className={`transition-[max-height] duration-500 ease-in-out overflow-hidden ${
+                      showLenderActions ? "max-h-40" : "max-h-0"
+                    }`}
+                  >
+                    <ul className="bg-gray-100 rounded-md">
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/fundaloan")}
+                        onClick={() => handleNavigation("/dashboard/fundaloan")}
                       >
                         <i className="bx bx-search text-lg"></i>
-                        {/* <span>View Loan Requests</span>
-                      </li>
-                      <li
-                        className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/fundaloan")}
-                      >
-                        <i className="bx bx-wallet text-lg"></i> */}
                         <span>Fund a Loan</span>
                       </li>
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
-                        onClick={() => navigate("/dashboard/loans-funded")}
+                        onClick={() => handleNavigation("/dashboard/loans-funded")}
                       >
                         <i className="bx bx-dollar-circle text-lg"></i>
                         <span>My Funded Loans</span>
                       </li>
                     </ul>
-                  )}
+                  </div>
                 </li>
+
 
                 {/* Settings */}
                 <li
                   className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
-                  onClick={() => navigate("/dashboard/settings")}
+                  onClick={() => handleNavigation("/dashboard/settings")}
                 >
                   <i className="bx bx-cog text-xl font-bold"></i>
                   <span>Settings</span>
@@ -453,7 +463,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Sign Out */}
-          <div className="mt-2 flex pt-30 items-center py-2 px-3">
+          <div className="mt-2 flex pt-20 items-center py-2 px-3">
             <img
               src={default_profile}
               alt="User Avatar"
@@ -496,7 +506,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  className="px-5 py-2 bg-orange-600 text-white rounded-lg hover:bg-red-700 transition"
                 >
                   Logout
                 </button>

@@ -1,6 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import arrow from '../../assets/arrow.png'
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -58,13 +59,19 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-[100vh] bg-gray-100">
-      <div className="flex w-[70%] max-w-5xl h-[80vh] bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="w-1/2 px-10 py-5">
-          <div className="flex items-center mb-4">
-            <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
-            <h2 className="text-xl font-bold text-black">SWIFTFUND</h2>
-          </div>
+    <div className=' bg-orange-50 h-[120vh] md:p-15 p-8'>
+      <div className="flex items-center4 mb-">
+        <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
+        <h2 className="text-2xl font-bold text-zinc-800">SWIFTFUND</h2>
+      </div>
+      <div className='flex md:flex-row flex-col w-full md:mt-20  mt-15 justify-between'>
+        <div className=' font-bold text-zinc-800'>
+         <h1 className='md:text-6xl text-5xl'>Welcome back!  </h1>
+         <div className='flex '>
+            <h2 className='text-2xl p-2'>Login to Continue</h2>
+         </div>
+        </div>
+        <div className='bg-white mt-6 md:mt-0 rounded-2xl shadow-2xl p-12 md:w-[40%]'>
           <h2 className="text-xl font-bold text-orange-600 ">Login</h2>
           <h4 className="text-gray-500  mb-6">Enter your details below to access your account</h4>
           <form onSubmit={handleSubmit}>
@@ -110,25 +117,14 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
-          <p className="text-center text-[13px] text-gray-500 mt-4">
+          <p className="text-center text-[14px] text-gray-500 mt-4">
             Forgot your password?{' '}
             <a href="/forgot-password" className="text-black hover:underline">Reset it here</a>
           </p>
-          <p className="text-center text-[13px] text-gray-500 ">
+          <p className="text-center text-[14px] text-gray-500 ">
             Don't have an account?{' '}
             <a href="/register" className="text-black hover:underline">Sign up here</a>
           </p>
-        </div>
-
-        {/* Welcome Section */}
-        <div className="w-1/2 bg-orange-600 text-white flex flex-col justify-center items-center">
-          <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-          <p className="mb-6">New to Swiftfund?</p>
-          <a href="/register">
-            <button className="border-2 cursor-pointer border-white rounded-3xl font-bold py-2 px-6 transform transition duration-300 delay-100  hover:bg-white hover:text-orange-600">
-              Sign Up
-            </button>
-          </a>
         </div>
       </div>
     </div>

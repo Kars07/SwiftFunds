@@ -25,6 +25,7 @@ import Transaction from './pages/Dashboard/transaction'
 import FundLoan from './pages/Dashboard/fundaloan';
 import Settings from './pages/Dashboard/settings';
 import NotFound from './components/NotFound';
+import ScrollToTop from './ScrollToTop';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -34,8 +35,9 @@ const App: React.FC = () => {
   return (
     <>
       {showNavbarFooter && <Navbar />}
-
+      <ScrollToTop />
       {animatedRoutes.includes(location.pathname) ? (
+        
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<PageWrapper><HeaderSection /></PageWrapper>} />

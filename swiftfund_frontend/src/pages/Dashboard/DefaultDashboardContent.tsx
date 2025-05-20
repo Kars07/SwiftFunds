@@ -263,13 +263,13 @@ const DefaultDashboardContent: React.FC = () => {
       <div className="">
         <div className="flex items-center absolute  right-0 mx-6 my-5  top-0 space-x-6">
           {/* Notification Icon */}
-          <button className="relative text-gray-600 hover:text-gray-800">
+          <button className="relative text-gray-600  hover:text-gray-800" >
             <i className="bx bx-bell text-2xl"></i>
             <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
           {/* Settings Icon */}
-          <button className="text-gray-600 hover:text-gray-800">
+          <button className="text-gray-600 cursor-pointer hover:text-gray-800" onClick={() => navigate("/dashboard/settings")}>
             <i className="bx bx-cog text-2xl"></i>
           </button>
 
@@ -370,8 +370,8 @@ const DefaultDashboardContent: React.FC = () => {
     </div>
 
     {/* Wallet Balance Section */}
-    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-6 mb-6 mt-9 max-w-3xl"> 
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-4 md:p-6  mb-6 mt-9 max-w-3xl"> 
+      <div className="flex justify-between  items-center mb-6">
         <div>
          <h2 className="text-lg font-semibold text-black">Wallet Balance</h2> <div className=" flex justify-center items-center flex-col text-black"><hr className="w-30 h-1 border-2 rounded-2xl bg-black"/></div>
         </div>
@@ -396,7 +396,7 @@ const DefaultDashboardContent: React.FC = () => {
 
         <div>
           {connection && (
-            <div className="text-zinc-800 mb-3">
+            <div className="text-zinc-800 mb-3 pl-10">
               <p>
                 <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
               </p>
@@ -406,15 +406,15 @@ const DefaultDashboardContent: React.FC = () => {
      </div>
       <div className="grid grid-cols-2 gap-0">
         <div className="p-3 ">
-          <p className="text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
-          <h3 className="text-xl font-bold text-black">
+          <p className="md:text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
+          <h3 className="md:text-xl text-lg font-bold text-black">
           ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
           </h3>
         </div>
 
         <div className="bg-orange-300 p-3 rounded-md">
-          <p className="text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
-          <h3 className="text-xl font-bold text-black"> 
+          <p className=" md:text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
+          <h3 className="md:text-xl text-lg font-bold text-black"> 
             {connection ? lovelaceToAda(walletBalance) : "0"} ADA
           </h3>
         </div>

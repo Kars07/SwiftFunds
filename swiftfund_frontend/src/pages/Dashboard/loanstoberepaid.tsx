@@ -316,13 +316,13 @@ const LoanToBeRepaid: React.FC = () => {
     }
 
     return (
-        <div className="p-4 pt-10">
-            <div className="flex justify-between">
+        <div className="md:p-4 pt-10">
+            <div className="md:flex justify-between">
                 <h1 className="text-3xl font-medium mb-6">Loans to Repay</h1>
                 
                 {/* Wallet Connection Status */}
                 {!connection ? (
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                    <div className="mb-6 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                         <h2 className="text-lg font-semibold mb-3">Connect your wallet to view loans</h2>
                         <p className="text-gray-600 mb-3">Please connect your wallet in the sidebar to view and manage your loans.</p>
                     </div>

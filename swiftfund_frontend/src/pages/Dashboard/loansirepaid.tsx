@@ -130,21 +130,21 @@ const LoansIRepaid: React.FC = () => {
     }
 
     return (
-        <div className=" p-4 pt-10">
-            <div className="flex justify-between">
+        <div className=" md:p-4 pt-10">
+            <div className="md:flex justify-between">
                 <h1 className="text-3xl font-medium mb-6">Loans I Have Repaid</h1>
                 
                 {/* Wallet Connection */}
                 {!connection ? (
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
+                    <div className="mb-6  bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Connect your wallet :</h2>
                         <div className="flex flex-wrap gap-2">
                             {wallets.map((wallet) => (
                                 <button
                                     key={wallet.name}
                                     onClick={() => handleConnectWallet(wallet)}
                                     disabled={isConnecting}
-                                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+                                    className="flex items-center bg-black hover:text-orange-600 cursor-pointer text-white px-4 py-2 rounded-2xl transition"
                                 >
                                     {wallet.icon && (
                                         <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
@@ -169,7 +169,7 @@ const LoansIRepaid: React.FC = () => {
             )}
             
             {/* Repaid Loans List */}
-            <div className="mb-10 p-9 mt-10  bg-white rounded-2xl shadow-2xl">
+            <div className="mb-10 p-4 md:p-9 mt-10  bg-white rounded-2xl shadow-2xl">
                 <h2 className="text-xl font-semibold mb-4">Your Repaid Loans</h2>
                 
                 {isLoading ? (

@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
+
 interface FormData {
   fullname: string;
   email: string;
@@ -70,13 +71,14 @@ const Registration: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full h-full bg-gray-100 flex items-center justify-center">
-      <div className="flex w-[70%] max-w-7xl h-[85vh] bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="w-1/2 px-10 py-5">
-          <div className="flex items-center mb-4">
-            <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
-            <h2 className="text-xl font-bold text-black">Swiftfund</h2>
-          </div>
+    <div className="  h-[150vh] bg-orange-50  md:p-15 p-8">
+      <div className="flex items-center4 mb-">
+        <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
+        <h2 className="text-2xl font-bold text-zinc-800">SWIFTFUND</h2>
+      </div>
+      <div className='flex flex-col md:flex-row w-full mt-15 md:mt-20  justify-between'>
+       <div className='p-8 bg-white w-full rounded-2xl shadow-2xl  md:w-[55%]'>
+          <h1 className='md:text-6xl text-4xl font-bold mb-4 text-zinc-800'>Start your journey <br />to smarter lending.</h1>
           <h2 className="text-xl font-bold text-orange-500 ">Sign Up</h2>
           <h4 className="text-gray-500 mb-6">Enter your details below to create an account</h4>
           <form onSubmit={handleSubmit}>
@@ -133,38 +135,29 @@ const Registration: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`text-orange-600 border-2 border-orange-600 font-bold py-2 px-10 rounded-3xl  cursor-pointer hover:bg-orange-600 hover:text-white transition-colors duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`text-orange-600 border-2 border-orange-600 w-[300px] font-bold py-3 px-10 rounded-3xl  cursor-pointer hover:bg-orange-600 hover:text-white transition-colors duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {loading ? 'Registering...' : 'Register'}
               </button>
-           </div>
+            </div>
           </form>
-          <p className="text-center text-gray-500 mt-4">or register with social platforms</p>
-          <div className="flex justify-center space-x-6">
-            <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-google text-blue-500 text-xl"></i>
-            </button>
-            <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-twitter text-blue-500 text-xl"></i>
-            </button>
-            <button className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 shadow cursor-pointer">
-              <i className="bx bxl-discord-alt text-blue-500 text-xl"></i>
-            </button>
+          <div className='flex justify-center items-center'>
+              <p className="pt-2">Already have an account?</p>
+            <Link to="/login">
+              <button className=" pt-2 px-2 border-b-2 border-black transition-colors cursor-pointer duration-300 font-semibold hover:bg-white hover:text-orange-600">
+                Login
+              </button>
+            </Link>
+          </div>
+        </div>   
+        <div className=" justify-center mt-10 md:mt-20 md:w-[35%] items-center">
+          <h2 className="mb-4">"Step into a world where financial support is no longer a privilege — it’s a shared mission. Borrow with dignity. Lend with purpose. Connect, grow, and thrive on your own terms."</h2>
+          <div className=' flex cursor-pointer  '>
+            <h1 className='md:w-[50px] w-[30px] h-[30px] md:h-[50px] bg-orange-600 ease-in-out transform duration-300 transition-transform hover:rotate-[360deg] rounded-full hover:rounded-none'></h1>
           </div>
         </div>
-
-        {/* Welcome Section */}
-        <div className="w-1/2 bg-orange-600 text-white flex flex-col justify-center items-center">
-          <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-          <p className="mb-6">Already have an account?</p>
-          <Link to="/login">
-            <button className="border-2 border-white py-2 px-10 transition-colors duration-300 font-bold rounded-3xl hover:bg-white hover:text-orange-600">
-              Login
-            </button>
-          </Link>
-        </div>
       </div>
-    </div>
+   </div>
   );
 };
 

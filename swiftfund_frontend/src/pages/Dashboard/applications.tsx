@@ -280,7 +280,7 @@ const Applications: React.FC = () => {
     }
 
     return (
-        <div className="p-4 pt-10">
+        <div className="md:p-4  pt-10">
             <div className="flex justify-between items-start">
                 <h1 className="text-3xl font-medium mb-6">Loan Applications</h1>
                 
@@ -313,7 +313,7 @@ const Applications: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="mb-6 p-4  bg-orange-50 border border-orange-200 rounded-lg">
                     <p className="text-zinc-800">
                         <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
                     </p>
