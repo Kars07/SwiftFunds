@@ -5,36 +5,58 @@ import { useNavigate } from 'react-router-dom';
 const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
 
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 py-8">
-      <div className="flex w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Message Section */}
-        <div className="w-1/2 p-8 flex flex-col justify-center items-center">
-          <div className="flex items-center mb-6">
-            <img src={logo} alt="Swiftfund Logo" className="w-16 h-auto mr-3" />
-            <h2 className="text-2xl font-bold text-black">Swiftfund</h2>
-          </div>
-
-          <div className="text-center">
-            <h2 className="text-gray-800 font-semibold mb-2">✅ Registration successful!</h2>
-            <p className="text-gray-600 mb-4">
-              A verification link has been sent to your email address.
-              <br />
-              Please check your inbox and click the link to verify your account.
-            </p>
+   return (
+    <div className="bg-orange-50 min-h-screen flex items-center justify-center py-8">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center space-x-2">
+            {/* Logo Icon */}
+           <img 
+           src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" 
+           />
+            <span className="text-xl font-bold text-black">SWIFTFUND</span>
           </div>
         </div>
+        <hr className="my-3 border-t border-gray-200" />
 
-        {/* Welcome/Login Section */}
-        <div className="w-1/2 bg-orange-500 text-white flex flex-col justify-center items-center">
-          <h2 className="text-3xl font-bold mb-4">Welcome!</h2>
-          <p className="mb-6">Already clicked the link?</p>
+        {/* Main Icon */}
+        <div className="flex flex-col items-center mt-6 mb-4">
+           <span className="ml-2  text-orange-600">
+                <i className="bx bx-envelope text-6xl"></i>
+              </span>
+        </div>
+
+        {/* Main content */}
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-semibold text-orange-600 mb-2">Email Verification Link</h2>
+          <p className="text-gray-700 text-base">
+           We've sent a verification link to your email. Please check your inbox and click the link to verify your account. Once verified, you can proceed to log in.
+          </p>
+        </div>
+
+        {/* Secure Button */}
+        <div className="flex justify-center mb-3">
           <button
             onClick={() => navigate('/login')}
-            className="border-2 border-white py-2 px-4 rounded-lg hover:bg-white hover:text-blue-500"
+             className="bg-white border-2 border-orange-600 text-orange-600 font-bold mt-2 py-2 px-4 rounded-lg w-1/2  cursor-pointer hover:bg-orange-600 hover:text-white transition-colors duration-300"
           >
-            Login
+            Redirect to Login
           </button>
+        </div>
+        <p className="text-gray-400 text-xs text-center mb-4">Please ignore if this was not done by you.</p>
+
+        {/* Footer */}
+        <div className="bg-gray-50 -mx-8 px-8 py-4 rounded-b-2xl mt-4">
+          <p className="text-gray-400 text-xs text-center">
+            You're receiving this email because your account needs to be verified before you can proceed to use our services.<br/>
+            © 2025. swiftfund.com All rights reserved<br/>
+            Lagos Nigeria, 100015.
+          </p>
+        </div>
+        <div className="flex justify-between mt-2">
+          <a href="#" className="text-xs text-gray-400 hover:underline">Unsubscribe</a>
+          <span className="text-xs text-gray-400">⚡ by Cardano Blockchain</span>
         </div>
       </div>
     </div>

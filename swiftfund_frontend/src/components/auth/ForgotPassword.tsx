@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const ForgotPassword: React.FC = () => {
@@ -28,64 +28,70 @@ const ForgotPassword: React.FC = () => {
       const data = await res.json();
 
       if (res.ok) {
-        setSuccessMessage(data.message || 'We have sent you an email with instructions to reset your password.');
+        setSuccessMessage(
+          data.message || 'We have sent you an email with instructions to reset your password.'
+        );
         setTimeout(() => navigate('/login'), 3000);
       } else {
         setErrorMessage(data.message || 'This email address is not registered.');
       }
-    } catch (err) {
-      console.error('Forgot password error:', err);
+    } catch {
       setErrorMessage('Something went wrong. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Navbar */}
-      <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-10">
-        <div className="container mx-auto py-4 px-8 flex items-center">
-          <img src={logo} alt="Swiftfund Logo" className="w-12 h-auto" />
-          <span className="ml-4 text-2xl font-bold text-black">SWIFTFUND</span>
+      <nav className="bg-white shadow fixed top-0 left-0 w-full z-10">
+        <div className="max-w-6xl mx-auto py-4 px-6 flex items-center">
+          <img src={logo} alt="Swiftfund Logo" className="w-10 h-10" />
+          <span className="ml-3 text-xl font-bold text-black tracking-wide">SWIFTFUND</span>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="flex flex-col justify-center items-center min-h-screen pt-24">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-orange-500">Reset your password</h2>
+      <div className="flex flex-1 justify-center items-center pt-24">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-7">
+            <h2 className="text-2xl font-bold text-orange-500 mb-2">Reset your password</h2>
             <p className="text-gray-500">
-              Enter your email address and we will send you instructions to reset your password.
+              Enter your email address and we'll send you instructions to reset your password.
             </p>
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="flex items-center bg-gray-100 rounded-lg p-3 mb-6 border border-gray-300">
+          <form onSubmit={handleSubmit} autoComplete="off">
+            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-5 border border-gray-200 focus-within:ring-2 focus-within:ring-orange-200">
               <input
                 type="email"
                 placeholder="youremail@example.com"
                 required
-                className="bg-transparent outline-none flex-grow text-gray-700"
+                className="bg-transparent outline-none flex-grow text-gray-700 placeholder-gray-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoFocus
               />
-              <span className="ml-2 text-orange-500">
-                <i className="bx bx-envelope"></i>
+              {/* Simple envelope svg icon for broad compatibility */}
+              <span className="ml-2 text-orange-400">
+                <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="none"/>
+                  <path d="M3 8l9 6 9-6M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </span>
             </div>
-            {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
-            {successMessage && <p className="text-green-500 text-sm mb-4">{successMessage}</p>}
+            {errorMessage && <p className="text-red-600 text-sm mb-4">{errorMessage}</p>}
+            {successMessage && <p className="text-green-600 text-sm mb-4">{successMessage}</p>}
             <button
               type="submit"
-              className="bg-white border-2 border-orange-500 text-orange-500 font-bold py-2 px-4 rounded-lg w-1/2 ml-25 cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-300"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition-colors duration-200 shadow cursor-pointer"
             >
               Reset Password
             </button>
           </form>
           <p className="text-center text-sm text-gray-500 mt-6">
             Remember your password?{' '}
-            <a href="/login" className="text-blue-500 hover:underline">
+            <Link to="/login" className="text-orange-500 hover:underline">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>
