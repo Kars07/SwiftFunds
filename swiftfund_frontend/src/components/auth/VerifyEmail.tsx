@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from '../../assets/logo.png';
+import cardanoImg from '../../assets/cardano_image.png'
 import { useNavigate } from 'react-router-dom';
 
 const VerifyEmail: React.FC = () => {
@@ -56,7 +57,11 @@ const VerifyEmail: React.FC = () => {
         </div>
         <div className="flex justify-between mt-2">
           <a href="#" className="text-xs text-gray-400 hover:underline">Unsubscribe</a>
-          <span className="text-xs text-gray-400">⚡ by Cardano Blockchain</span>
+          <span className="text-xs text-gray-400"> 
+             <img 
+           src={cardanoImg} alt="Cardano Logo" className="w-20 h-auto" 
+           />
+          </span>
         </div>
       </div>
     </div>
