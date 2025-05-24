@@ -449,6 +449,14 @@ const Dashboard: React.FC = () => {
                   </div>
                 </li>
 
+                {/* profile */}
+                <li
+                  className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
+                  onClick={() => handleNavigation("/dashboard/profile")}
+                >
+                  <i className="bx  bx-user text-xl font-bold"></i>
+                  <span>Profile</span>
+                </li>
 
                 {/* Settings */}
                 <li
@@ -463,7 +471,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Sign Out */}
-          <div className="mt-2 flex pt-20 items-center py-2 px-3">
+          <div className="mt-2 flex pt-10 items-center py-5 px-1">
             <img
               src={default_profile}
               alt="User Avatar"

@@ -23,6 +23,7 @@ import LoansFunded from './pages/Dashboard/loans-funded';
 import LoansRepaid from './pages/Dashboard/loansirepaid';
 import Transaction from './pages/Dashboard/transaction'
 import FundLoan from './pages/Dashboard/fundaloan';
+import Profile from './pages/Dashboard/Profile'
 import Settings from './pages/Dashboard/settings';
 import NotFound from './components/NotFound';
 import ScrollToTop from './ScrollToTop';
@@ -71,6 +72,7 @@ const App: React.FC = () => {
             <Route path="loans-funded" element={<LoansFunded />} />
             <Route path="loansirepaid" element={<LoansRepaid />} />
             <Route path="transactions" element={<Transaction />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="" element={<NotFound />} /> 
