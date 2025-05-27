@@ -31,7 +31,7 @@ const fundloanredeemerschema = Data.Object({
 type redeemerType = Data.Static<typeof fundloanredeemerschema>;
 const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
-// Define types for funded loan details - kept as is
+// Types for funded loan details
 type FundedLoanDetails = {
     loanId: string;                // Original loan request UTXO ID
     fundedLoanId: string;          // Funded loan UTXO ID
@@ -52,12 +52,9 @@ type FundedLoanDetails = {
         repaymentTxHash: string;
     };
 };
-
+const API_BASE_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
 const LoansFunded: React.FC = () => {
-    // Use the wallet context instead of managing wallet connection locally
     const { connection, isConnecting } = useWallet();
-    
-    // Keep existing state variables
     const [fundedLoans, setFundedLoans] = useState<FundedLoanDetails[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -70,7 +67,7 @@ const LoansFunded: React.FC = () => {
         setInitialized(true);
     }, []);
 
-    // Effect to refresh data periodically (every 60 seconds) - keep as is
+    // Effect to refresh data periodically (every 60 seconds)
     useEffect(() => {
         if (connection) {
             const intervalId = setInterval(() => {
@@ -88,101 +85,52 @@ const LoansFunded: React.FC = () => {
         }
     }, [connection, initialized]);
 
-    // Effect to reload data when refresh is triggered - keep as is
+    // Effect to reload data when refresh is triggered
     useEffect(() => {
         if (connection && refreshTrigger > 0) {
             loadFundedLoansData(connection.pkh, connection.lucid);
         }
     }, [refreshTrigger, connection]);
 
-    // Function to create unique identifier for UTxO - keep as is
+    // Function to create unique identifier for UTxO
     function createUtxoId(txHash: string, outputIndex: number): string {
         return `${txHash}-${outputIndex}`;
     }
 
-    // Function to load funded loans data - keep as is
+    //Function to load funded loans data from API 
     async function loadFundedLoansData(userPkh: string, lucidInstance: LucidEvolution): Promise<void> {
         try {
             setIsLoading(true);
             setError(null);
             
-            // Get funded loans tracking from localStorage
-            let fundedLoansTracking;
-            try {
-                fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-            } catch (error) {
-                console.error("Error parsing fundedLoans from localStorage:", error);
-                setDebugInfo(`Error parsing fundedLoans from localStorage: ${error instanceof Error ? error.message : String(error)}`);
-                fundedLoansTracking = {};
+            // Get funded loans from API endpoint 
+            const response = await fetch(`${API_BASE_URL}?action=get`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ lenderPKH: userPkh }),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
             }
             
-            // Get repaid loans tracking from localStorage
-            let repaidLoansTracking;
-            try {
-                repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
-            } catch (error) {
-                console.error("Error parsing repaidLoans from localStorage:", error);
-                setDebugInfo(`Error parsing repaidLoans from localStorage: ${error instanceof Error ? error.message : String(error)}`);
-                repaidLoansTracking = {};
+            const data = await response.json();
+            
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to load funded loans');
             }
             
-            // Build funded loans list for the current user
-            const userFundedLoans: FundedLoanDetails[] = [];
-            
-            for (const [loanId, loanData] of Object.entries(fundedLoansTracking)) {
-                try {
-                    const loanInfo = loanData as any;
-                    
-                    // Validate loan data before using it
-                    if (!loanInfo || typeof loanInfo !== 'object') {
-                        console.warn(`Skipping invalid loan data for loan ID ${loanId}`);
-                        continue;
-                    }
-                    
-                    // Only include loans funded by the current user
-                    if (loanInfo.lenderPKH === userPkh) {
-                        // Check if this loan has been repaid
-                        const repaymentInfo = repaidLoansTracking[loanInfo.fundedLoanId];
-                        
-                        const fundedLoan: FundedLoanDetails = {
-                            loanId,
-                            fundedLoanId: loanInfo.fundedLoanId || loanId, // Fallback if missing
-                            fundedAt: loanInfo.fundedAt || Date.now(), // Fallback if missing
-                            lenderPKH: loanInfo.lenderPKH,
-                            borrowerPKH: loanInfo.borrowerPKH || "unknown", // Fallback if missing
-                            loanAmount: loanInfo.loanAmount || "0", // Fallback if missing
-                            interest: loanInfo.interest || "0", // Fallback if missing
-                            deadline: loanInfo.deadline || "0", // Fallback if missing
-                            txHash: loanInfo.txHash || "", // Fallback if missing
-                            fundedWith: Array.isArray(loanInfo.fundedWith) ? loanInfo.fundedWith : [],
-                            isActive: !repaymentInfo,
-                            repaymentInfo: repaymentInfo ? {
-                                repaidAt: repaymentInfo.repaidAt || Date.now(),
-                                repaymentTxHash: repaymentInfo.repaymentTxHash || ""
-                            } : undefined
-                        };
-                        
-                        userFundedLoans.push(fundedLoan);
-                    }
-                } catch (error) {
-                    console.error(`Error processing loan ${loanId}:`, error);
-                    setDebugInfo(`Error processing loan ${loanId}: ${error instanceof Error ? error.message : String(error)}`);
-                }
-            }
-            
-            // Sort by funding date (newest first)
-            userFundedLoans.sort((a, b) => b.fundedAt - a.fundedAt);
-            
-            // Store the initial data from localStorage first
-            setFundedLoans(userFundedLoans);
+            // Store the data from API
+            setFundedLoans(data.loans || []);
             
             // Then verify against on-chain data to update status
             try {
-                await verifyOnChainState(lucidInstance, userFundedLoans);
+                await verifyOnChainState(lucidInstance, data.loans || []);
             } catch (error) {
                 console.error("Error in verifyOnChainState:", error);
                 setDebugInfo(`Error in verifyOnChainState: ${error instanceof Error ? error.message : String(error)}`);
-            
             }
             
         } catch (error) {
@@ -195,106 +143,156 @@ const LoansFunded: React.FC = () => {
         }
     }
 
-    // Function to verify on-chain state and update loan statuses - keep as is
+    //Function to verify on-chain state and update loan statuses via API
     async function verifyOnChainState(lucidInstance: LucidEvolution, loans: FundedLoanDetails[]): Promise<void> {
         try {
             // Get all UTXOs at fund loan address and repay address
             let fundedUtxos: UTxO[] = [];
-            let repaidUtxos: UTxO[] = [];
             
             try {
                 fundedUtxos = await lucidInstance.utxosAt(FundLoanAddress);
             } catch (error) {
                 console.error("Error fetching funded UTXOs:", error);
                 setDebugInfo(`Error fetching funded UTXOs: ${error instanceof Error ? error.message : String(error)}`);
+                return; // Exit early if we can't get UTXOs
             }
             
-            try {
-                repaidUtxos = await lucidInstance.utxosAt(RepayLoanAddress);
-            } catch (error) {
-                console.error("Error fetching repaid UTXOs:", error);
-                setDebugInfo(`Error fetching repaid UTXOs: ${error instanceof Error ? error.message : String(error)}`);
-            }
-            
-            // Get repaid loans tracking from localStorage 
-            let repaidLoansTracking;
-            try {
-                repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
-            } catch (error) {
-                console.error("Error parsing repaidLoans from localStorage:", error);
-                repaidLoansTracking = {};
-            }
-            
-            // Create a map of active funded loan UTXOs
-            const activeFundedUTXOs = new Map<string, UTxO>();
-            
-            for (const utxo of fundedUtxos) {
+            // Create a list of active funded loan UTXOs for verification
+            const activeFundedUTXOs = fundedUtxos.map(utxo => {
                 try {
-                    const utxoId = createUtxoId(utxo.txHash, utxo.outputIndex);
-                    activeFundedUTXOs.set(utxoId, utxo);
+                    return {
+                        id: createUtxoId(utxo.txHash, utxo.outputIndex),
+                        txHash: utxo.txHash,
+                        outputIndex: utxo.outputIndex
+                    };
                 } catch (error) {
                     console.error("Error processing funded UTXO:", error);
+                    return null;
                 }
-            }
+            }).filter(x => x !== null);
             
-            // Process repay transactions to find any newly repaid loans
-            for (const utxo of repaidUtxos) {
+            // Calling the API to verify and update any loans that are no longer on-chain
+            if (activeFundedUTXOs.length > 0) {
                 try {
-                    if (!utxo.datum) continue;
-                    const repayTxs = utxo.txHash;  
-                } catch (error) {
-                    console.error("Error parsing repay datum:", error);
-                }
-            }
-            
-            // Update the loan statuses based on on-chain verification
-            const updatedLoans = loans.map(loan => {
-                try {
-                    const isStillOnChain = activeFundedUTXOs.has(loan.fundedLoanId);
+                    const response = await fetch(`${API_BASE_URL}?action=verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ activeFundedUTXOs }),
+                    });
                     
-                    // If the funded loan UTXO is not on-chain but we don't have repayment info,
-                    // it might have been repaid but not yet tracked in localStorage
-                    if (!isStillOnChain && loan.isActive) {
-                        // Check if we have new repayment info
-                        const repaymentInfo = repaidLoansTracking[loan.fundedLoanId];
-                        
-                        if (repaymentInfo) {
-                            return {
-                                ...loan,
-                                isActive: false,
-                                repaymentInfo: {
-                                    repaidAt: repaymentInfo.repaidAt,
-                                    repaymentTxHash: repaymentInfo.repaymentTxHash
-                                }
-                            };
-                        } else {
-                            // Mark as inactive without specific repayment info
-                            // This could happen if the blockchain state changed but localStorage wasn't updated
-                            return {
-                                ...loan,
-                                isActive: false
-                            };
-                        }
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status}`);
                     }
                     
-                    return loan;
+                    const result = await response.json();
+                    
+                    if (result.status === 'error') {
+                        throw new Error(result.message || 'Failed to verify loans');
+                    }
+                    
+                    // After verification, refresh the loans list to get updated statuses
+                    if (connection) {
+                        loadFundedLoansData(connection.pkh, connection.lucid);
+                    }
+                    
                 } catch (error) {
-                    console.error(`Error updating loan status for ${loan.fundedLoanId}:`, error);
-                    // Return the original loan object unchanged
-                    return loan;
+                    console.error("Error verifying loans with API:", error);
+                    setDebugInfo(`Error verifying loans with API: ${error instanceof Error ? error.message : String(error)}`);
                 }
-            });
-            
-            setFundedLoans(updatedLoans);
+            }
         } catch (error) {
             console.error("Error verifying on-chain state:", error);
             setDebugInfo(`Error verifying on-chain state: ${error instanceof Error ? error.message : String(error)}`);
-            // Don't update loans state if there was an error
-            throw error; // Rethrow to be caught by caller
+            throw error; 
         }
     }
     
-    // Format lovelace to ADA - keep as is
+    // Function to record a new funded loan via API
+    async function recordFundedLoan(loanData: {
+        loanId: string;
+        fundedLoanId: string;
+        lenderPKH: string;
+        borrowerPKH: string;
+        loanAmount: string;
+        interest: string;
+        deadline: string;
+        txHash: string;
+        fundedWith: Array<{txHash: string, outputIndex: number}>;
+        fundedAt: number;
+    }): Promise<boolean> {
+        try {
+            const response = await fetch(`${API_BASE_URL}?action=add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loanData),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                throw new Error(result.message || 'Failed to record funded loan');
+            }
+            
+            // Refresh the loans list after recording a new loan
+            if (connection) {
+                loadFundedLoansData(connection.pkh, connection.lucid);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Error recording funded loan:", error);
+            setDebugInfo(`Error recording funded loan: ${error instanceof Error ? error.message : String(error)}`);
+            return false;
+        }
+    }
+    
+    //Function to record a loan repayment via API
+    async function recordLoanRepayment(repaymentData: {
+        fundedLoanId: string;
+        repaidAt: number;
+        repaymentTxHash: string;
+    }): Promise<boolean> {
+        try {
+            const response = await fetch(`${API_BASE_URL}?action=repay`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(repaymentData),
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                throw new Error(result.message || 'Failed to record loan repayment');
+            }
+            
+            // Refresh the loans list after recording a repayment
+            if (connection) {
+                loadFundedLoansData(connection.pkh, connection.lucid);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Error recording loan repayment:", error);
+            setDebugInfo(`Error recording loan repayment: ${error instanceof Error ? error.message : String(error)}`);
+            return false;
+        }
+    }
+    
+    // Format lovelace to ADA
     function lovelaceToAda(lovelace: string): string {
         try {
             return (Number(lovelace) / 1_000_000).toFixed(6);
@@ -304,7 +302,7 @@ const LoansFunded: React.FC = () => {
         }
     }
     
-    // Format date - keep as is
+    // Format date
     function formatDate(timestamp: number): string {
         try {
             return new Date(timestamp).toLocaleString();
@@ -314,7 +312,7 @@ const LoansFunded: React.FC = () => {
         }
     }
     
-    // Calculate total amount (loan + interest) - keep as is
+    // Calculate total amount (loan + interest)
     function calculateTotal(loanAmount: string, interest: string): string {
         try {
             return (Number(loanAmount) + Number(interest)).toString();
@@ -324,7 +322,7 @@ const LoansFunded: React.FC = () => {
         }
     }
     
-    // Check if loan is overdue (past deadline) - keep as is
+    // Check if loan is overdue (past deadline)
     function isOverdue(deadline: string): boolean {
         try {
             return Number(deadline) < Date.now();
@@ -334,7 +332,7 @@ const LoansFunded: React.FC = () => {
         }
     }
     
-    // Calculate days until/past deadline - keep as is
+    // Calculate days until/past deadline
     function daysFromDeadline(deadline: string): { days: number; isPast: boolean } {
         try {
             const now = Date.now();
@@ -348,7 +346,7 @@ const LoansFunded: React.FC = () => {
         }
     }
 
-    // Function to manually trigger a refresh - simplified to use context connection
+    // Function to manually trigger a refresh
     const handleManualRefresh = () => {
         if (connection) {
             setIsLoading(true);
@@ -356,7 +354,7 @@ const LoansFunded: React.FC = () => {
         }
     };
 
-    // Filter active and repaid loans - keep as is
+    // Filter active and repaid loans
     const activeLoans = fundedLoans.filter(loan => loan.isActive);
     const repaidLoans = fundedLoans.filter(loan => !loan.isActive);
     
@@ -371,8 +369,8 @@ const LoansFunded: React.FC = () => {
     }
 
     return (
-        <div className=" md:p-4 pt-10">
-            <div className="md:flex justify-between ">
+        <div className=" p-4 pt-10">
+            <div className="flex justify-between ">
                 <h1 className="text-3xl font-medium mb-6">Loans I Have Funded</h1>
                 
                 {/* Debug Info - Can be removed in production */}
@@ -382,10 +380,10 @@ const LoansFunded: React.FC = () => {
                     </div>
                 )}
                 
-                {/* Wallet Connection Status - Simplified to use context */}
+                {/* Wallet Connection Status */}
                 {!connection ? (
-                    <div className="mb-6 p-4 bg-orange-50 border border-orange-200 w-[500px] rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Wallet Connection Required :</h2>
+                    <div className="mb-6 p-4  bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Wallet Connection Required</h2>
                         <p className="text-gray-600">
                             Please connect your wallet using the sidebar wallet connection panel to view your funded loans.
                         </p>
@@ -428,8 +426,8 @@ const LoansFunded: React.FC = () => {
                     {error}
                 </div>
             )}
-            <div className="mb-10 p-4 md:p-9   bg-white rounded-2xl shadow-2xl ">
-                {/* Summary Stats - Always show, but populate with zeros when not connected */}
+            <div className="mb-10 p-9   bg-white rounded-2xl shadow-2xl ">
+                {/* Summary Stats */}
                 <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
                         <h3 className="text-sm font-medium text-blue-700">Total Loans Funded</h3>
@@ -451,7 +449,7 @@ const LoansFunded: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* Loans Display - Always render the container, but show appropriate content based on connection and loading state */}
+                {/* Loans Display */}
                 <div className="space-y-8">
                     {/* Active Loans Section */}
                     <div>

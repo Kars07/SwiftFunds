@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Address,  validatorToAddress, UTxO, Data, SpendingValidator } from "@lucid-evolution/lucid";
+import { Address, validatorToAddress, UTxO, Data, SpendingValidator } from "@lucid-evolution/lucid";
 import { useWallet } from "./Dashboard";
+import axios from "axios"; 
 
 const loanRequestValidatorScript: SpendingValidator = {
     type: "PlutusV2",
@@ -12,8 +13,12 @@ const FundRequestValidatorScript: SpendingValidator = {
     script: "59028801010029800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cdc3a400530080024888966002600460106ea800e2653001300d00198069807000cdc3a40009112cc004c004c030dd500444c8c8cc8966002602a00713259800980318089baa0018acc004c018c044dd5003c4ca60026eb8c0580064602e60300033016301337540109112cc006600266e3c00cdd7180c980b1baa001a50a51405115980099b87375a603260340086eb4c008c058dd5000c5660026644b30013232598009807000c528c566002602600313259800980a180d1baa3007301b3754603c60366ea8016266e24004012266e200040110191bad301d301a375400514a080c1018180c1baa001301b30183754603660306ea800a26464b3001300e0018a508acc004c04c006264b30013014301a3754600e60366ea8c01cc06cdd5002c4cdc4802000c4cdc4002000a032375a603a60346ea800a2945018203030183754002603660306ea8c010c060dd50014528202c3019301a301a301a301a301a301a301a3016375401c6eb4c064c068c068c068c058dd5000c56600264660020026eb0c068c06cc06cc06cc06cc06cc06cc06cc06cc05cdd5007912cc00400629422b30013371e6eb8c06c0040162946266004004603800280b101944cdd7980c980b1baa30193016375400a01914a080a22941014452820288a5040503012375401b16404116404064660020026eb0c054c048dd5005112cc004006298103d87a80008992cc004cdd7980b980a1baa00100a899ba548000cc0580052f5c113300300330180024048602c00280a22c8090dd698090009bae30120023012001300d375401116402c3009375400716401c300800130033754011149a26cac80081"
 };
 
+
 const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestValidatorScript);
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
+
+
+const API_BASE_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
 
 type LoanRequest = {
     txId: string;
@@ -56,6 +61,20 @@ const MyLoanApplications: React.FC = () => {
         }
     }, [connection]);
 
+    // Helper function to get funded loan IDs from the API
+    async function getFundedLoanIds(): Promise<string[]> {
+        try {
+            const response = await axios.get(`${API_BASE_URL}?action=getAllFundedLoanIds`);
+            if (response.data.status === 'success') {
+                return response.data.loanIds || [];
+            }
+            return [];
+        } catch (error) {
+            console.error("Error fetching funded loan IDs:", error);
+            return [];
+        }
+    }
+
     // Fetch user's loan requests
     async function fetchMyLoanRequests(conn: any): Promise<void> {
         try {
@@ -71,8 +90,15 @@ const MyLoanApplications: React.FC = () => {
             const requests: LoanRequest[] = [];
             const currentTime = Date.now();
             
-            // Get funded loans tracking from localStorage
-            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
+            // Get funded loans from the API instead of localStorage
+            const fundedLoanIds = await getFundedLoanIds();
+            console.log("Funded loan IDs from API:", fundedLoanIds);
+            
+            // Create a map for quick lookups
+            const fundedLoansMap: Record<string, boolean> = {};
+            fundedLoanIds.forEach(id => {
+                fundedLoansMap[id] = true;
+            });
             
             for (const utxo of utxosAtScript) {
                 if (!utxo.datum) continue;
@@ -93,8 +119,8 @@ const MyLoanApplications: React.FC = () => {
                             status = "expired";
                         }
                         
-                        // Check if loan is funded
-                        if (fundedLoansTracking[loanId]) {
+                        // Check if loan is funded using API data
+                        if (fundedLoansMap[loanId]) {
                             status = "funded";
                         }
                         
@@ -135,6 +161,7 @@ const MyLoanApplications: React.FC = () => {
             setIsLoading(false);
         }
     }
+    
     
     // Refresh loan data
     function refreshLoanData(): void {
@@ -183,14 +210,14 @@ const MyLoanApplications: React.FC = () => {
     }
 
     return (
-        <div className=" md:p-4 pt-10">
-            <div className="md:flex  justify-between">
+        <div className=" p-4 pt-10">
+            <div className="flex  justify-between">
                 <h1 className="text-3xl font-medium mb-6">My Loan Applications</h1>
                 
                 {/* Wallet Status */}
                 {!connection ? (
-                    <div className="mb-6 p-3   bg-orange-50 border border-orange-200 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Wallet connection required :</h2>
+                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+                        <h2 className="text-lg font-semibold mb-3">Wallet connection required</h2>
                         <p className="text-gray-600">Please connect your wallet from the sidebar to view your loan applications.</p>
                     </div>
                 ) : (
@@ -314,7 +341,7 @@ const MyLoanApplications: React.FC = () => {
             
             {/* Summary Stats */}
             {connection && myLoanRequests.length > 0 && (
-                <div className="bg-gray-50 rounded-2xl shadow-2xl p-6 md:h-[200px]">
+                <div className="bg-gray-50 rounded-2xl shadow-2xl p-6 h-[200px]">
                     <h3 className="text-lg font-semibold mb-3">Summary</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white p-4 rounded-lg border border-gray-200">

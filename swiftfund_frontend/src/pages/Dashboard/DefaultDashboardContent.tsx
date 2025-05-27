@@ -12,6 +12,51 @@ type Connection = {
   pkh: string;
 };
 
+// API Types - Matching the PHP API responses
+type Loan = {
+  loanId: string;
+  fundedLoanId: string;
+  fundedAt: number;
+  lenderPKH: string;
+  borrowerPKH: string;
+  loanAmount: number;
+  interest: number;
+  deadline: string;
+  txHash: string;
+  isActive: boolean;
+  fundedWith?: Array<{
+    txHash: string;
+    outputIndex: number;
+  }>;
+  repaymentInfo?: {
+    repaidAt: number;
+    repaymentTxHash: string;
+  };
+};
+
+type RepaidLoan = {
+  id: string;
+  data: {
+    repaidAt: number;
+    repaymentTxHash: string;
+    loanAmount: number;
+    interest: number;
+    originalLoanId: string;
+    lenderPKH: string;
+    borrowerPKH: string;
+  };
+};
+
+type CreditScoreData = {
+  current_score: number;
+  total_loans: number;
+  on_time_payments: number;
+  early_payments: number;
+  late_payments: number;
+};
+
+const API_BASE_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+
 function shortenAddress(address: string, start = 6, end = 4) {
   if (!address) return "";
   return `${address.slice(0, start)}...${address.slice(-end)}`;
@@ -54,12 +99,17 @@ const DefaultDashboardContent: React.FC = () => {
   const [adaToNgnRate, setAdaToNgnRate] = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<bigint | null>(null);
 
-  // Dynamic state variables
+  // Dashboard statistics
   const [activeLoans, setActiveLoans] = useState<number>(0);
   const [totalApplications, setTotalApplications] = useState<number>(0);
   const [pendingApproval, setPendingApproval] = useState<number>(0);
   const [totalRepaid, setTotalRepaid] = useState<number>(0);
   
+  // Credit Score State
+  const [creditScore, setCreditScore] = useState<CreditScoreData | null>(null);
+  const [isCreditScoreLoading, setIsCreditScoreLoading] = useState<boolean>(false);
+  
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -70,7 +120,6 @@ const DefaultDashboardContent: React.FC = () => {
   useEffect(() => {
     const fetchExchangeRate = async () => {
       try {
-        // Fetch ADA to NGN rate
         const response = await fetch(
           "https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=ngn"
         );
@@ -101,11 +150,80 @@ const DefaultDashboardContent: React.FC = () => {
     }
   }, [navigate]);
 
+  // Fetch credit score function
+  const fetchCreditScore = async (userPKH: string): Promise<void> => {
+    try {
+      setIsCreditScoreLoading(true);
+      const response = await fetch(`${API_BASE_URL}?action=getCreditScore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userPKH }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        setCreditScore(data.creditScore);
+      } else {
+        console.error("Error fetching credit score:", data.message);
+        // Set default credit score if none exists
+        setCreditScore({
+          current_score: 600,
+          total_loans: 0,
+          on_time_payments: 0,
+          early_payments: 0,
+          late_payments: 0
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching credit score:", error);
+      // Set default credit score on error
+      setCreditScore({
+        current_score: 600,
+        total_loans: 0,
+        on_time_payments: 0,
+        early_payments: 0,
+        late_payments: 0
+      });
+    } finally {
+      setIsCreditScoreLoading(false);
+    }
+  };
+
+  // Credit score utility functions
+  const getCreditScoreColor = (score: number): string => {
+    if (score >= 750) return 'text-green-600';
+    if (score >= 650) return 'text-blue-600';
+    if (score >= 550) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getCreditScoreLabel = (score: number): string => {
+    if (score >= 750) return 'Excellent';
+    if (score >= 650) return 'Good';
+    if (score >= 550) return 'Fair';
+    return 'Poor';
+  };
+
+  const getCreditScoreBgColor = (score: number): string => {
+    if (score >= 750) return 'bg-green-500';
+    if (score >= 650) return 'bg-blue-500';
+    if (score >= 550) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getCreditScoreProgress = (score: number): number => {
+    return Math.min((score / 850) * 100, 100); // Assuming max score is 850
+  };
+
   // Fetch wallet balance and loan statistics when connection changes
   useEffect(() => {
     if (connection) {
       fetchWalletBalance();
-      fetchAllLoanStatistics(connection);
+      fetchLoanStatistics();
+      fetchCreditScore(connection.pkh);
     }
   }, [connection]);
 
@@ -124,8 +242,59 @@ const DefaultDashboardContent: React.FC = () => {
     }
   };
 
-  // Fetch all loan statistics including active loans, total applications, and pending approvals
-  async function fetchAllLoanStatistics(conn: Connection): Promise<void> {
+  // Fetch loan statistics from API
+  const fetchLoanStatistics = async () => {
+    if (!connection) return;
+    setIsLoading(true);
+    
+    try {
+      // Fetch borrower loans (active loans)
+      const activeLoansResponse = await fetch(`${API_BASE_URL}?action=getBorrowerLoans`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          borrowerPKH: connection.pkh
+        })
+      });
+      
+      const activeLoansData = await activeLoansResponse.json();
+      
+      if (activeLoansData.status === 'success') {
+        // Active loans are those that are funded and not repaid yet
+        setActiveLoans(activeLoansData.loans.length);
+      }
+      
+      // Fetch repaid loans
+      const repaidLoansResponse = await fetch(`${API_BASE_URL}?action=getBorrowerRepaidLoans`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          borrowerPKH: connection.pkh
+        })
+      });
+      
+      const repaidLoansData = await repaidLoansResponse.json();
+      
+      if (repaidLoansData.status === 'success') {
+        setTotalRepaid(repaidLoansData.repaidLoans.length);
+      }
+      
+      // For total applications and pending approvals, we still need to check on-chain data
+      await fetchChainLoanStatistics(connection);
+      
+    } catch (error) {
+      console.error("Error fetching loan statistics from API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch on-chain loan statistics for total applications and pending approvals
+  async function fetchChainLoanStatistics(conn: Connection): Promise<void> {
     try {
       const { lucid, pkh } = conn;
       
@@ -151,7 +320,6 @@ const DefaultDashboardContent: React.FC = () => {
         }
       }
 
-      let userActiveLoans = 0;
       let userTotalApplications = 0;
       let userPendingApprovals = 0;
       
@@ -166,17 +334,10 @@ const DefaultDashboardContent: React.FC = () => {
             // Count total applications by this user
             userTotalApplications++;
             
-            // Check if this loan is active (not funded)
-            const isActive = !fundedLoanAmounts.has(datumObject.loanAmount.toString());
-            
-            if (isActive) {
-              userActiveLoans++;
-              
-              // Check if loan is not expired (pending approval)
-              const now = BigInt(Date.now());
-              if (datumObject.deadline > now) {
-                userPendingApprovals++;
-              }
+            // Check if loan is not expired (pending approval)
+            const now = BigInt(Date.now());
+            if (datumObject.deadline > now) {
+              userPendingApprovals++;
             }
           }
         } catch (error) {
@@ -184,32 +345,10 @@ const DefaultDashboardContent: React.FC = () => {
         }
       }
 
-      // Load repaid loans from localStorage
-      let userRepaidLoans = 0;
-      try {
-        const repaidLoansTracking = JSON.parse(localStorage.getItem('repaidLoans') || '{}');
-        const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-        
-        for (const [fundedLoanId, repaymentData] of Object.entries(repaidLoansTracking)) {
-          const loanInfo = Object.values(fundedLoansTracking).find(
-            (info: any) => info.fundedLoanId === fundedLoanId
-          ) as any;
-          
-          // Only count if the user is the borrower
-          if (loanInfo && loanInfo.borrowerPKH === pkh) {
-            userRepaidLoans++;
-          }
-        }
-      } catch (error) {
-        console.error("Error loading repayment history:", error);
-      }
-
-      setActiveLoans(userActiveLoans);
       setTotalApplications(userTotalApplications);
       setPendingApproval(userPendingApprovals);
-      setTotalRepaid(userRepaidLoans);
     } catch (error) {
-      console.error("Error fetching loan statistics:", error);
+      console.error("Error fetching on-chain loan statistics:", error);
     }
   }
 
@@ -263,13 +402,13 @@ const DefaultDashboardContent: React.FC = () => {
       <div className="">
         <div className="flex items-center absolute  right-0 mx-6 my-5  top-0 space-x-6">
           {/* Notification Icon */}
-          <button className="relative text-gray-600  hover:text-gray-800" >
+          <button className="relative text-gray-600 hover:text-gray-800">
             <i className="bx bx-bell text-2xl"></i>
             <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
           {/* Settings Icon */}
-          <button className="text-gray-600 cursor-pointer hover:text-gray-800" onClick={() => navigate("/dashboard/settings")}>
+          <button className="text-gray-600 hover:text-gray-800">
             <i className="bx bx-cog text-2xl"></i>
           </button>
 
@@ -312,7 +451,7 @@ const DefaultDashboardContent: React.FC = () => {
     </div>
     
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {/* Total Applications - Updated to show dynamic value */}
+      {/* Total Applications */}
       <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium text-gray-500">Total Applications</h3>
@@ -320,13 +459,15 @@ const DefaultDashboardContent: React.FC = () => {
             <i className="bx bx-file text-lg"></i>
           </div>
         </div>
-        <p className="text-3xl font-bold text-gray-800">{totalApplications}</p>
+        <p className="text-3xl font-bold text-gray-800">
+          {isLoading ? "..." : totalApplications}
+        </p>
         <p className="text-sm text-blue-500 flex items-center mt-2">
           <i className="bx bx-info-circle mr-1"></i> All loan requests made
         </p>
       </div>
 
-      {/* Active Loans - Updated to show dynamic value */}
+      {/* Active Loans */}
       <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium text-gray-500">Active Loans</h3>
@@ -334,13 +475,15 @@ const DefaultDashboardContent: React.FC = () => {
             <i className="bx bx-money text-lg"></i>
           </div>
         </div>
-        <p className="text-3xl font-bold text-gray-800">{activeLoans}</p>
+        <p className="text-3xl font-bold text-gray-800">
+          {isLoading ? "..." : activeLoans}
+        </p>
         <p className="text-sm text-green-500 flex items-center mt-2">
-          <i className="bx bx-trending-up mr-1"></i> Not expired & unfunded
+          <i className="bx bx-trending-up mr-1"></i> Funded & not repaid
         </p>
       </div>
 
-      {/* Pending Approval - Updated to show dynamic value */}
+      {/* Pending Approval */}
       <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium text-gray-500">Pending Approval</h3>
@@ -348,7 +491,9 @@ const DefaultDashboardContent: React.FC = () => {
             <i className="bx bx-time text-lg"></i>
           </div>
         </div>
-        <p className="text-3xl font-bold text-gray-800">{pendingApproval}</p>
+        <p className="text-3xl font-bold text-gray-800">
+          {isLoading ? "..." : pendingApproval}
+        </p>
         <p className="text-sm text-yellow-500 mt-2 flex items-center">
           <i className="bx bx-time mr-1"></i> Awaiting funding
         </p>
@@ -362,7 +507,9 @@ const DefaultDashboardContent: React.FC = () => {
             <i className="bx bx-check-circle text-lg"></i>
           </div>
         </div>
-        <p className="text-3xl font-bold text-gray-800">{totalRepaid}</p>
+        <p className="text-3xl font-bold text-gray-800">
+          {isLoading ? "..." : totalRepaid}
+        </p>
         <p className="text-sm text-green-500 mt-2 flex items-center">
           <i className="bx bx-trending-up mr-1"></i> Repaid Loans
         </p>
@@ -370,8 +517,8 @@ const DefaultDashboardContent: React.FC = () => {
     </div>
 
     {/* Wallet Balance Section */}
-    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-4 md:p-6  mb-6 mt-9 max-w-3xl"> 
-      <div className="flex justify-between  items-center mb-6">
+    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-6 mb-6 mt-9 max-w-3xl"> 
+      <div className="flex justify-between items-center mb-6">
         <div>
          <h2 className="text-lg font-semibold text-black">Wallet Balance</h2> <div className=" flex justify-center items-center flex-col text-black"><hr className="w-30 h-1 border-2 rounded-2xl bg-black"/></div>
         </div>
@@ -396,7 +543,7 @@ const DefaultDashboardContent: React.FC = () => {
 
         <div>
           {connection && (
-            <div className="text-zinc-800 mb-3 pl-10">
+            <div className="text-zinc-800 mb-3">
               <p>
                 <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
               </p>
@@ -406,15 +553,15 @@ const DefaultDashboardContent: React.FC = () => {
      </div>
       <div className="grid grid-cols-2 gap-0">
         <div className="p-3 ">
-          <p className="md:text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
-          <h3 className="md:text-xl text-lg font-bold text-black">
+          <p className="text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
+          <h3 className="text-xl font-bold text-black">
           ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
           </h3>
         </div>
 
         <div className="bg-orange-300 p-3 rounded-md">
-          <p className=" md:text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
-          <h3 className="md:text-xl text-lg font-bold text-black"> 
+          <p className="text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
+          <h3 className="text-xl font-bold text-black"> 
             {connection ? lovelaceToAda(walletBalance) : "0"} ADA
           </h3>
         </div>
@@ -451,14 +598,39 @@ const DefaultDashboardContent: React.FC = () => {
         <div className="mb-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Credit Reputation Score</span>
-            <span className="text-sm text-gray-900 font-bold">600</span>
+            {isCreditScoreLoading ? (
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-12"></div>
+              </div>
+            ) : (
+              <span className={`text-sm font-bold ${creditScore ? getCreditScoreColor(creditScore.current_score) : 'text-gray-900'}`}>
+                {creditScore ? creditScore.current_score : "600"}
+              </span>
+            )}
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div className="h-2 bg-green-500 rounded-full" style={{ width: "10%" }}></div>
+            <div 
+              className={`h-2 rounded-full ${creditScore ? getCreditScoreBgColor(creditScore.current_score) : 'bg-green-500'}`} 
+              style={{ width: `${creditScore ? getCreditScoreProgress(creditScore.current_score) : 10}%` }}
+            ></div>
           </div>
-          <div className="bg-green-100 text-green-800 text-sm p-2 mt-2 rounded-md shadow">
-            <p className="font-medium">Good credit score</p>
-            <p>You qualify for loans up to $20 with competitive interest rates.</p>
+          <div className={`${creditScore && creditScore.current_score >= 650 ? 'bg-green-100 text-green-800' : creditScore && creditScore.current_score >= 550 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'} text-sm p-2 mt-2 rounded-md shadow`}>
+            <p className="font-medium">
+              {creditScore ? getCreditScoreLabel(creditScore.current_score) : "Good"} credit score
+            </p>
+            <p>
+              {creditScore && creditScore.current_score >= 650 
+                ? "You qualify for loans with competitive interest rates."
+                : creditScore && creditScore.current_score >= 550
+                ? "You may qualify for loans with moderate interest rates."
+                : "Work on improving your credit score for better loan terms."
+              }
+            </p>
+            {creditScore && (
+              <div className="mt-2 text-xs">
+                <p>Total Loans: {creditScore.total_loans} | Early: {creditScore.early_payments}  | On-time: {creditScore.on_time_payments} | Late: {creditScore.late_payments}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -474,4 +646,5 @@ const DefaultDashboardContent: React.FC = () => {
   </div>
   );
 };
+
 export default DefaultDashboardContent;

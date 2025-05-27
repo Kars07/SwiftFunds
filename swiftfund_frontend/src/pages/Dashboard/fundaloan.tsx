@@ -15,6 +15,8 @@ const FundRequestValidatorScript: SpendingValidator = {
 const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestValidatorScript);
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
+const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+
 type LoanRequest = {
     txId: string;
     outputIndex: number;
@@ -38,6 +40,17 @@ type FundedLoan = {
     utxo: UTxO;
     fundedLoanId: string;
     originalLoanId?: string;
+    repaymentInfo?: {
+        repaidAt: number;
+        repaymentTxHash: string;
+    };
+};
+type CreditScoreData = {
+    current_score: number;
+    total_loans: number;
+    on_time_payments: number;
+    early_payments: number;
+    late_payments: number;
 };
 
 const loanRequestSchema = Data.Object({
@@ -56,6 +69,28 @@ const fundloanredeemerschema = Data.Object({
 type redeemerType = Data.Static<typeof fundloanredeemerschema>;
 const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
+// Utility function for API calls
+async function apiCall(endpoint: string, method: string, data?: any) {
+    try {
+        const response = await fetch(`${API_URL}/${endpoint}`, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: data ? JSON.stringify(data) : undefined,
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error(`API error: ${error}`);
+        throw error;
+    }
+}
+
 const FundLoan: React.FC = () => {
     const { connection, wallets, connectWallet, isConnecting } = useWallet();
     const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
@@ -63,46 +98,171 @@ const FundLoan: React.FC = () => {
     const [loadingFund, setLoadingFund] = useState<string | null>(null);
     const [txHash, setTxHash] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [creditScores, setCreditScores] = useState<Map<string, CreditScoreData>>(new Map());
     
     // Fetch loan data when connection changes
     useEffect(() => {
         if (connection) {
-            fetchLoanData(connection.lucid);
+            // First register the user (or get existing user) with the API
+            registerUser(connection.address, connection.pkh)
+                .then(() => fetchLoanData(connection.lucid))
+                .catch(err => {
+                    console.error("Error registering user:", err);
+                    setError("Failed to connect to the server. Please try again.");
+                });
         }
     }, [connection]);
+
+    // Register or get user from database
+    async function registerUser(address: string, pkh: string): Promise<void> {
+        await apiCall('user.php?action=register', 'POST', { address, pkh });
+    }
+    async function fetchCreditScore(userPKH: string): Promise<CreditScoreData | null> {
+    try {
+        const response = await fetch(`${API_URL}?action=getCreditScore`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userPKH }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            return data.creditScore;
+        } else {
+            console.error("Error fetching credit score:", data.message);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching credit score:", error);
+        return null;
+    }
+}
+    function getCreditScoreColor(score: number): string {
+        if (score >= 750) return 'text-green-600';
+        if (score >= 650) return 'text-blue-600';
+        if (score >= 550) return 'text-yellow-600';
+        return 'text-red-600';
+    }
+
+    function getCreditScoreLabel(score: number): string {
+        if (score >= 750) return 'Excellent';
+        if (score >= 650) return 'Good';
+        if (score >= 550) return 'Fair';
+        return 'Poor';
+    }
 
     // Create a unique identifier for a specific UTxO
     function createUtxoId(txId: string, outputIndex: number): string {
         return `${txId}-${outputIndex}`;
     }
 
-    // Fetch loan data (both requests and funded loans)
-    async function fetchLoanData(lucidInstance: LucidEvolution): Promise<void> {
-        try {
-            setIsLoading(true);
-            
-            // First, fetch funded loans
-            const fundedLoansData = await fetchFundedLoans(lucidInstance);
+async function fetchLoanData(lucidInstance: LucidEvolution): Promise<void> {
+    try {
+        setIsLoading(true);
         
+        // First, fetch ALL funded loans, not just the user's
+        const fundedLoansData = await fetchFundedLoans(lucidInstance);
+        
+        // Then fetch loan requests and filter out the funded ones
+        await fetchLoanRequests(lucidInstance, fundedLoansData);
+    } catch (error) {
+        console.error("Error fetching loan data:", error);
+        setError("Failed to fetch loan data. Please try again.");
+    } finally {
+        setIsLoading(false);
+    }
+}
+
+async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
+    // Fetch on-chain data - UTXOs at fund loan address
+    const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
+    console.log("UTXOs at fund loan address:", fundedUtxos);
+    
+    // Collect the active funded UTXOs from the blockchain
+    const activeFundedUTXOs = [];
+    
+    for (const utxo of fundedUtxos) {
+        if (!utxo.datum) continue;
+        
+        try {
+            const datumObject = Data.from(utxo.datum, redeemerType);
+            const fundedLoanId = createUtxoId(utxo.txHash, utxo.outputIndex);
             
-            // Then fetch loan requests and filter out the funded ones
-            await fetchLoanRequests(lucidInstance, fundedLoansData);
+            activeFundedUTXOs.push({
+                id: fundedLoanId,
+                txHash: utxo.txHash,
+                outputIndex: utxo.outputIndex
+            });
         } catch (error) {
-            console.error("Error fetching loan data:", error);
-            setError("Failed to fetch loan data. Please try again.");
-        } finally {
-            setIsLoading(false);
+            console.error("Error parsing funded loan datum:", error, "UTxO:", utxo);
         }
     }
+    
+    // fetching ALL funded loans data from the database API, not just the user's
+    let fundedLoans: FundedLoan[] = [];
+    try {
+        //sync the on-chain status with the database
+        await apiCall('funded_loans.php?action=verify', 'POST', { 
+            activeFundedUTXOs 
+        });
+        
+        // Then fetch ALL loans, not just for the current user
+        const response = await apiCall('funded_loans.php?action=getAll', 'GET');
+        
+        if (response.status === 'success') {
+            // Transform the API data to match our FundedLoan type
+            fundedLoans = response.loans.map((loan: any) => ({
+                txId: loan.txHash,
+                outputIndex: loan.fundedWith.length > 0 ? loan.fundedWith[0].outputIndex : 0,
+                lenderPKH: loan.lenderPKH,
+                loanAmount: BigInt(loan.loanAmount),
+                borrowerPKH: loan.borrowerPKH,
+                interest: BigInt(loan.interest),
+                deadline: BigInt(loan.deadline),
+                utxo: {} as UTxO, // This will be populated if the loan is still on-chain
+                fundedLoanId: loan.fundedLoanId,
+                originalLoanId: loan.loanId,
+                repaymentInfo: loan.repaymentInfo
+            }));
+            
+            // Match up the on-chain UTXOs with our database records
+            for (const loan of fundedLoans) {
+                const matchingUtxo = fundedUtxos.find(utxo => 
+                    createUtxoId(utxo.txHash, utxo.outputIndex) === loan.fundedLoanId
+                );
+                
+                if (matchingUtxo) {
+                    loan.utxo = matchingUtxo;
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching funded loans from API:", error);
+    }
+    
+    return fundedLoans;
+}
 
-    async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
+async function fetchAllFundedLoanIds(lucidInstance: LucidEvolution): Promise<Set<string>> {
+    // Create a set to store all funded loan IDs
+    const fundedLoanOriginalIds = new Set<string>();
+    
+    try {
+        // Make API call to get all funded loan IDs
+        const response = await apiCall('funded_loans.php?action=getAllFundedLoanIds', 'GET');
+        
+        if (response.status === 'success' && Array.isArray(response.loanIds)) {
+            response.loanIds.forEach((id: string) => {
+                fundedLoanOriginalIds.add(id);
+            });
+        }
+        
+        // including any UTXOs currently at the FundLoanAddress
+        // This ensures we catch any newly funded loans that might not be in the database yet
         const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
-        console.log("UTXOs at fund loan address:", fundedUtxos);
-        
-        const fundedLoans: FundedLoan[] = [];
-        
-        // Get funded loans tracking from localStorage
-        const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
         
         for (const utxo of fundedUtxos) {
             if (!utxo.datum) continue;
@@ -110,100 +270,101 @@ const FundLoan: React.FC = () => {
             try {
                 const datumObject = Data.from(utxo.datum, redeemerType);
                 
-                // Create unique identifier for this funded loan UTXO
-                const fundedLoanId = createUtxoId(utxo.txHash, utxo.outputIndex);
+                // If this is a valid funded loan UTxO, get its originating loan ID
+                // We might need to call the API to map this funded loan to its original loan ID
+                // For now, let's add this to our list of IDs to check
+                const response = await apiCall('funded_loans.php?action=getOriginalLoanId', 'POST', {
+                    fundedLoanId: createUtxoId(utxo.txHash, utxo.outputIndex)
+                });
                 
-                // Try to find the original loan ID this funded loan is associated with
-                let originalLoanId = undefined;
+                if (response.status === 'success' && response.originalLoanId) {
+                    fundedLoanOriginalIds.add(response.originalLoanId);
+                }
+            } catch (error) {
+                console.error("Error parsing funded loan datum:", error);
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching funded loan IDs:", error);
+    }
+    
+    return fundedLoanOriginalIds;
+}
+
+async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData: FundedLoan[]): Promise<void> {
+    try {
+        const utxosAtScript: UTxO[] = await lucidInstance.utxosAt(LoanRequestAddress);
+        console.log("UTxOs at loan request address:", utxosAtScript);
+
+        const requests: LoanRequest[] = [];
+        const currentTime = Date.now();
+        
+        // Get ALL funded loan IDs, not just those funded by the current user
+        const fundedLoanOriginalIds = await fetchAllFundedLoanIds(lucidInstance);
+        console.log("All funded loan IDs:", Array.from(fundedLoanOriginalIds));
+
+        // Track unique borrower PKHs to fetch credit scores
+        const borrowerPKHs = new Set<string>();
+
+        for (const utxo of utxosAtScript) {
+            if (!utxo.datum) continue;
+            
+            try {
+                const datumObject = Data.from(utxo.datum, BorrowerDatum);
                 
-                // Look through the tracking data to find a match
-                for (const [loanId, trackingInfo] of Object.entries(fundedLoansTracking)) {
-                    const tracking = trackingInfo as any;
-                    if (tracking.txHash === utxo.txHash) {
-                        originalLoanId = loanId;
-                        break;
-                    }
+                // Skip expired loan requests
+                if (Number(datumObject.deadline) < currentTime) {
+                    console.log(`Loan request with deadline ${new Date(Number(datumObject.deadline)).toLocaleString()} has expired, skipping`);
+                    continue;
                 }
                 
-                fundedLoans.push({
+                // Create a unique identifier for this loan request UTXO
+                const loanId = createUtxoId(utxo.txHash, utxo.outputIndex);
+                
+                // Check if this specific loan request has been funded by ANYONE
+                if (fundedLoanOriginalIds.has(loanId)) {
+                    console.log(`Loan request ${loanId} has been funded, skipping`);
+                    continue;
+                }
+
+                // Add borrower PKH to our set for credit score fetching
+                borrowerPKHs.add(datumObject.borrowerPKH);
+
+                requests.push({
                     txId: utxo.txHash,
                     outputIndex: utxo.outputIndex,
-                    lenderPKH: datumObject.lenderPKH,
+                    borrowerPKH: datumObject.borrowerPKH,
                     loanAmount: datumObject.loanAmount,
+                    interest: datumObject.interest,
+                    deadline: datumObject.deadline,
+                    datumObject,
                     utxo,
-                    fundedLoanId,
-                    originalLoanId
+                    uniqueId: loanId
                 });
             } catch (error) {
-                console.error("Error parsing funded loan datum:", error, "UTxO:", utxo);
+                console.error("Error parsing datum:", error, "UTxO:", utxo);
+            }
+        }
+
+        setLoanRequests(requests);
+
+        // Fetch credit scores for all unique borrowers
+        const newCreditScores = new Map<string, CreditScoreData>();
+        
+        for (const borrowerPKH of borrowerPKHs) {
+            const creditScore = await fetchCreditScore(borrowerPKH);
+            if (creditScore) {
+                newCreditScores.set(borrowerPKH, creditScore);
             }
         }
         
-        return fundedLoans;
+        setCreditScores(newCreditScores);
+
+    } catch (error) {
+        console.error("Error fetching loan requests:", error);
+        setError("Failed to fetch loan requests. Please try again.");
     }
-
-    async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData: FundedLoan[]): Promise<void> {
-        try {
-            const utxosAtScript: UTxO[] = await lucidInstance.utxosAt(LoanRequestAddress);
-            console.log("UTxOs at loan request address:", utxosAtScript);
-
-            const requests: LoanRequest[] = [];
-            const currentTime = Date.now();
-            
-            // Track funded loans in localStorage
-            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-            
-            // Create a map of original loan IDs that have funded loans
-            const fundedLoanOriginalIds = new Set<string>();
-            fundedLoansData.forEach(fl => {
-                if (fl.originalLoanId) {
-                    fundedLoanOriginalIds.add(fl.originalLoanId);
-                }
-            });
-
-            for (const utxo of utxosAtScript) {
-                if (!utxo.datum) continue;
-                
-                try {
-                    const datumObject = Data.from(utxo.datum, BorrowerDatum);
-                    
-                    // Skip expired loan requests
-                    if (Number(datumObject.deadline) < currentTime) {
-                        console.log(`Loan request with deadline ${new Date(Number(datumObject.deadline)).toLocaleString()} has expired, skipping`);
-                        continue;
-                    }
-                    
-                    // Create a unique identifier for this loan request UTXO
-                    const loanId = createUtxoId(utxo.txHash, utxo.outputIndex);
-                    
-                    // Check if this specific loan request has been funded
-                    if (fundedLoanOriginalIds.has(loanId) || fundedLoansTracking[loanId]) {
-                        console.log(`Loan request ${loanId} has been funded, skipping`);
-                        continue;
-                    }
-
-                    requests.push({
-                        txId: utxo.txHash,
-                        outputIndex: utxo.outputIndex,
-                        borrowerPKH: datumObject.borrowerPKH,
-                        loanAmount: datumObject.loanAmount,
-                        interest: datumObject.interest,
-                        deadline: datumObject.deadline,
-                        datumObject,
-                        utxo,
-                        uniqueId: loanId
-                    });
-                } catch (error) {
-                    console.error("Error parsing datum:", error, "UTxO:", utxo);
-                }
-            }
-
-            setLoanRequests(requests);
-        } catch (error) {
-            console.error("Error fetching loan requests:", error);
-            setError("Failed to fetch loan requests. Please try again.");
-        }
-    }
+}
 
     // Fund loan function
     async function fundLoan(loanRequest: LoanRequest): Promise<void> {
@@ -279,29 +440,32 @@ const FundLoan: React.FC = () => {
                 }
             }
 
-            // After successful funding, track it in localStorage
-            const fundedLoansTracking = JSON.parse(localStorage.getItem('fundedLoans') || '{}');
-            const loanId = loanRequest.uniqueId;
-            
             // Create unique funded loan identifier using the specific funding transaction
             const fundedLoanId = createUtxoId(txHash, fundedOutputIndex >= 0 ? fundedOutputIndex : 0);
             
-            fundedLoansTracking[loanId] = {
-                fundedAt: Date.now(),
-                lenderPKH: pkh,
-                txHash: txHash,
-                fundedLoanId: fundedLoanId,
-                loanAmount: loanRequest.loanAmount.toString(),
-                interest: loanRequest.interest.toString(),
-                deadline: loanRequest.deadline.toString(),
-                borrowerPKH: loanRequest.borrowerPKH,
-                // Store the funding UTXO details for reference
-                fundedWith: [{
-                    txHash: txHash,
-                    outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
-                }]
-            };
-            localStorage.setItem('fundedLoans', JSON.stringify(fundedLoansTracking));
+            // Record the funded loan in the database
+            try {
+                await apiCall('funded_loans.php?action=add', 'POST', {
+                    loanId: loanRequest.uniqueId,
+                    fundedLoanId,
+                    lenderPKH: pkh,
+                    borrowerPKH: loanRequest.borrowerPKH,
+                    loanAmount: loanRequest.loanAmount.toString(),
+                    interest: loanRequest.interest.toString(),
+                    deadline: loanRequest.deadline.toString(),
+                    txHash,
+                    fundedAt: Date.now(),
+                    fundedWith: [{
+                        txHash,
+                        outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
+                    }]
+                });
+                
+                console.log('Loan funding recorded in database');
+            } catch (error) {
+                console.error('Failed to record loan funding in database:', error);
+                // Note: We don't set an error here as the transaction itself succeeded
+            }
             
             // Wait for a moment and then refresh the loan data
             setTimeout(() => {
@@ -335,8 +499,8 @@ const FundLoan: React.FC = () => {
     }
 
     return (
-        <div className="md:p-4 pt-10">
-            <div className="md:flexjustify-between">
+        <div className="p-4 pt-10">
+            <div className="flex justify-between">
                 <h1 className="text-3xl font-medium mb-6">Fund Loans</h1>
                 
                 {/* Wallet Connection Status */}
@@ -399,84 +563,109 @@ const FundLoan: React.FC = () => {
                     </div>
                 ) : (
                     <div className="">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Borrower
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Interest
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Deadline
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {loanRequests.map((loan) => (
-                                    <tr key={loan.uniqueId}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
-                                            {connection && loan.borrowerPKH === connection.pkh && (
-                                                <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                                    You
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.loanAmount)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {lovelaceToAda(loan.interest)} ADA
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {formatDate(loan.deadline)}
-                                            <br />
-                                            <span className="text-green-600">
-                                                {daysRemaining(loan.deadline)} days remaining
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                            {loan.uniqueId.substring(0, 8)}...
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {connection && loan.borrowerPKH === connection.pkh ? (
-                                                <button
-                                                    disabled
-                                                    className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
-                                                    title="You cannot fund your own loan"
-                                                >
-                                                    Cannot Fund Own Loan
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => fundLoan(loan)}
-                                                    disabled={!connection || loadingFund === loan.txId}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
-                                                >
-                                                    {loadingFund === loan.txId ? "Processing..." : "Fund Loan"}
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+<table className="min-w-full divide-y divide-gray-200">
+    <thead className="bg-gray-50">
+        <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Borrower
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Credit Score
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Loan Amount
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Interest
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Deadline
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Loan ID
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-200">
+        {loanRequests.map((loan) => {
+            const creditScore = creditScores.get(loan.borrowerPKH);
+            
+            return (
+                <tr key={loan.uniqueId}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
+                        {connection && loan.borrowerPKH === connection.pkh && (
+                            <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                You
+                            </span>
+                        )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {creditScore ? (
+                            <div className="flex items-center space-x-2">
+                                <span className={`text-lg font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                                    {creditScore.current_score}
+                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
+                                    {getCreditScoreLabel(creditScore.current_score)}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center space-x-2">
+                                <div className="animate-pulse">
+                                    <div className="h-4 bg-gray-200 rounded w-12"></div>
+                                </div>
+                                <span className="text-gray-400 text-xs">Loading...</span>
+                            </div>
+                        )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {lovelaceToAda(loan.loanAmount)} ADA
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {lovelaceToAda(loan.interest)} ADA
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(loan.deadline)}
+                        <br />
+                        <span className="text-green-600">
+                            {daysRemaining(loan.deadline)} days remaining
+                        </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                        {loan.uniqueId.substring(0, 8)}...
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {connection && loan.borrowerPKH === connection.pkh ? (
+                            <button
+                                disabled
+                                className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md cursor-not-allowed"
+                                title="You cannot fund your own loan"
+                            >
+                                Cannot Fund Own Loan
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => fundLoan(loan)}
+                                disabled={!connection || loadingFund === loan.txId}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
+                            >
+                                {loadingFund === loan.txId ? "Processing..." : "Fund Loan"}
+                            </button>
+                        )}
+                    </td>
+                </tr>
+            );
+        })}
+    </tbody>
+</table>
                     </div>
                 )}
             </div>
         </div>
     );
 };
-
 export default FundLoan;

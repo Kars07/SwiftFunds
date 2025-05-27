@@ -14,10 +14,21 @@ const FundRequestValidatorScript: SpendingValidator = {
 const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestValidatorScript);
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
-// Define loan request fee constants (in lovelace)
+// loan request fee constants (in lovelace)
 const STANDARD_LOAN_FEE = BigInt(5_000_000); // 5 ADA in lovelace
 const PREMIUM_LOAN_FEE = BigInt(10_000_000); // 10 ADA in lovelace
 const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
+
+
+const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+
+type CreditScoreData = {
+    current_score: number;
+    total_loans: number;
+    on_time_payments: number;
+    early_payments: number;
+    late_payments: number;
+};
 
 type LoanRequest = {
     txId: string;
@@ -43,8 +54,6 @@ type FundedLoan = {
     fundedLoanId: string; // Unique identifier for this specific funded loan UTXO
     originalLoanId?: string; // Reference to the original loan request UTXO ID
 };
-
-
 const loanRequestSchema = Data.Object({
     borrowerPKH: Data.Bytes(),
     loanAmount: Data.Integer(),
@@ -63,13 +72,13 @@ const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
 const Applications: React.FC = () => {
     const { connection, wallets, connectWallet, isConnecting } = useWallet();
-    const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
-    const [fundedLoans, setFundedLoans] = useState<FundedLoan[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [loadingFund, setLoadingFund] = useState<string | null>(null);
     
     // Exchange rate state
     const [adaToNgnRate, setAdaToNgnRate] = useState<number>(0);
+    
+    // Credit score state
+    const [creditScore, setCreditScore] = useState<CreditScoreData | null>(null);
+    const [loadingCreditScore, setLoadingCreditScore] = useState<boolean>(false);
     
     // Loan request form state - now in Naira
     const [loanAmountNaira, setLoanAmountNaira] = useState<number>(50000);
@@ -109,6 +118,87 @@ const Applications: React.FC = () => {
         
         return () => clearInterval(interval);
     }, []);
+
+    // Fetch credit score when wallet is connected
+    async function fetchCreditScore(userPKH: string): Promise<void> {
+        try {
+            setLoadingCreditScore(true);
+            const response = await fetch(`${API_URL}?action=getCreditScore`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userPKH }),
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                setCreditScore(data.creditScore);
+            } else {
+                console.error("Error fetching credit score:", data.message);
+                // Set default credit score for new users
+                setCreditScore({
+                    current_score: 300,
+                    total_loans: 0,
+                    on_time_payments: 0,
+                    early_payments: 0,
+                    late_payments: 0
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching credit score:", error);
+            // Set default credit score for new users
+            setCreditScore({
+                current_score: 300,
+                total_loans: 0,
+                on_time_payments: 0,
+                early_payments: 0,
+                late_payments: 0
+            });
+        } finally {
+            setLoadingCreditScore(false);
+        }
+    }
+
+    // Load credit score when connection is established
+    useEffect(() => {
+        if (connection && connection.pkh) {
+            fetchCreditScore(connection.pkh);
+        }
+    }, [connection]);
+
+    // Get maximum loan amount based on credit score
+    function getMaxLoanAmountByCreditScore(creditScore: number): number {
+        if (creditScore >= 750) return MAX_LOAN_AMOUNT; // Excellent - can request any amount
+        if (creditScore >= 650) return 100000; // Good - up to 100,000 naira
+        if (creditScore >= 550) return 80000; // Fair - up to 80,000 naira
+        return 40000; // Poor - up to 40,000 naira
+    }
+
+    // Get credit score color
+    function getCreditScoreColor(score: number): string {
+        if (score >= 750) return 'text-green-600';
+        if (score >= 650) return 'text-blue-600';
+        if (score >= 550) return 'text-yellow-600';
+        return 'text-red-600';
+    }
+
+    // Get credit score label
+    function getCreditScoreLabel(score: number): string {
+        if (score >= 750) return 'Excellent';
+        if (score >= 650) return 'Good';
+        if (score >= 550) return 'Fair';
+        return 'Poor';
+    }
+
+    // Get risk level
+    function getRiskLevel(score: number): string {
+        if (score >= 750) return 'Very Low Risk';
+        if (score >= 650) return 'Low Risk';
+        if (score >= 550) return 'Moderate Risk';
+        return 'High Risk';
+    }
     
     // Create a unique identifier for a specific UTxO
     function createUtxoId(txId: string, outputIndex: number): string {
@@ -179,11 +269,13 @@ const Applications: React.FC = () => {
         // Clear previous input error
         setInputError(prev => ({ ...prev, loanAmount: undefined }));
         
-        // Enforce maximum limit
-        if (value > MAX_LOAN_AMOUNT) {
+        const maxAmount = creditScore ? getMaxLoanAmountByCreditScore(creditScore.current_score) : 40000;
+        
+        // Enforce credit score based limit
+        if (value > maxAmount) {
             setInputError(prev => ({ 
                 ...prev, 
-                loanAmount: `Maximum loan amount is ${formatNaira(MAX_LOAN_AMOUNT)}`
+                loanAmount: `Your credit score (${creditScore?.current_score || 'N/A'}) limits you to a maximum of ${formatNaira(maxAmount)}`
             }));
             // Still update the value to show user what they typed
             setLoanAmountNaira(value);
@@ -204,15 +296,22 @@ const Applications: React.FC = () => {
             return;
         }
 
+        if (!creditScore) {
+            setError("Credit score not loaded. Please wait a moment and try again.");
+            return;
+        }
+
         // Validate loan amount
         if (loanAmountNaira <= 0) {
             setError("Loan amount must be greater than zero");
             return;
         }
 
-        // Check if loan amount exceeds maximum
-        if (loanAmountNaira > MAX_LOAN_AMOUNT) {
-            setError(`Loan amount cannot exceed ${formatNaira(MAX_LOAN_AMOUNT)}`);
+        const maxAmount = getMaxLoanAmountByCreditScore(creditScore.current_score);
+        
+        // Check if loan amount exceeds credit score limit
+        if (loanAmountNaira > maxAmount) {
+            setError(`Your credit score (${creditScore.current_score}) limits you to a maximum loan of ${formatNaira(maxAmount)}`);
             return;
         }
 
@@ -243,6 +342,7 @@ const Applications: React.FC = () => {
             
             const dtm: Datum = Data.to<BorrowerDatum>(datum, BorrowerDatum);
             const SWIFTFUND_ADDRRESS = "addr_test1qrthkqeq2v9vkstw2mwkw6z97fvgvrq2gqj4hjvp5776fu5ly6hkduuy05uj2n0ww68x43z0cxpqqgfx38wclr45zt3q8kwyxs"
+            
             // Create and submit the transaction
             const tx = await lucid
                 .newTx()
@@ -280,7 +380,7 @@ const Applications: React.FC = () => {
     }
 
     return (
-        <div className="md:p-4  pt-10">
+        <div className="p-4 pt-10">
             <div className="flex justify-between items-start">
                 <h1 className="text-3xl font-medium mb-6">Loan Applications</h1>
                 
@@ -313,10 +413,72 @@ const Applications: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <div className="mb-6 p-4  bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                     <p className="text-zinc-800">
                         <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
                     </p>
+                </div>
+            )}
+
+            {/* Credit Score Display */}
+            {connection && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Credit Profile</h3>
+                    {loadingCreditScore ? (
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-gray-200 rounded w-32 mb-2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-48"></div>
+                        </div>
+                    ) : creditScore ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-4">
+                                <span className={`text-2xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                                    {creditScore.current_score}
+                                </span>
+                                <div className="flex flex-col">
+                                    <span className={`px-2 py-1 rounded text-sm font-medium ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
+                                        {getCreditScoreLabel(creditScore.current_score)}
+                                    </span>
+                                    <span className="text-xs text-gray-600 mt-1">
+                                        {getRiskLevel(creditScore.current_score)}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg p-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm font-medium text-gray-700">
+                                        Maximum Loan Amount:
+                                    </span>
+                                    <span className="text-lg font-bold text-green-600">
+                                        {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
+                                    </span>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    Based on your current credit score
+                                </div>
+                            </div>
+                            
+                            {creditScore.total_loans > 0 && (
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                    <div className="text-center">
+                                        <div className="font-semibold text-green-600">{creditScore.on_time_payments}</div>
+                                        <div className="text-gray-600">On Time</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="font-semibold text-blue-600">{creditScore.early_payments}</div>
+                                        <div className="text-gray-600">Early</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="font-semibold text-red-600">{creditScore.late_payments}</div>
+                                        <div className="text-gray-600">Late</div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-gray-500">Unable to load credit score</div>
+                    )}
                 </div>
             )}
 
@@ -365,15 +527,20 @@ const Applications: React.FC = () => {
                                     className={`w-full pl-8 pr-3 py-2 border ${
                                         inputError.loanAmount ? 'border-red-500' : 'border-gray-300'
                                     } rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
-                                    disabled={isSubmitting || adaToNgnRate === 0}
+                                    disabled={isSubmitting || adaToNgnRate === 0 || loadingCreditScore}
                                     min="0"
-                                    max={MAX_LOAN_AMOUNT}
+                                    max={creditScore ? getMaxLoanAmountByCreditScore(creditScore.current_score) : 40000}
                                     step="1000"
                                 />
                             </div>
                             {adaToNgnRate > 0 && (
                                 <div className="mt-1">
                                     <div className="text-xs text-gray-500">≈ {formatAda(nairaToAda(loanAmountNaira))}</div>
+                                    {creditScore && (
+                                        <div className="text-xs text-blue-600 mt-1">
+                                            Max: {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
+                                        </div>
+                                    )}
                                     {inputError.loanAmount && (
                                         <div className="text-red-500 text-sm font-medium mt-1">
                                             {inputError.loanAmount}
@@ -421,7 +588,7 @@ const Applications: React.FC = () => {
                     </div>
                     
                     {/* Loan Summary */}
-                    {adaToNgnRate > 0 && (
+                    {adaToNgnRate > 0 && creditScore && (
                         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-700 mb-3">Loan Summary</h3>
                             <div className="space-y-2 text-sm">
@@ -450,13 +617,13 @@ const Applications: React.FC = () => {
                                     <div className="flex justify-between">
                                         <span>Loan Type:</span>
                                         <span className="font-medium">
-                                            {getLoanTypeName(Math.min(loanAmountNaira, MAX_LOAN_AMOUNT))}
+                                            {getLoanTypeName(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Application Fee:</span>
                                         <span className="font-medium">
-                                            {formatAda(lovelaceToAda(getLoanRequestFee(Math.min(loanAmountNaira, MAX_LOAN_AMOUNT))))}
+                                            {formatAda(lovelaceToAda(getLoanRequestFee(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))))}
                                         </span>
                                     </div>
                                 </div>
@@ -466,12 +633,21 @@ const Applications: React.FC = () => {
                     
                     <button
                         onClick={createLoanRequest}
-                        disabled={isSubmitting || adaToNgnRate === 0 || loanAmountNaira > MAX_LOAN_AMOUNT}
+                        disabled={
+                            isSubmitting || 
+                            adaToNgnRate === 0 || 
+                            loadingCreditScore || 
+                            !creditScore ||
+                            (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score))
+                        }
                         className="border-2 border-amber-600 text-[15px] cursor-pointer text-orange-600 hover:bg-orange-600 hover:shadow-lg font-medium delay-150 duration-200 hover:text-white px-6 py-3 rounded-3xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? "Submitting..." : 
-                         adaToNgnRate === 0 ? "Loading rates..." : 
-                         loanAmountNaira > MAX_LOAN_AMOUNT ? "Loan amount too high" :
+                         adaToNgnRate === 0 ? "Loading rates..." :
+                         loadingCreditScore ? "Loading credit score..." :
+                         !creditScore ? "Credit score unavailable" :
+                         (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score)) ? 
+                            "Amount exceeds credit limit" :
                          "Create Loan Request"}
                     </button>
                 </div>
