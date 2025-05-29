@@ -30,30 +30,30 @@ type CreditScoreData = {
     late_payments: number;
 };
 
-type LoanRequest = {
-    txId: string;
-    outputIndex: number;
-    borrowerPKH: string;
-    loanAmount: bigint;
-    interest: bigint;
-    deadline: bigint;
-    datumObject: any;
-    utxo: UTxO;
-    uniqueId: string; // Unique identifier for this specific loan request UTXO
-};
+// type LoanRequest = {
+//     txId: string;
+//     outputIndex: number;
+//     borrowerPKH: string;
+//     loanAmount: bigint;
+//     interest: bigint;
+//     deadline: bigint;
+//     datumObject: any;
+//     utxo: UTxO;
+//     uniqueId: string; // Unique identifier for this specific loan request UTXO
+// };
 
-type FundedLoan = {
-    txId: string;
-    outputIndex: number;
-    lenderPKH: string;
-    loanAmount: bigint;
-    borrowerPKH?: string;
-    interest?: bigint;
-    deadline?: bigint;
-    utxo: UTxO;
-    fundedLoanId: string; // Unique identifier for this specific funded loan UTXO
-    originalLoanId?: string; // Reference to the original loan request UTXO ID
-};
+// type FundedLoan = {
+//     txId: string;
+//     outputIndex: number;
+//     lenderPKH: string;
+//     loanAmount: bigint;
+//     borrowerPKH?: string;
+//     interest?: bigint;
+//     deadline?: bigint;
+//     utxo: UTxO;
+//     fundedLoanId: string; // Unique identifier for this specific funded loan UTXO
+//     originalLoanId?: string; // Reference to the original loan request UTXO ID
+// };
 const loanRequestSchema = Data.Object({
     borrowerPKH: Data.Bytes(),
     loanAmount: Data.Integer(),
