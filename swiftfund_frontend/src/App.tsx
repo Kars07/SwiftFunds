@@ -21,7 +21,8 @@ import LoansToBeRepaid from './pages/Dashboard/loanstoberepaid';
 import MyLoanApplications from './pages/Dashboard/myloan-applications';
 import LoansFunded from './pages/Dashboard/loans-funded';
 import LoansRepaid from './pages/Dashboard/loansirepaid';
-import Transaction from './pages/Dashboard/transaction'
+import Transaction from './pages/Dashboard/transaction';
+import Verification from './pages/Dashboard/Verification'
 import FundLoan from './pages/Dashboard/fundaloan';
 import Profile from './pages/Dashboard/Profile'
 import Settings from './pages/Dashboard/settings';
@@ -71,6 +72,8 @@ const App: React.FC = () => {
             <Route path="myloan-applications" element={<MyLoanApplications />} />
             <Route path="loans-funded" element={<LoansFunded />} />
             <Route path="loansirepaid" element={<LoansRepaid />} />
+             {/* <Route path="KYC-Verify" element={<Verification />} /> */}
+             <Route path="KYC-Verify" element={<Verification onComplete={() => {}} onClose={() => {}} />} />
             <Route path="transactions" element={<Transaction />} />
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />

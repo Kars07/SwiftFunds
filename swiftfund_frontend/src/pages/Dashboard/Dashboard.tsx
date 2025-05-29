@@ -1,8 +1,9 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import default_profile from "../../assets/avatar-default.png";
 import { Address, Blockfrost, Lucid, LucidEvolution, paymentCredentialOf, WalletApi, PaymentKeyHash } from "@lucid-evolution/lucid";
+import Verification from "./Verification";
 
 type Wallet = {
   name: string;
@@ -37,6 +38,103 @@ export const useWallet = () => {
   return context;
 };
 
+// Welcome Modal Component
+const WelcomeModal: React.FC<{ 
+  isOpen: boolean; 
+  userName: string; 
+  onClose: () => void; 
+  onProceedKYC: () => void; 
+}> = ({ isOpen, userName, onClose, onProceedKYC }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 text-center relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
+        >
+          <i className="bx bx-x"></i>
+        </button>
+        
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Welcome to SwiftFund Dashboard
+          </h1>
+          <p className="text-lg text-gray-600">
+            Hello, <span className="font-semibold text-orange-600">{userName}</span>! 
+          </p>
+        </div>
+        
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-orange-100 p-3 rounded-full">
+              <i className="bx bx-shield-check text-2xl text-orange-600"></i>
+            </div>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            KYC Verification Required
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Before you can make a loan request, you need to complete your KYC (Know Your Customer) verification. 
+            This helps us ensure the security and compliance of our platform.
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-300"
+          >
+            Skip for Now
+          </button>
+          <button
+            onClick={onProceedKYC}
+            className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105 shadow-md"
+          >
+            <i className="bx bx-right-arrow-alt mr-2"></i>
+            Proceed to KYC Verification
+          </button>
+        </div>
+        
+        <div className="mt-6 text-sm text-gray-500">
+          <p>Need help? Contact our support team for assistance.</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// KYC Verification Modal Component
+const KYCVerificationModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onComplete: () => void;
+}> = ({ isOpen, onClose, onComplete }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="max-w-4xl w-full max-h-[90vh] bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10"
+        >
+          <i className="bx bx-x"></i>
+        </button>
+        
+        <div className="p-6 h-full overflow-y-auto">
+          {/* Your Verification component goes here */}
+          <Verification 
+            onComplete={onComplete}
+            onClose={onClose}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const [isNaira, setIsNaira] = useState<boolean>(true);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
@@ -48,6 +146,8 @@ const Dashboard: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
   const [showBorrowerActions, setShowBorrowerActions] = useState<boolean>(false);
   const [showLenderActions, setShowLenderActions] = useState<boolean>(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(false);
+  const [showKYCModal, setShowKYCModal] = useState<boolean>(false); // New state for KYC modal
   const navigate = useNavigate();
 
   // Wallet state
@@ -56,6 +156,12 @@ const Dashboard: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [walletError, setWalletError] = useState<string | null>(null);
   const [showWalletDropdown, setShowWalletDropdown] = useState<boolean>(false);
+
+  // Mobile menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
 
   useEffect(() => {
     const fetchExchangeRate = async () => {
@@ -75,20 +181,26 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUserName(parsedUser.fullname || "User");
-        setUserEmail(parsedUser.email || "user@example.com");
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        navigate("/login");
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      setUserName(parsedUser.fullname || "User");
+      setUserEmail(parsedUser.email || "user@example.com");
+      
+      // Check if welcome modal has been shown before
+      const hasSeenWelcome = localStorage.getItem("hasSeenWelcomeModal");
+      if (!hasSeenWelcome) {
+        setShowWelcomeModal(true);
       }
-    } else {
+    } catch (error) {
+      console.error("Failed to parse stored user:", error);
       navigate("/login");
     }
-  }, [navigate]);
+  } else {
+    navigate("/login");
+  }
+}, [navigate]);
 
   // Load available wallets
   useEffect(() => {
@@ -139,6 +251,14 @@ const Dashboard: React.FC = () => {
     }
   }, [wallets]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+  
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = async () => {
     disconnectWallet();
@@ -173,6 +293,38 @@ const Dashboard: React.FC = () => {
 
   const toggleWalletDropdown = () => {
     setShowWalletDropdown(!showWalletDropdown);
+  };
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    if (isMobile) setMenuOpen(false);
+  };
+
+  // Handle KYC proceed button
+  const handleProceedKYC = () => {
+  setShowWelcomeModal(false);
+  setShowKYCModal(true);
+  // Mark that user has seen the welcome modal
+  localStorage.setItem("hasSeenWelcomeModal", "true");
+};
+
+  // Handle closing welcome modal
+  const handleCloseWelcomeModal = () => {
+  setShowWelcomeModal(false);
+  localStorage.setItem("hasSeenWelcomeModal", "true");
+};
+ 
+  // Handle KYC completion
+  const handleKYCComplete = () => {
+    setShowKYCModal(false);
+    console.log("KYC verification completed!");
+  };
+
+  // Handle KYC modal close
+  const handleCloseKYCModal = () => {
+    setShowKYCModal(false);
   };
 
   // Wallet connect function
@@ -228,30 +380,10 @@ const Dashboard: React.FC = () => {
     connectWallet,
     disconnectWallet
   };
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-  
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(
-      typeof window !== "undefined" && window.innerWidth < 768
-    );
-   const toggleMenu = () => setMenuOpen(!menuOpen);
-   const handleNavigation = (path: string) => {
-    navigate(path);
-    if (isMobile) setMenuOpen(false);
-  };
-  
- 
+
   return (
     <WalletContext.Provider value={walletContextValue}>
-      <div className="flex  flex-row  bg-gray-100">
+      <div className="flex flex-row bg-gray-100">
         {isMobile && !menuOpen && (
           <button
             onClick={toggleMenu}
@@ -261,7 +393,7 @@ const Dashboard: React.FC = () => {
           </button>
         )}
         {/* Sidebar */}
-        <aside className={`w-[100vw] scroll-auto shadow-lg  md:w-1/4 z-10 bg-white text-white p-3 flex flex-col justify-between h-full md:h-[100vh]  overflow-hidden fixed   transform transition-transform duration-300 md:static ${
+        <aside className={`w-[100vw] scroll-auto shadow-lg md:w-1/4 z-10 bg-white text-white p-3 flex flex-col justify-between h-full md:h-[100vh] overflow-hidden fixed transform transition-transform duration-300 md:static ${
           isMobile ? "w-2/3 bg-white backdrop-blur-md " : "w-1/5"}
          ${menuOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}`}
         >
@@ -344,7 +476,7 @@ const Dashboard: React.FC = () => {
               <ul className="space-y-6 scroll-auto cursor-pointer">
                 {/* Home */}
                 <li
-                  className="flex items-center  space-x-2  bg-orange-500 text-white py-3 px-6 rounded-full"
+                  className="flex items-center space-x-2 bg-orange-500 text-white py-3 px-6 rounded-full"
                   onClick={() => handleNavigation("/dashboard")}
                 >
                   <i className="bx bx-home text-xl font-bold"></i>
@@ -374,7 +506,7 @@ const Dashboard: React.FC = () => {
                       showBorrowerActions ? "max-h-60" : "max-h-0"
                     }`}
                   >
-                    <ul className="bg-gray-100  rounded-md">
+                    <ul className="bg-gray-100 rounded-md">
                       <li
                         className="flex items-center space-x-2 px-4 py-2 text-black hover:text-orange-600 cursor-pointer"
                         onClick={() => handleNavigation("/dashboard/applications")}
@@ -454,7 +586,7 @@ const Dashboard: React.FC = () => {
                   className="flex items-center space-x-2 py-2 px-5 text-gray-700 hover:text-orange-600 rounded-md"
                   onClick={() => handleNavigation("/dashboard/profile")}
                 >
-                  <i className="bx  bx-user text-xl font-bold"></i>
+                  <i className="bx bx-user text-xl font-bold"></i>
                   <span>Profile</span>
                 </li>
 
@@ -494,6 +626,21 @@ const Dashboard: React.FC = () => {
         <main className="flex-1 bg-white-100 p-6 h-screen overflow-y-auto">
           <Outlet />
         </main>
+
+        {/* Welcome Modal */}
+        <WelcomeModal 
+          isOpen={showWelcomeModal}
+          userName={userName}
+          onClose={handleCloseWelcomeModal}
+          onProceedKYC={handleProceedKYC}
+        />
+
+        {/* KYC Verification Modal */}
+        <KYCVerificationModal
+          isOpen={showKYCModal}
+          onClose={handleCloseKYCModal}
+          onComplete={handleKYCComplete}
+        />
 
         {/* Logout Confirmation Modal */}
         {showLogoutModal && (
