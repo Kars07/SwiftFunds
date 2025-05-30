@@ -82,7 +82,7 @@ validator fundloan {
   ) {
     trace @"Fund Loan UTx0..."
 
-    // Use the usual way of fetching input
+    //fetching input
     expect Some(input1) = transaction.find_input(tx.inputs, out_ref)
 
     expect Some(d) = datum
@@ -91,7 +91,7 @@ validator fundloan {
       FundLoanAction { lender, fund_loan } -> {
         trace @"Funding loan"
 
-        // Ensure the lender is not the same as the borrower
+        // Ensuring the lender is not the same as the borrower
         let is_not_self_funding = lender != d.borrower
         let lender_signed = list.has(tx.extra_signatories, lender)
         let is_funding_valid = fund_loan == d.loan_amount
@@ -126,7 +126,7 @@ validator repayloan {
   ) {
     trace @"Repay Loan UTx0..."
 
-    // Use the usual way of fetching input
+    //Fetching input
     expect Some(input1) = transaction.find_input(tx.inputs, out_ref)
 
     expect Some(d) = datum

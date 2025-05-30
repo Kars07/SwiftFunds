@@ -404,14 +404,14 @@ return (
       <div className="flex items-center justify-between mb-12">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
             Welcome, {userName} 👋
           </h1>
           <p className="text-gray-600 text-lg">Your personal loan management dashboard in the decentralized ecosystem</p>
         </div>
 
         {/* User Actions Section */}
-        <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-white/80 backdrop-blur-xl border z-10 border-gray-200 rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center space-x-6">
             {/* Notification Icon */}
             <button className="relative text-gray-600 hover:text-orange-600 transition-colors duration-300">
@@ -465,9 +465,9 @@ return (
       </div>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid justify-center items-center grid-cols-1 md:grid-cols-4 gap-40 mb-12">
         {/* Total Applications */}
-        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Applications</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
@@ -486,7 +486,7 @@ return (
         </div>
 
         {/* Active Loans */}
-        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Active Loans</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
@@ -504,7 +504,7 @@ return (
           </div>
         </div>
 
-        {/* Pending Approval */}
+        {/* Pending Approval
         <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Pending Approval</h3>
@@ -521,10 +521,10 @@ return (
             <i className="bx bx-time mr-2"></i>
             <span>Awaiting funding</span>
           </div>
-        </div>
+        </div> */}
 
         {/* Total Repaid */}
-        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Repaid</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
@@ -544,7 +544,7 @@ return (
       </div>
 
       {/* Wallet Balance Section */}
-      <div className="bg-gradient-to-r from-orange-500/90 to-orange-400/90 backdrop-blur-xl border border-orange-300 rounded-3xl shadow-2xl p-8 mb-12 max-w-4xl mx-auto"> 
+      <div className="bg-gradient-to-r from-orange-500/90 to-orange-400/90 backdrop-blur-xl border border-orange-300 rounded-3xl shadow-2xl p-8 mb-12 max-w-4xl  "> 
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
             <div className="w-1 h-12 bg-gradient-to-b from-white to-orange-200 rounded-full"></div>

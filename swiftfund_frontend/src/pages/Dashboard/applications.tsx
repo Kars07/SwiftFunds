@@ -15,8 +15,8 @@ const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestVal
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
 // loan request fee constants (in lovelace)
-const STANDARD_LOAN_FEE = BigInt(5_000_000); // 5 ADA in lovelace
-const PREMIUM_LOAN_FEE = BigInt(10_000_000); // 10 ADA in lovelace
+const STANDARD_LOAN_FEE = BigInt(2_000_000); // 5 ADA in lovelace
+const PREMIUM_LOAN_FEE = BigInt(5_000_000); // 10 ADA in lovelace
 const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
 
 
@@ -106,7 +106,7 @@ const Applications: React.FC = () => {
                 setAdaToNgnRate(rate);
             } catch (error) {
                 console.error("Error fetching exchange rate", error);
-                // Set a fallback rate if API fails (this should be updated with current rate)
+                // fallback rate if API fails (this should be updated with current rate)
                 setAdaToNgnRate(400); // Fallback rate
             }
         };
@@ -540,7 +540,7 @@ return (
                 <div className="mb-8 bg-gradient-to-r from-green-50/80 to-emerald-100/80 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
                     <div className="flex items-center space-x-3 mb-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <p className="text-green-700 font-semibold">Transaction Submitted Successfully!</p>
+                        <p className="text-green-700 font-semibold">Loan Request Submitted Successfully!</p>
                     </div>
                     <p className="text-gray-600 text-sm break-all">Hash: {txHash}</p>
                 </div>

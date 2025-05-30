@@ -580,7 +580,7 @@ return (
                 <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
                     <div className="flex items-center space-x-3 mb-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <p className="text-green-700 font-semibold">Transaction Submitted Successfully!</p>
+                        <p className="text-green-700 font-semibold">Loan Funded Successfully!</p>
                     </div>
                     <p className="text-gray-600 text-sm break-all">Hash: {txHash}</p>
                 </div>
