@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:8.1-fmp-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -7,22 +7,22 @@ RUN apk add --no-cache \
     mysql-client \
     && docker-php-ext-install pdo pdo_mysql mysqli
 
-# Create nginx user and directories
-RUN adduser -D -S nginx nginx \
-    && mkdir -p /var/log/nginx \
-    && mkdir -p /var/cache/nginx \
-    && mkdir -p /etc/nginx/conf.d \
-    && mkdir -p /var/log/supervisor \
-    && mkdir -p /etc/supervisor/conf.d \
-    && mkdir -p /run/nginx \
-    && mkdir -p /var/lib/nginx/tmp
+# Create directories and set permissions
+RUN mkdir -p /var/log/nginx \
+    /var/cache/nginx \
+    /var/lib/nginx \
+    /var/lib/nginx/tmp \
+    /var/log/supervisor \
+    /etc/supervisor/conf.d \
+    /run/nginx \
+    && chown -R nginx:nginx /var/log/nginx /var/cache/nginx /var/lib/nginx /run/nginx
 
 # Create main nginx configuration
 RUN cat > /etc/nginx/nginx.conf << 'EOF'
 user nginx;
 worker_processes auto;
 error_log /var/log/nginx/error.log warn;
-pid /var/run/nginx.pid;
+pid /run/nginx.pid;
 
 events {
     worker_connections 1024;
@@ -48,13 +48,32 @@ http {
 }
 EOF
 
-# Copy nginx server configuration
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy and create nginx server configuration
+RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
+server {
+    listen 80;
+    index index.php index.html;
+    server_name localhost;
+    root /var/www/html;
+    client_max_body_size 10000M;
 
-# Update fastcgi_pass to use localhost instead of php service name
-RUN sed -i 's/php:9000/127.0.0.1:9000/g' /etc/nginx/conf.d/default.conf
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
 
-# Copy PHP configuration
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+    }
+}
+EOF
+
+# Copy PHP configuration if it exists
 COPY src/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Copy application source
@@ -62,22 +81,19 @@ COPY src/ /var/www/html/
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chown -R nginx:nginx /var/cache/nginx \
-    && chown -R nginx:nginx /var/log/nginx \
-    && chown -R nginx:nginx /run/nginx \
-    && chown -R nginx:nginx /var/lib/nginx
+    && chmod -R 755 /var/www/html
 
-# Create supervisor configuration file
-COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
+# Create supervisor configuration
+RUN cat > /etc/supervisor/conf.d/supervisord.conf << 'EOF'
 [supervisord]
 nodaemon=true
 user=root
 logfile=/var/log/supervisor/supervisord.log
 pidfile=/var/run/supervisord.pid
+loglevel=info
 
 [program:php-fpm]
-command=php-fpm
+command=php-fpm --nodaemonize
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/supervisor/php-fpm.err.log
@@ -92,6 +108,9 @@ stderr_logfile=/var/log/supervisor/nginx.err.log
 stdout_logfile=/var/log/supervisor/nginx.out.log
 user=root
 EOF
+
+# Test nginx configuration
+RUN nginx -t
 
 EXPOSE 80
 
