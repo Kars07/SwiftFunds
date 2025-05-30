@@ -52,7 +52,7 @@ type FundedLoanDetails = {
         repaymentTxHash: string;
     };
 };
-const API_BASE_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+const API_BASE_URL = "http://localhost:9000/funded_loans.php";
 const LoansFunded: React.FC = () => {
     const { connection, isConnecting } = useWallet();
     const [fundedLoans, setFundedLoans] = useState<FundedLoanDetails[]>([]);
@@ -199,7 +199,7 @@ const LoansFunded: React.FC = () => {
                     
                 } catch (error) {
                     console.error("Error verifying loans with API:", error);
-                    setDebugInfo(`Error verifying loans with API: ${error instanceof Error ? error.message : String(error)}`);
+                    // setDebugInfo(`Error verifying loans with API: ${error instanceof Error ? error.message : String(error)}`);
                 }
             }
         } catch (error) {
@@ -367,327 +367,436 @@ const LoansFunded: React.FC = () => {
             </div>
         );
     }
+return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
+        </div>
 
-    return (
-        <div className=" p-4 pt-10">
-            <div className="flex justify-between ">
-                <h1 className="text-3xl font-medium mb-6">Loans I Have Funded</h1>
-                
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+                <div className="mb-6 lg:mb-0">
+                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                        Loans I Have Funded
+                    </h1>
+                    <p className="text-gray-600 text-lg">Track and manage your funded loan portfolio in the decentralized ecosystem</p>
+                </div>
+
                 {/* Debug Info - Can be removed in production */}
                 {debugInfo !== "No errors" && (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
-                        <strong>Debug:</strong> {debugInfo}
-                    </div>
-                )}
-                
-                {/* Wallet Connection Status */}
-                {!connection ? (
-                    <div className="mb-6 p-4  bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Wallet Connection Required</h2>
-                        <p className="text-gray-600">
-                            Please connect your wallet using the sidebar wallet connection panel to view your funded loans.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="mb-6 p-3 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
-                        <div className="flex items-center">
-                            <p className="text-zinc-800">
-                                <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                            </p>
-                            <button 
-                                onClick={handleManualRefresh}
-                                disabled={isLoading}
-                                className="bg-green-500 mt-2 -translate-y-1 hover:bg-green-600 text-white px-3 mx-4 py-1 rounded-md text-sm transition flex items-center"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Refreshing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        Refresh
-                                    </>
-                                )}
-                            </button>
+                    <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 backdrop-blur-xl border border-yellow-200 rounded-2xl p-6 shadow-2xl">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                            <div>
+                                <p className="text-yellow-700 font-semibold">Debug Info</p>
+                                <p className="text-yellow-600 text-sm">{debugInfo}</p>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
-            
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
+
+            {/* Wallet Connection Status */}
+            {!connection ? (
+                <div className="mb-8 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                    <h2 className="text-xl font-semibold mb-4 text-orange-600">Wallet Connection Required</h2>
+                    <p className="text-gray-600">
+                        Please connect your wallet using the sidebar wallet connection panel to view your funded loans.
+                    </p>
+                </div>
+            ) : (
+                <div className="mb-8 bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div>
+                                <p className="text-green-700 font-semibold">Wallet Connected</p>
+                                <p className="text-gray-600 text-sm">
+                                    {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                                </p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={handleManualRefresh}
+                            disabled={isLoading}
+                            className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    <span>Refreshing...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center space-x-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span>Refresh</span>
+                                </div>
+                            )}
+                        </button>
+                    </div>
                 </div>
             )}
-            <div className="mb-10 p-9   bg-white rounded-2xl shadow-2xl ">
-                {/* Summary Stats */}
-                <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                        <h3 className="text-sm font-medium text-blue-700">Total Loans Funded</h3>
-                        <p className="text-2xl font-bold text-blue-900">{connection ? fundedLoans.length : 0}</p>
+
+            {/* Error Messages */}
+            {error && (
+                <div className="mb-8 bg-gradient-to-r from-red-50 to-red-100 backdrop-blur-xl border border-red-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <p className="text-red-700">{error}</p>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                        <h3 className="text-sm font-medium text-green-700">Loans Repaid</h3>
-                        <p className="text-2xl font-bold text-green-900">{connection ? repaidLoans.length : 0}</p>
+                </div>
+            )}
+
+            {/* Summary Stats */}
+            <div className="mb-8 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    <h2 className="text-2xl font-bold text-gray-800">Portfolio Overview</h2>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-xl border border-blue-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-sm font-medium text-blue-700 mb-2">Total Loans Funded</h3>
+                        <p className="text-3xl font-bold text-blue-900">{connection ? fundedLoans.length : 0}</p>
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg">
-                        <h3 className="text-sm font-medium text-yellow-700">Active Loans</h3>
-                        <p className="text-2xl font-bold text-yellow-900">{connection ? activeLoans.length : 0}</p>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-sm font-medium text-green-700 mb-2">Loans Repaid</h3>
+                        <p className="text-3xl font-bold text-green-900">{connection ? repaidLoans.length : 0}</p>
                     </div>
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                        <h3 className="text-sm font-medium text-purple-700">Overdue Loans</h3>
-                        <p className="text-2xl font-bold text-purple-900">
+                    <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 backdrop-blur-xl border border-yellow-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-sm font-medium text-yellow-700 mb-2">Active Loans</h3>
+                        <p className="text-3xl font-bold text-yellow-900">{connection ? activeLoans.length : 0}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 backdrop-blur-xl border border-purple-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-sm font-medium text-purple-700 mb-2">Overdue Loans</h3>
+                        <p className="text-3xl font-bold text-purple-900">
                             {connection ? activeLoans.filter(l => isOverdue(l.deadline)).length : 0}
                         </p>
                     </div>
                 </div>
-                
-                {/* Loans Display */}
-                <div className="space-y-8">
-                    {/* Active Loans Section */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-4 flex items-center">
-                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md mr-2 text-sm">
-                                {connection ? activeLoans.length : 0}
-                            </span>
-                            Active Loans
-                        </h2>
-                        
-                        {!connection ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <p className="text-gray-500">Connect your wallet to view your active loans.</p>
-                            </div>
-                        ) : isLoading ? (
-                            <div className="text-center py-8">
-                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                                <p className="mt-2 text-gray-600">Loading your active loans...</p>
-                            </div>
-                        ) : activeLoans.length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <p className="text-gray-500">You don't have any active funded loans.</p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Funded On
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Borrower
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Loan Amount
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Interest
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Expected Total
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Deadline
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Transaction
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Loan ID
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {activeLoans.map((loan) => {
-                                            try {
-                                                const totalExpected = calculateTotal(loan.loanAmount, loan.interest);
-                                                const deadline = daysFromDeadline(loan.deadline);
-                                                const isLoanOverdue = isOverdue(loan.deadline);
-                                                
-                                                return (
-                                                    <tr key={loan.fundedLoanId} className={`hover:bg-gray-50 ${isLoanOverdue ? 'bg-red-50' : ''}`}>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {formatDate(loan.fundedAt)}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            </div>
+
+            {/* Active Loans Section */}
+            <div className="mb-8 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center space-x-4 mb-8">
+                    <div className="w-1 h-8 bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-full"></div>
+                    <h2 className="text-3xl font-bold text-gray-800">Active Loans</h2>
+                    <span className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 px-4 py-2 rounded-xl text-sm font-medium border border-yellow-300">
+                        {connection ? activeLoans.length : 0}
+                    </span>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                </div>
+
+                {!connection ? (
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">🔐</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">Connect your wallet to view active loans</p>
+                        <p className="text-gray-500 mt-2">Your funded loans will appear here</p>
+                    </div>
+                ) : isLoading ? (
+                    <div className="text-center py-16">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-400 rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2" style={{animationDirection: 'reverse'}}></div>
+                        </div>
+                        <p className="text-gray-600 text-lg">Loading your active loans...</p>
+                    </div>
+                ) : activeLoans.length === 0 ? (
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">💼</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">No active funded loans</p>
+                        <p className="text-gray-500 mt-2">Your active loans will appear here once you fund them</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {activeLoans.map((loan, index) => {
+                            try {
+                                const totalExpected = calculateTotal(loan.loanAmount, loan.interest);
+                                const deadline = daysFromDeadline(loan.deadline);
+                                const isLoanOverdue = isOverdue(loan.deadline);
+                                
+                                return (
+                                    <div 
+                                        key={loan.fundedLoanId}
+                                        className={`group bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] ${
+                                            isLoanOverdue ? 'border-red-300 bg-gradient-to-r from-red-50/80 to-red-100/80' : 'border-gray-200'
+                                        }`}
+                                        style={{animationDelay: `${index * 100}ms`}}
+                                    >
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            {/* Borrower Info */}
+                                            <div className="lg:col-span-3">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                        {loan.borrowerPKH.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-600 text-sm">Borrower</p>
+                                                        <p className="text-gray-800 font-mono text-sm">
                                                             {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {lovelaceToAda(loan.loanAmount)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {lovelaceToAda(loan.interest)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                            {lovelaceToAda(totalExpected)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {formatDate(Number(loan.deadline))}
-                                                            <br />
-                                                            <span className={`text-xs ${
-                                                                isLoanOverdue ? 'text-red-600 font-semibold' : 'text-green-600'
-                                                            }`}>
-                                                                {isLoanOverdue 
-                                                                    ? `${deadline.days} days overdue`
-                                                                    : `${deadline.days} days remaining`
-                                                                }
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                                                            <a 
-                                                                href={`https://preprod.cardanoscan.io/transaction/${loan.txHash}`} 
-                                                                target="_blank" 
-                                                                rel="noopener noreferrer"
-                                                                className="hover:underline flex items-center"
-                                                            >
-                                                                <span className="text-xs">Funding: </span>
-                                                                <span>{loan.txHash.substring(0, 8)}...</span>
+                                                        </p>
+                                                        <p className="text-gray-500 text-xs mt-1">
+                                                            Funded: {formatDate(loan.fundedAt)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Loan Details */}
+                                            <div className="lg:col-span-4">
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Loan Amount</p>
+                                                        <p className="text-xl font-bold text-orange-600">
+                                                            {lovelaceToAda(loan.loanAmount)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Interest</p>
+                                                        <p className="text-lg font-semibold text-yellow-600">
+                                                            {lovelaceToAda(loan.interest)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Expected Total</p>
+                                                        <p className="text-lg font-bold text-green-600">
+                                                            {lovelaceToAda(totalExpected)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Deadline & Status */}
+                                            <div className="lg:col-span-3">
+                                                <div className="text-center">
+                                                    <p className="text-gray-500 text-sm mb-1">Deadline</p>
+                                                    <p className="text-gray-800 text-sm mb-2">{formatDate(Number(loan.deadline))}</p>
+                                                    <div className={`inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium ${
+                                                        isLoanOverdue 
+                                                            ? 'bg-red-100 text-red-700 border border-red-200' 
+                                                            : 'bg-green-100 text-green-700 border border-green-200'
+                                                    }`}>
+                                                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                                                            isLoanOverdue ? 'bg-red-500 animate-pulse' : 'bg-green-500'
+                                                        }`}></div>
+                                                        {isLoanOverdue 
+                                                            ? `${deadline.days} days overdue`
+                                                            : `${deadline.days} days remaining`
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Transaction Link */}
+                                            <div className="lg:col-span-2">
+                                                <div className="text-right">
+                                                    <a 
+                                                        href={`https://preprod.cardanoscan.io/transaction/${loan.txHash}`} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm"
+                                                    >
+                                                        <span>View Transaction</span>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                                            <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Loan ID */}
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <p className="text-xs text-gray-400 font-mono">
+                                                Loan ID: {loan.fundedLoanId}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            } catch (error) {
+                                return null;
+                            }
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Repaid Loans Section */}
+            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center space-x-4 mb-8">
+                    <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-600 rounded-full"></div>
+                    <h2 className="text-3xl font-bold text-gray-800">Repaid Loans</h2>
+                    <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-4 py-2 rounded-xl text-sm font-medium border border-green-300">
+                        {connection ? repaidLoans.length : 0}
+                    </span>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                </div>
+
+                {!connection ? (
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">🔐</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">Connect your wallet to view repaid loans</p>
+                        <p className="text-gray-500 mt-2">Your repaid loans will appear here</p>
+                    </div>
+                ) : isLoading ? (
+                    <div className="text-center py-16">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-400 rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2" style={{animationDirection: 'reverse'}}></div>
+                        </div>
+                        <p className="text-gray-600 text-lg">Loading your repaid loans...</p>
+                    </div>
+                ) : repaidLoans.length === 0 ? (
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">✅</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">No repaid loans yet</p>
+                        <p className="text-gray-500 mt-2">Successful repayments will appear here</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {repaidLoans.map((loan, index) => {
+                            try {
+                                const totalExpected = calculateTotal(loan.loanAmount, loan.interest);
+                                
+                                return (
+                                    <div 
+                                        key={loan.fundedLoanId}
+                                        className="group bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-xl border border-green-200 rounded-2xl p-6 hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]"
+                                        style={{animationDelay: `${index * 100}ms`}}
+                                    >
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            {/* Borrower Info */}
+                                            <div className="lg:col-span-3">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                        ✓
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-600 text-sm">Borrower</p>
+                                                        <p className="text-gray-800 font-mono text-sm">
+                                                            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
+                                                        </p>
+                                                        <p className="text-gray-500 text-xs mt-1">
+                                                            Funded: {formatDate(loan.fundedAt)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Loan Details */}
+                                            <div className="lg:col-span-4">
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Loan Amount</p>
+                                                        <p className="text-xl font-bold text-orange-600">
+                                                            {lovelaceToAda(loan.loanAmount)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Interest</p>
+                                                        <p className="text-lg font-semibold text-yellow-600">
+                                                            {lovelaceToAda(loan.interest)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm mb-1">Total Received</p>
+                                                        <p className="text-lg font-bold text-green-600">
+                                                            {lovelaceToAda(totalExpected)} <span className="text-sm text-gray-500">ADA</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Repayment Info */}
+                                            <div className="lg:col-span-3">
+                                                <div className="text-center">
+                                                    <p className="text-gray-500 text-sm mb-1">Repaid On</p>
+                                                    <p className="text-gray-800 text-sm mb-2">
+                                                        {loan.repaymentInfo ? formatDate(loan.repaymentInfo.repaidAt) : '-'}
+                                                    </p>
+                                                    <div className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-green-100 text-green-700 border border-green-200">
+                                                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                        Completed
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Transaction Links */}
+                                            <div className="lg:col-span-2">
+                                                <div className="text-right space-y-2">
+                                                    <a 
+                                                        href={`https://preprod.cardanoscan.io/transaction/${loan.txHash}`} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="block bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-3 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-xs"
+                                                    >
+                                                        <div className="flex items-center justify-center">
+                                                            <span>Funding Tx</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                                                            </svg>
+                                                        </div>
+                                                    </a>
+                                                    {loan.repaymentInfo ? (
+                                                        <a 
+                                                            href={`https://preprod.cardanoscan.io/transaction/${loan.repaymentInfo.repaymentTxHash}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="block bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-3 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-xs"
+                                                        >
+                                                            <div className="flex items-center justify-center">
+                                                                <span>Repayment Tx</span>
                                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
                                                                     <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                                                                     <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
                                                                 </svg>
-                                                            </a>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                                            {loan.fundedLoanId}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            } catch (error) {
-                                                return null;
-                                            }
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                                                            </div>
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Loan ID */}
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <p className="text-xs text-gray-400 font-mono">
+                                                Loan ID: {loan.fundedLoanId}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            } catch (error) {
+                                return null;
+                            }
+                        })}
                     </div>
-                    {/* Repaid Loans Section */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-4 flex items-center">
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md mr-2 text-sm">
-                                {connection ? repaidLoans.length : 0}
-                            </span>
-                            Repaid Loans
-                        </h2>
-                        {!connection ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <p className="text-gray-500">Connect your wallet to view your repaid loans.</p>
-                            </div>
-                        ) : isLoading ? (
-                            <div className="text-center py-8">
-                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                                <p className="mt-2 text-gray-600">Loading your repaid loans...</p>
-                            </div>
-                        ) : repaidLoans.length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg">
-                                <p className="text-gray-500">You don't have any repaid loans yet.</p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Funded On
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Borrower
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Loan Amount
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Interest
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Expected Total
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Deadline
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Repaid On
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Transaction
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Loan ID
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {repaidLoans.map((loan) => {
-                                            try {
-                                                const totalExpected = calculateTotal(loan.loanAmount, loan.interest);
-                                                return (
-                                                    <tr key={loan.fundedLoanId} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {formatDate(loan.fundedAt)}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {loan.borrowerPKH.substring(0, 8)}...{loan.borrowerPKH.substring(loan.borrowerPKH.length - 8)}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {lovelaceToAda(loan.loanAmount)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {lovelaceToAda(loan.interest)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                            {lovelaceToAda(totalExpected)} ADA
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {formatDate(Number(loan.deadline))}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {loan.repaymentInfo ? formatDate(loan.repaymentInfo.repaidAt) : '-'}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                                                            {loan.repaymentInfo ? (
-                                                                <a 
-                                                                    href={`https://preprod.cardanoscan.io/transaction/${loan.repaymentInfo.repaymentTxHash}`} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    className="hover:underline flex items-center"
-                                                                >
-                                                                    <span className="text-xs">Repayment: </span>
-                                                                    <span>{loan.repaymentInfo.repaymentTxHash.substring(0, 8)}...</span>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                                                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                                                                    </svg>
-                                                                </a>
-                                                            ) : (
-                                                                <span className="text-gray-400">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                                            {loan.fundedLoanId}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            } catch (error) {
-                                                return null;
-                                            }
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-             </div>
+                )}
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default LoansFunded;

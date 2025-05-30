@@ -55,8 +55,7 @@ type CreditScoreData = {
   late_payments: number;
 };
 
-const API_BASE_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
-
+const API_BASE_URL = "http://localhost:9000";
 function shortenAddress(address: string, start = 6, end = 4) {
   if (!address) return "";
   return `${address.slice(0, start)}...${address.slice(-end)}`;
@@ -154,7 +153,7 @@ const DefaultDashboardContent: React.FC = () => {
   const fetchCreditScore = async (userPKH: string): Promise<void> => {
     try {
       setIsCreditScoreLoading(true);
-      const response = await fetch(`${API_BASE_URL}?action=getCreditScore`, {
+      const response = await fetch(`${API_BASE_URL}/funded_loans.php?action=getCreditScore`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +248,7 @@ const DefaultDashboardContent: React.FC = () => {
     
     try {
       // Fetch borrower loans (active loans)
-      const activeLoansResponse = await fetch(`${API_BASE_URL}?action=getBorrowerLoans`, {
+      const activeLoansResponse = await fetch(`${API_BASE_URL}/funded_loans.php?action=getBorrowerLoans`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -267,7 +266,7 @@ const DefaultDashboardContent: React.FC = () => {
       }
       
       // Fetch repaid loans
-      const repaidLoansResponse = await fetch(`${API_BASE_URL}?action=getBorrowerRepaidLoans`, {
+      const repaidLoansResponse = await fetch(`${API_BASE_URL}/funded_loans.php?action=getBorrowerRepaidLoans`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -388,263 +387,304 @@ const DefaultDashboardContent: React.FC = () => {
   }, []);
 
   
-  return (
-  <div>
-    {/* Dashboard Header */}
-    <div className="flex items-center justify-between mb-3 mt-3">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold mb-2 pt-5">Welcome, {userName} 👋</h1>
-        <p className="text-gray-600 pb-8">Your personal loan management dashboard</p>
-      </div>
+return (
+  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+    {/* Animated Background Elements */}
+    <div className="absolute inset-0 opacity-20">
+      <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+      <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
+    </div>
 
-      {/* User Actions Section */}
-      <div className="">
-        <div className="flex items-center absolute  right-0 mx-6 my-5  top-0 space-x-6">
-          {/* Notification Icon */}
-          <button className="relative text-gray-600 hover:text-gray-800">
-            <i className="bx bx-bell text-2xl"></i>
-            <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
+    {/* Grid Pattern Overlay */}
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
-          {/* Settings Icon */}
-          <button className="text-gray-600 hover:text-gray-800">
-            <i className="bx bx-cog text-2xl"></i>
-          </button>
+    <div className="relative z-10 p-6 pt-16">
+      {/* Dashboard Header */}
+      <div className="flex items-center justify-between mb-12">
+        {/* Welcome Section */}
+        <div>
+          <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+            Welcome, {userName} 👋
+          </h1>
+          <p className="text-gray-600 text-lg">Your personal loan management dashboard in the decentralized ecosystem</p>
+        </div>
 
-          {/* User Avatar */}
-          <div className="relative inline-block text-left" ref={dropdownRef}>
-            <div className="flex items-center space-x-2">
-              <img
-                src={default_profile}
-                alt="User Avatar"
-                className="w-8 h-8 rounded-full"
-              />
-              <button
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setShowDropdown((prev) => !prev)}
-              >
-                ▼
-              </button>
-            </div>
+        {/* User Actions Section */}
+        <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center space-x-6">
+            {/* Notification Icon */}
+            <button className="relative text-gray-600 hover:text-orange-600 transition-colors duration-300">
+              <i className="bx bx-bell text-2xl"></i>
+              <span className="absolute -top-1 -right-1 inline-block w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full animate-pulse"></span>
+            </button>
 
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-50 p-4">
-              <p className="text-sm text-gray-600">Signed in as</p>
-              <p className="font-medium">{userName || "User"}</p>
-            
-              {connection?.address && (
-                <>
-                  <hr className="my-2 border-gray-300" />
-                  <p className="text-sm text-gray-600">Wallet Address:</p>
-                  <p className="text-xs font-mono break-all text-blue-600">
-                    {shortenAddress(connection.address)}
-                  </p>
-                </>
+            {/* Settings Icon */}
+            <button className="text-gray-600 hover:text-orange-600 transition-colors duration-300">
+              <i className="bx bx-cog text-2xl"></i>
+            </button>
+
+            {/* User Avatar */}
+            <div className="relative inline-block text-left" ref={dropdownRef}>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
+                  <img src={default_profile} alt="User Avatar" className="w-full h-full object-cover" />
+                </div>
+                <button
+                  className="text-gray-600 hover:text-orange-600 transition-colors duration-300"
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                >
+                  <i className="bx bx-chevron-down text-lg"></i>
+                </button>
+              </div>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-4 w-80 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6 transform animate-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <p className="text-sm text-gray-600">Signed in as</p>
+                  </div>
+                  <p className="font-semibold text-gray-800 mb-4">{userName || "User"}</p>
+                
+                  {connection?.address && (
+                    <>
+                      <div className="h-px bg-gradient-to-r from-gray-300 to-transparent mb-4"></div>
+                      <p className="text-sm text-gray-600 mb-2">Wallet Address:</p>
+                      <div className="bg-gray-100/60 rounded-xl p-3">
+                        <p className="text-xs font-mono text-orange-600 break-all">
+                          {shortenAddress(connection.address)}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>  
               )}
-            </div>  
-            )}
+            </div>
           </div>
-
         </div>
       </div>
-    </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {/* Total Applications */}
-      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-500">Total Applications</h3>
-          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
-            <i className="bx bx-file text-lg"></i>
-          </div>
-        </div>
-        <p className="text-3xl font-bold text-gray-800">
-          {isLoading ? "..." : totalApplications}
-        </p>
-        <p className="text-sm text-blue-500 flex items-center mt-2">
-          <i className="bx bx-info-circle mr-1"></i> All loan requests made
-        </p>
-      </div>
-
-      {/* Active Loans */}
-      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-500">Active Loans</h3>
-          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
-            <i className="bx bx-money text-lg"></i>
-          </div>
-        </div>
-        <p className="text-3xl font-bold text-gray-800">
-          {isLoading ? "..." : activeLoans}
-        </p>
-        <p className="text-sm text-green-500 flex items-center mt-2">
-          <i className="bx bx-trending-up mr-1"></i> Funded & not repaid
-        </p>
-      </div>
-
-      {/* Pending Approval */}
-      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-500">Pending Approval</h3>
-          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
-            <i className="bx bx-time text-lg"></i>
-          </div>
-        </div>
-        <p className="text-3xl font-bold text-gray-800">
-          {isLoading ? "..." : pendingApproval}
-        </p>
-        <p className="text-sm text-yellow-500 mt-2 flex items-center">
-          <i className="bx bx-time mr-1"></i> Awaiting funding
-        </p>
-      </div>
-
-      {/* Total Repaid */}
-      <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-500">Total Repaid</h3>
-          <div className="bg-orange-100 text-orange-500 p-2 rounded-full">
-            <i className="bx bx-check-circle text-lg"></i>
-          </div>
-        </div>
-        <p className="text-3xl font-bold text-gray-800">
-          {isLoading ? "..." : totalRepaid}
-        </p>
-        <p className="text-sm text-green-500 mt-2 flex items-center">
-          <i className="bx bx-trending-up mr-1"></i> Repaid Loans
-        </p>
-      </div>
-    </div>
-
-    {/* Wallet Balance Section */}
-    <div className="bg-gradient-to-r  from-orange-500 to-orange-400 rounded-2xl shadow-xl p-6 mb-6 mt-9 max-w-3xl"> 
-      <div className="flex justify-between items-center mb-6">
-        <div>
-         <h2 className="text-lg font-semibold text-black">Wallet Balance</h2> <div className=" flex justify-center items-center flex-col text-black"><hr className="w-30 h-1 border-2 rounded-2xl bg-black"/></div>
-        </div>
-        {!connection ? (
-          <div className="flex w-full justify-end flex-wrap gap-1">
-            {wallets.map((wallet) => (
-              <button
-                key={wallet.name}
-                onClick={() => connectWallet(wallet)}
-                disabled={isConnecting}
-                className="flex items-center bg-black text-[13px]  delay-100  hover:text-orange-400 duration-200 cursor-pointer text-white px-4 py-1.5 rounded-2xl transition" 
-              >
-                {wallet.icon && (
-                  <img src={wallet.icon} alt={wallet.name} className="w-4 h-4 mr-1" /> 
-                )}
-                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-              </button>
-            ))}
-          </div>
-        ) : null}
       
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        {/* Total Applications */}
+        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-600">Total Applications</h3>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
+              <i className="bx bx-file text-xl"></i>
+            </div>
+          </div>
+          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+            {isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+            ) : totalApplications}
+          </p>
+          <div className="flex items-center text-sm text-blue-600">
+            <i className="bx bx-info-circle mr-2"></i>
+            <span>All loan requests made</span>
+          </div>
+        </div>
 
-        <div>
-          {connection && (
-            <div className="text-zinc-800 mb-3">
-              <p>
-                <span className="font-semibold">Connected:</span> {formatAddress(connection.address)}
-              </p>
+        {/* Active Loans */}
+        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-600">Active Loans</h3>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
+              <i className="bx bx-money text-xl"></i>
+            </div>
+          </div>
+          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+            {isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+            ) : activeLoans}
+          </p>
+          <div className="flex items-center text-sm text-green-600">
+            <i className="bx bx-trending-up mr-2"></i>
+            <span>Funded & not repaid</span>
+          </div>
+        </div>
+
+        {/* Pending Approval */}
+        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-600">Pending Approval</h3>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
+              <i className="bx bx-time text-xl"></i>
+            </div>
+          </div>
+          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+            {isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+            ) : pendingApproval}
+          </p>
+          <div className="flex items-center text-sm text-yellow-600">
+            <i className="bx bx-time mr-2"></i>
+            <span>Awaiting funding</span>
+          </div>
+        </div>
+
+        {/* Total Repaid */}
+        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-600">Total Repaid</h3>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
+              <i className="bx bx-check-circle text-xl"></i>
+            </div>
+          </div>
+          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+            {isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+            ) : totalRepaid}
+          </p>
+          <div className="flex items-center text-sm text-green-600">
+            <i className="bx bx-trending-up mr-2"></i>
+            <span>Repaid Loans</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Wallet Balance Section */}
+      <div className="bg-gradient-to-r from-orange-500/90 to-orange-400/90 backdrop-blur-xl border border-orange-300 rounded-3xl shadow-2xl p-8 mb-12 max-w-4xl mx-auto"> 
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="w-1 h-12 bg-gradient-to-b from-white to-orange-200 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Wallet Balance</h2>
+              <div className="h-px w-24 bg-gradient-to-r from-white to-transparent mt-2"></div>
+            </div>
+          </div>
+          
+          {!connection ? (
+            <div className="flex flex-wrap gap-3">
+              {wallets.map((wallet) => (
+                <button
+                  key={wallet.name}
+                  onClick={() => connectWallet(wallet)}
+                  disabled={isConnecting}
+                  className="group flex items-center bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/30 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                >
+                  {wallet.icon && (
+                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
+                  )}
+                  {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <div>
+                  <p className="text-white font-semibold">Wallet Connected</p>
+                  <p className="text-orange-100 text-sm font-mono">
+                    {formatAddress(connection.address)}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
-       </div>
-     </div>
-      <div className="grid grid-cols-2 gap-0">
-        <div className="p-3 ">
-          <p className="text-lg text-gray-700 mb-1">Total Balance (₦)</p> 
-          <h3 className="text-xl font-bold text-black">
-          ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
-          </h3>
         </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+            <p className="text-orange-100 text-sm mb-2">Total Balance (₦)</p> 
+            <h3 className="text-3xl font-bold text-white">
+              ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
+            </h3>
+          </div>
 
-        <div className="bg-orange-300 p-3 rounded-md">
-          <p className="text-lg text-gray-700 mb-1">Total Balance (ADA)</p>
-          <h3 className="text-xl font-bold text-black"> 
-            {connection ? lovelaceToAda(walletBalance) : "0"} ADA
-          </h3>
+          <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-6">
+            <p className="text-orange-100 text-sm mb-2">Total Balance (ADA)</p>
+            <h3 className="text-3xl font-bold text-white"> 
+              {connection ? lovelaceToAda(walletBalance) : "0"} ADA
+            </h3>
+          </div>
         </div>
       </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        {/* Chart Section */}
+        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800">Repayment Timeline</h2>
+            <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+          </div>
+          <RepaymentTimelineChart />
+        </div>
+
+        {/* Verification Status Section */}
+        <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+            <h2 className="text-xl font-bold text-gray-800">Verification Status</h2>
+          </div>
+
+          {/* KYC Level Progress */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm text-gray-600">KYC Level</span>
+              <span className="text-sm font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">Level 1</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
+              <div className="h-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 animate-pulse" style={{ width: "33%" }}></div>
+            </div>
+            <a href="#" className="text-orange-600 text-sm font-medium hover:text-orange-700 transition-colors duration-300 flex items-center">
+              Upgrade to Level 2 
+              <i className="bx bx-right-arrow-alt ml-1"></i>
+            </a>
+          </div>
+
+          {/* Credit Reputation Score */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm text-gray-600">Credit Reputation Score</span>
+              {isCreditScoreLoading ? (
+                <div className="animate-pulse bg-gray-200 h-6 w-12 rounded"></div>
+              ) : (
+                <span className={`text-sm font-bold ${creditScore ? getCreditScoreColor(creditScore.current_score) : 'text-gray-900'}`}>
+                  {creditScore ? creditScore.current_score : "600"}
+                </span>
+              )}
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
+              <div 
+                className={`h-3 rounded-full transition-all duration-1000 ${creditScore ? getCreditScoreBgColor(creditScore.current_score) : 'bg-green-500'}`} 
+                style={{ width: `${creditScore ? getCreditScoreProgress(creditScore.current_score) : 10}%` }}
+              ></div>
+            </div>
+            <div className={`${creditScore && creditScore.current_score >= 650 ? 'bg-green-50 border-green-200 text-green-800' : creditScore && creditScore.current_score >= 550 ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : 'bg-red-50 border-red-200 text-red-800'} border backdrop-blur-sm text-sm p-4 rounded-2xl shadow-lg`}>
+              <p className="font-semibold mb-2">
+                {creditScore ? getCreditScoreLabel(creditScore.current_score) : "Good"} credit score
+              </p>
+              <p className="text-xs leading-relaxed">
+                {creditScore && creditScore.current_score >= 650 
+                  ? "You qualify for loans with competitive interest rates."
+                  : creditScore && creditScore.current_score >= 550
+                  ? "You may qualify for loans with moderate interest rates."
+                  : "Work on improving your credit score for better loan terms."
+                }
+              </p>
+              {creditScore && (
+                <div className="mt-3 text-xs bg-white/50 rounded-lg p-2">
+                  <p>Total: {creditScore.total_loans} | Early: {creditScore.early_payments} | On-time: {creditScore.on_time_payments} | Late: {creditScore.late_payments}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Verification Button */}
+          <button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold">
+            Verify Your Account
+          </button>
+        </div>
+      </div>
+      
+      <Outlet />
     </div>
-
-    {/* Stats Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
-
-      {/* Chart Section */}
-      <div className="md:col-span-2 p-4">
-        <RepaymentTimelineChart />
-      </div>
-
-      {/* Verification Status Section */}
-      <div className="md:col-span-1 bg-white rounded-lg mt-4 shadow-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">Verification Status</h2>
-
-        {/* KYC Level Progress */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">KYC Level</span>
-            <span className="text-sm text-gray-900 font-bold">Level 1</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div className="h-2 rounded-full bg-orange-400" style={{ width: "33%" }}></div>
-          </div>
-          <a href="#" className="text-orange-500 text-sm font-medium mt-2 inline-block">
-            Upgrade to Level 2 →
-          </a>
-        </div>
-
-        {/* Credit Reputation Score */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Credit Reputation Score</span>
-            {isCreditScoreLoading ? (
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-12"></div>
-              </div>
-            ) : (
-              <span className={`text-sm font-bold ${creditScore ? getCreditScoreColor(creditScore.current_score) : 'text-gray-900'}`}>
-                {creditScore ? creditScore.current_score : "600"}
-              </span>
-            )}
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div 
-              className={`h-2 rounded-full ${creditScore ? getCreditScoreBgColor(creditScore.current_score) : 'bg-green-500'}`} 
-              style={{ width: `${creditScore ? getCreditScoreProgress(creditScore.current_score) : 10}%` }}
-            ></div>
-          </div>
-          <div className={`${creditScore && creditScore.current_score >= 650 ? 'bg-green-100 text-green-800' : creditScore && creditScore.current_score >= 550 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'} text-sm p-2 mt-2 rounded-md shadow`}>
-            <p className="font-medium">
-              {creditScore ? getCreditScoreLabel(creditScore.current_score) : "Good"} credit score
-            </p>
-            <p>
-              {creditScore && creditScore.current_score >= 650 
-                ? "You qualify for loans with competitive interest rates."
-                : creditScore && creditScore.current_score >= 550
-                ? "You may qualify for loans with moderate interest rates."
-                : "Work on improving your credit score for better loan terms."
-              }
-            </p>
-            {creditScore && (
-              <div className="mt-2 text-xs">
-                <p>Total Loans: {creditScore.total_loans} | Early: {creditScore.early_payments}  | On-time: {creditScore.on_time_payments} | Late: {creditScore.late_payments}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Verification Button for New Users */}
-        <button className="bg-orange-500 text-white w-full py-3 mt-4 rounded-full hover:scale-105 cursor-pointer duration-300 hover:bg-orange-600 transition">
-          Verify Your Account
-        </button>
-      </div>
-    </div>
-
-    
-    <Outlet />
   </div>
-  );
+);
 };
 
 export default DefaultDashboardContent;

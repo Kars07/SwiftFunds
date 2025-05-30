@@ -20,7 +20,7 @@ const PREMIUM_LOAN_FEE = BigInt(10_000_000); // 10 ADA in lovelace
 const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
 
 
-const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+const API_URL = "http://localhost:9000/funded_loans.php";
 
 type CreditScoreData = {
     current_score: number;
@@ -379,33 +379,56 @@ const Applications: React.FC = () => {
         return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     }
 
-    return (
-        <div className="p-4 pt-10">
-            <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-medium mb-6">Loan Applications</h1>
-                
+return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
+        </div>
+
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+                <div className="mb-6 lg:mb-0">
+                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                        Loan Applications
+                    </h1>
+                    <p className="text-gray-600 text-lg">Submit your loan request to the decentralized lending ecosystem</p>
+                </div>
+
                 {/* Exchange Rate Display */}
                 {adaToNgnRate > 0 && (
-                    <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-                        <span className="font-medium">Current ADA Rate:</span> {formatNaira(adaToNgnRate)}
+                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-4 shadow-2xl">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div>
+                                <p className="text-gray-600 text-sm">Current ADA Rate</p>
+                                <p className="text-orange-600 font-bold text-lg">{formatNaira(adaToNgnRate)}</p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
 
             {/* Wallet Connection Status */}
             {!connection ? (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-3">Connect your wallet :</h2>
-                    <div className="flex flex-wrap gap-2">
+                <div className="mb-8 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                    <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
+                    <div className="flex flex-wrap gap-3">
                         {wallets.map((wallet) => (
                             <button
                                 key={wallet.name}
                                 onClick={() => connectWallet(wallet)}
                                 disabled={isConnecting}
-                                className="flex items-center bg-black text-[13px] delay-100  hover:bg-orange-500 duration-200 cursor-pointer text-white px-4 py-2 rounded-2xl transition"
+                                className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
                             >
                                 {wallet.icon && (
-                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
+                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
                                 )}
                                 {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
                             </button>
@@ -413,44 +436,60 @@ const Applications: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                    <p className="text-zinc-800">
-                        <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                    </p>
+                <div className="mb-8 bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <div>
+                            <p className="text-green-700 font-semibold">Wallet Connected</p>
+                            <p className="text-gray-600 text-sm">
+                                {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {/* Credit Score Display */}
             {connection && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Credit Profile</h3>
+                <div className="mb-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 backdrop-blur-xl border border-blue-200 rounded-2xl p-6 shadow-2xl">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Your Credit Profile</h3>
                     {loadingCreditScore ? (
-                        <div className="animate-pulse">
-                            <div className="h-8 bg-gray-200 rounded w-32 mb-2"></div>
-                            <div className="h-4 bg-gray-200 rounded w-48"></div>
+                        <div className="animate-pulse space-y-4">
+                            <div className="flex items-center space-x-4">
+                                <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-48"></div>
+                                </div>
+                            </div>
                         </div>
                     ) : creditScore ? (
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-4">
-                                <span className={`text-2xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-6">
+                                <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-r ${
+                                    creditScore.current_score >= 750 ? 'from-green-500 to-green-600' :
+                                    creditScore.current_score >= 650 ? 'from-blue-500 to-blue-600' :
+                                    creditScore.current_score >= 550 ? 'from-yellow-500 to-yellow-600' :
+                                    'from-red-500 to-red-600'
+                                }`}>
                                     {creditScore.current_score}
-                                </span>
+                                </div>
                                 <div className="flex flex-col">
-                                    <span className={`px-2 py-1 rounded text-sm font-medium ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
+                                    <span className={`px-4 py-2 rounded-xl text-lg font-bold ${getCreditScoreColor(creditScore.current_score)} bg-white/60 backdrop-blur-sm border border-white/40`}>
                                         {getCreditScoreLabel(creditScore.current_score)}
                                     </span>
-                                    <span className="text-xs text-gray-600 mt-1">
+                                    <span className="text-sm text-gray-600 mt-2">
                                         {getRiskLevel(creditScore.current_score)}
                                     </span>
                                 </div>
                             </div>
                             
-                            <div className="bg-white rounded-lg p-3">
+                            <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-medium text-gray-700">
                                         Maximum Loan Amount:
                                     </span>
-                                    <span className="text-lg font-bold text-green-600">
+                                    <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
                                         {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
                                     </span>
                                 </div>
@@ -460,73 +499,89 @@ const Applications: React.FC = () => {
                             </div>
                             
                             {creditScore.total_loans > 0 && (
-                                <div className="grid grid-cols-3 gap-2 text-xs">
-                                    <div className="text-center">
-                                        <div className="font-semibold text-green-600">{creditScore.on_time_payments}</div>
-                                        <div className="text-gray-600">On Time</div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40 text-center">
+                                        <div className="text-2xl font-bold text-green-600">{creditScore.on_time_payments}</div>
+                                        <div className="text-sm text-gray-600">On Time</div>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="font-semibold text-blue-600">{creditScore.early_payments}</div>
-                                        <div className="text-gray-600">Early</div>
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40 text-center">
+                                        <div className="text-2xl font-bold text-blue-600">{creditScore.early_payments}</div>
+                                        <div className="text-sm text-gray-600">Early</div>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="font-semibold text-red-600">{creditScore.late_payments}</div>
-                                        <div className="text-gray-600">Late</div>
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40 text-center">
+                                        <div className="text-2xl font-bold text-red-600">{creditScore.late_payments}</div>
+                                        <div className="text-sm text-gray-600">Late</div>
                                     </div>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className="text-gray-500">Unable to load credit score</div>
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <span className="text-2xl">⚠️</span>
+                            </div>
+                            <div className="text-gray-500">Unable to load credit score</div>
+                        </div>
                     )}
                 </div>
             )}
 
+            {/* Status Messages */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
+                <div className="mb-8 bg-gradient-to-r from-red-50/80 to-red-100/80 backdrop-blur-xl border border-red-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <p className="text-red-700">{error}</p>
+                    </div>
                 </div>
             )}
             
             {txHash && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800">
-                        <span className="font-semibold">Transaction submitted!</span>
-                        <br />
-                        Hash: {txHash}
-                    </p>
+                <div className="mb-8 bg-gradient-to-r from-green-50/80 to-emerald-100/80 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <p className="text-green-700 font-semibold">Transaction Submitted Successfully!</p>
+                    </div>
+                    <p className="text-gray-600 text-sm break-all">Hash: {txHash}</p>
                 </div>
             )}
             
             {/* Loading exchange rate indicator */}
             {adaToNgnRate === 0 && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-yellow-800">
-                        <span className="font-semibold">Loading exchange rates...</span>
-                        <br />
-                        Please wait while we fetch the current ADA to Naira exchange rate.
-                    </p>
+                <div className="mb-8 bg-gradient-to-r from-yellow-50/80 to-yellow-100/80 backdrop-blur-xl border border-yellow-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 border-2 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin"></div>
+                        <div>
+                            <p className="text-yellow-800 font-semibold">Loading exchange rates...</p>
+                            <p className="text-yellow-700 text-sm">Please wait while we fetch the current ADA to Naira exchange rate.</p>
+                        </div>
+                    </div>
                 </div>
             )}
             
             {/* Create Loan Request Form */}
             {connection && (
-                <div className="mb-10 p-9 mt-10 bg-white rounded-2xl shadow-2xl">
-                    <h2 className="text-xl font-semibold mb-4">Create Loan Request</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                    <div className="flex items-center space-x-4 mb-8">
+                        <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                        <h2 className="text-3xl font-bold text-gray-800">Create Loan Request</h2>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Loan Amount (Naira)
                             </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₦</span>
                                 <input
                                     type="number"
                                     value={loanAmountNaira}
                                     onChange={(e) => handleLoanAmountChange(Number(e.target.value))}
-                                    className={`w-full pl-8 pr-3 py-2 border ${
-                                        inputError.loanAmount ? 'border-red-500' : 'border-gray-300'
-                                    } rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+                                    className={`w-full pl-10 pr-4 py-4 bg-white/80 backdrop-blur-xl border ${
+                                        inputError.loanAmount ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-orange-400'
+                                    } rounded-xl transition-all duration-300 focus:ring-4 focus:ring-orange-100 appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                                     disabled={isSubmitting || adaToNgnRate === 0 || loadingCreditScore}
                                     min="0"
                                     max={creditScore ? getMaxLoanAmountByCreditScore(creditScore.current_score) : 40000}
@@ -534,52 +589,54 @@ const Applications: React.FC = () => {
                                 />
                             </div>
                             {adaToNgnRate > 0 && (
-                                <div className="mt-1">
-                                    <div className="text-xs text-gray-500">≈ {formatAda(nairaToAda(loanAmountNaira))}</div>
+                                <div className="space-y-1">
+                                    <div className="text-sm text-gray-500">≈ {formatAda(nairaToAda(loanAmountNaira))}</div>
                                     {creditScore && (
-                                        <div className="text-xs text-blue-600 mt-1">
+                                        <div className="text-sm text-blue-600">
                                             Max: {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
                                         </div>
                                     )}
                                     {inputError.loanAmount && (
-                                        <div className="text-red-500 text-sm font-medium mt-1">
+                                        <div className="text-red-500 text-sm font-medium bg-red-50 p-2 rounded-lg">
                                             {inputError.loanAmount}
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Interest (Naira)
                             </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+                                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₦</span>
                                 <input
                                     type="number"
                                     value={interestNaira}
                                     onChange={(e) => setInterestNaira(Number(e.target.value))}
-                                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-full pl-10 pr-4 py-4 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-xl transition-all duration-300 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     disabled={isSubmitting || adaToNgnRate === 0}
                                     min="0"
                                     step="1000"
                                 />
                             </div>
                             {adaToNgnRate > 0 && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                    <div>≈ {formatAda(nairaToAda(interestNaira))}</div>
+                                <div className="text-sm text-gray-500">
+                                    ≈ {formatAda(nairaToAda(interestNaira))}
                                 </div>
                             )}
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
                                 Deadline (Days)
                             </label>
                             <input
                                 type="number"
                                 value={deadlineDays}
                                 onChange={(e) => setDeadlineDays(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                className="w-full px-4 py-4 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-xl transition-all duration-300 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 disabled={isSubmitting}
                                 min="1"
                                 max="365"
@@ -589,42 +646,54 @@ const Applications: React.FC = () => {
                     
                     {/* Loan Summary */}
                     {adaToNgnRate > 0 && creditScore && (
-                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 className="text-sm font-medium text-gray-700 mb-3">Loan Summary</h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span>Loan Amount:</span>
-                                    <span className="font-medium">{formatNaira(loanAmountNaira)}</span>
+                        <div className="mb-8 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
+                                Loan Summary
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                                        <div className="text-sm text-gray-600">Loan Amount</div>
+                                        <div className="text-xl font-bold text-orange-600">{formatNaira(loanAmountNaira)}</div>
+                                    </div>
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                                        <div className="text-sm text-gray-600">Interest</div>
+                                        <div className="text-xl font-bold text-yellow-600">{formatNaira(interestNaira)}</div>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Interest:</span>
-                                    <span className="font-medium">{formatNaira(interestNaira)}</span>
-                                </div>
-                                <div className="flex justify-between border-t pt-2">
-                                    <span className="font-medium">Total to Repay:</span>
-                                    <span className="font-bold text-lg">{formatNaira(loanAmountNaira + interestNaira)}</span>
-                                </div>
-                                <div className="flex justify-between text-xs text-gray-600">
-                                    <span>Interest Rate:</span>
-                                    <span>{loanAmountNaira > 0 ? ((interestNaira / loanAmountNaira) * 100).toFixed(1) : 0}%</span>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">
-                                    <div>Total ADA equivalent: ≈ {formatAda(nairaToAda(loanAmountNaira + interestNaira))}</div>
+                                
+                                <div className="bg-white/80 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-lg font-medium text-gray-700">Total to Repay:</span>
+                                        <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+                                            {formatNaira(loanAmountNaira + interestNaira)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                                        <span>Interest Rate:</span>
+                                        <span className="font-medium">{loanAmountNaira > 0 ? ((interestNaira / loanAmountNaira) * 100).toFixed(1) : 0}%</span>
+                                    </div>
+                                    <div className="text-sm text-gray-500 mt-1">
+                                        Total ADA equivalent: ≈ {formatAda(nairaToAda(loanAmountNaira + interestNaira))}
+                                    </div>
                                 </div>
                                 
                                 {/* Loan Type and Fee Information */}
-                                <div className="mt-3 pt-2 border-t border-gray-200">
-                                    <div className="flex justify-between">
-                                        <span>Loan Type:</span>
-                                        <span className="font-medium">
-                                            {getLoanTypeName(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Application Fee:</span>
-                                        <span className="font-medium">
-                                            {formatAda(lovelaceToAda(getLoanRequestFee(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))))}
-                                        </span>
+                                <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div className="text-sm text-gray-600">Loan Type</div>
+                                            <div className="font-semibold text-gray-800">
+                                                {getLoanTypeName(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-gray-600">Application Fee</div>
+                                            <div className="font-semibold text-gray-800">
+                                                {formatAda(lovelaceToAda(getLoanRequestFee(Math.min(loanAmountNaira, getMaxLoanAmountByCreditScore(creditScore.current_score)))))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -640,10 +709,14 @@ const Applications: React.FC = () => {
                             !creditScore ||
                             (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score))
                         }
-                        className="border-2 border-amber-600 text-[15px] cursor-pointer text-orange-600 hover:bg-orange-600 hover:shadow-lg font-medium delay-150 duration-200 hover:text-white px-6 py-3 rounded-3xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full md:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                        {isSubmitting ? "Submitting..." : 
-                         adaToNgnRate === 0 ? "Loading rates..." :
+                        {isSubmitting ? (
+                            <div className="flex items-center justify-center space-x-2">
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Submitting...</span>
+                            </div>
+                        ) : adaToNgnRate === 0 ? "Loading rates..." :
                          loadingCreditScore ? "Loading credit score..." :
                          !creditScore ? "Credit score unavailable" :
                          (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score)) ? 
@@ -653,7 +726,8 @@ const Applications: React.FC = () => {
                 </div>
             )}
         </div>
-    );
+    </div>
+);
 };
 
 export default Applications;

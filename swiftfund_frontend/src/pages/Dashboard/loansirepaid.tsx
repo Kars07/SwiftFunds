@@ -10,7 +10,7 @@ type CreditScoreData = {
     late_payments: number;
 };
 // Define the API URL
-const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+const API_URL = "http://localhost:9000/funded_loans.php";
 
 type RepaidLoan = {
     id: string;           // Unique ID for the repaid loan (fundedLoanId)
@@ -193,26 +193,42 @@ const LoansIRepaid: React.FC = () => {
                 return <span className="text-gray-400">Unknown</span>;
         }
     }
+return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
+        </div>
 
-    return (
-        <div className=" p-4 pt-10">
-            <div className="flex justify-between">
-                <h1 className="text-3xl font-medium mb-6">Loans I Have Repaid</h1>
-                
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+
+        <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+                <div className="mb-6 lg:mb-0">
+                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                        Loans I Have Repaid
+                    </h1>
+                    <p className="text-gray-600 text-lg">Track your loan repayment history and build your credit score in the decentralized ecosystem</p>
+                </div>
+
                 {/* Wallet Connection */}
                 {!connection ? (
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Connect your wallet</h2>
-                        <div className="flex flex-wrap gap-2">
+                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                        <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
+                        <div className="flex flex-wrap gap-3">
                             {wallets.map((wallet) => (
                                 <button
                                     key={wallet.name}
                                     onClick={() => handleConnectWallet(wallet)}
                                     disabled={isConnecting}
-                                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+                                    className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
                                 >
                                     {wallet.icon && (
-                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-2" />
+                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
                                     )}
                                     {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
                                 </button>
@@ -220,63 +236,83 @@ const LoansIRepaid: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="mb-6 p-4 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
-                        <p className="text-zinc-800">
-                            <span className="font-semibold">Connected:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                        </p>
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div>
+                                <p className="text-green-700 font-semibold">Wallet Connected</p>
+                                <p className="text-gray-600 text-sm">
+                                    {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
-            </div>    
+            </div>
+
+            {/* Error Message */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
+                <div className="mb-8 bg-gradient-to-r from-red-50 to-red-100 backdrop-blur-xl border border-red-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <p className="text-red-700">{error}</p>
+                    </div>
                 </div>
             )}
+
+            {/* Credit Score Section */}
             {connection && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                <div className="mb-8 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                    <div className="flex items-center space-x-4 mb-6">
+                        <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                        <h3 className="text-3xl font-bold text-gray-800">Credit Score Dashboard</h3>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                    </div>
+
                     <div className="flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-800">Credit Score</h3>
                             {creditScore ? (
-                                <div className="flex items-center gap-4">
-                                    <span className={`text-2xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
-                                        {creditScore.current_score}
-                                    </span>
-                                    <span className={`px-2 py-1 rounded text-sm font-medium ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
-                                        {getCreditScoreLabel(creditScore.current_score)}
-                                    </span>
+                                <div className="flex items-center gap-6">
+                                    <div className="text-center">
+                                        <span className={`text-5xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                                            {creditScore.current_score}
+                                        </span>
+                                        <div className={`mt-2 px-4 py-2 rounded-xl text-lg font-semibold ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10 border border-current border-opacity-20`}>
+                                            {getCreditScoreLabel(creditScore.current_score)}
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="animate-pulse">
-                                    <div className="h-8 bg-gray-200 rounded w-20"></div>
+                                    <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
                                 </div>
                             )}
                         </div>
                         <button
                             onClick={() => setShowCreditScore(!showCreditScore)}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                         >
                             {showCreditScore ? 'Hide Details' : 'Show Details'}
                         </button>
                     </div>
                     
                     {showCreditScore && creditScore && (
-                        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div className="text-center p-2 bg-white rounded">
-                                <div className="font-semibold text-gray-600">Total Loans</div>
-                                <div className="text-lg font-bold text-blue-600">{creditScore.total_loans}</div>
+                        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="text-center p-6 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-xl">
+                                <div className="font-semibold text-gray-600 mb-2">Total Loans</div>
+                                <div className="text-3xl font-bold text-orange-600">{creditScore.total_loans}</div>
                             </div>
-                            <div className="text-center p-2 bg-white rounded">
-                                <div className="font-semibold text-gray-600">On Time</div>
-                                <div className="text-lg font-bold text-green-600">{creditScore.on_time_payments}</div>
+                            <div className="text-center p-6 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-xl">
+                                <div className="font-semibold text-gray-600 mb-2">On Time</div>
+                                <div className="text-3xl font-bold text-green-600">{creditScore.on_time_payments}</div>
                             </div>
-                            <div className="text-center p-2 bg-white rounded">
-                                <div className="font-semibold text-gray-600">Early</div>
-                                <div className="text-lg font-bold text-blue-600">{creditScore.early_payments}</div>
+                            <div className="text-center p-6 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-xl">
+                                <div className="font-semibold text-gray-600 mb-2">Early</div>
+                                <div className="text-3xl font-bold text-blue-600">{creditScore.early_payments}</div>
                             </div>
-                            <div className="text-center p-2 bg-white rounded">
-                                <div className="font-semibold text-gray-600">Late</div>
-                                <div className="text-lg font-bold text-red-600">{creditScore.late_payments}</div>
+                            <div className="text-center p-6 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-xl">
+                                <div className="font-semibold text-gray-600 mb-2">Late</div>
+                                <div className="text-3xl font-bold text-red-600">{creditScore.late_payments}</div>
                             </div>
                         </div>
                     )}
@@ -284,107 +320,134 @@ const LoansIRepaid: React.FC = () => {
             )}
 
             {/* Repaid Loans List */}
-            <div className="mb-10 p-9 mt-10 bg-white rounded-2xl shadow-2xl">
-                <h2 className="text-xl font-semibold mb-4">Your Repaid Loans</h2>
+            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center space-x-4 mb-8">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    <h2 className="text-3xl font-bold text-gray-800">Your Repaid Loans</h2>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                </div>
                 
                 {isLoading ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                        <p className="mt-2 text-gray-600">Loading your repaid loans...</p>
+                    <div className="text-center py-16">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-400 rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2" style={{animationDirection: 'reverse'}}></div>
+                        </div>
+                        <p className="text-gray-600 text-lg">Loading your repaid loans...</p>
                     </div>
                 ) : repaidLoans.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">You don't have any repaid loans yet.</p>
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">✅</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">No repaid loans found</p>
+                        <p className="text-gray-500 mt-2">Your repayment history will appear here once you repay loans</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Repaid On
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Payment Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Lender
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Interest
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Total Repaid
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Transaction
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan ID
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {repaidLoans.map((repayment) => {
-                                    const loanAmount = repayment.data.loanAmount;
-                                    const interest = repayment.data.interest;
-                                    const totalRepaid = (Number(loanAmount) + Number(interest)).toString();
-                                    
-                                    return (
-                                        <tr key={repayment.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatDate(repayment.data.repaidAt)}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                {getPaymentTimingDisplay(repayment.data.paymentCategory, repayment.data.daysEarlyLate)}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {repayment.data.lenderPKH.substring(0, 8)}...{repayment.data.lenderPKH.substring(repayment.data.lenderPKH.length - 8)}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {lovelaceToAda(loanAmount)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {lovelaceToAda(interest)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {lovelaceToAda(totalRepaid)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                    <div className="space-y-6">
+                        {repaidLoans.map((repayment, index) => {
+                            const loanAmount = repayment.data.loanAmount;
+                            const interest = repayment.data.interest;
+                            const totalRepaid = (Number(loanAmount) + Number(interest)).toString();
+                            
+                            return (
+                                <div 
+                                    key={repayment.id} 
+                                    className="group bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 hover:border-orange-300 hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02]"
+                                    style={{animationDelay: `${index * 100}ms`}}
+                                >
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                        {/* Repayment Date */}
+                                        <div className="lg:col-span-3">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white">
+                                                    <span className="text-lg">✓</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-600 text-sm">Repaid On</p>
+                                                    <p className="text-gray-800 font-medium text-sm">
+                                                        {formatDate(repayment.data.repaidAt)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Payment Status */}
+                                        <div className="lg:col-span-2">
+                                            <div className="p-4 rounded-xl border border-gray-200 bg-white/60">
+                                                <div className="text-center">
+                                                    {getPaymentTimingDisplay(repayment.data.paymentCategory, repayment.data.daysEarlyLate)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Loan Details */}
+                                        <div className="lg:col-span-4">
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Loan Amount</p>
+                                                    <p className="text-lg font-bold text-orange-600">
+                                                        {lovelaceToAda(loanAmount)} <span className="text-xs text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Interest</p>
+                                                    <p className="text-lg font-semibold text-yellow-600">
+                                                        {lovelaceToAda(interest)} <span className="text-xs text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Total Repaid</p>
+                                                    <p className="text-lg font-bold text-green-600">
+                                                        {lovelaceToAda(totalRepaid)} <span className="text-xs text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Lender & Transaction */}
+                                        <div className="lg:col-span-3">
+                                            <div className="text-right">
+                                                <p className="text-gray-500 text-sm mb-1">Lender</p>
+                                                <p className="text-gray-800 text-sm font-mono mb-2">
+                                                    {repayment.data.lenderPKH.substring(0, 8)}...{repayment.data.lenderPKH.substring(repayment.data.lenderPKH.length - 8)}
+                                                </p>
+                                                
                                                 <a 
                                                     href={`https://preprod.cardanoscan.io/transaction/${repayment.data.repaymentTxHash}`} 
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
-                                                    className="hover:underline flex items-center"
+                                                    className="inline-flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm"
                                                 >
-                                                    <span>{repayment.data.repaymentTxHash.substring(0, 8)}...</span>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <span>View Transaction</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                                                         <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                                                         <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
                                                     </svg>
                                                 </a>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                                {repayment.id.substring(0, 8)}...
-                                                {repayment.data.originalLoanId && (
-                                                    <div className="mt-1 text-xs text-gray-400">
-                                                        From loan: {repayment.data.originalLoanId.substring(0, 8)}...
-                                                    </div>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Loan ID (smaller text at bottom) */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="flex justify-between items-center text-xs text-gray-400 font-mono">
+                                            <span>Loan ID: {repayment.id.substring(0, 16)}...</span>
+                                            {repayment.data.originalLoanId && (
+                                                <span>Original: {repayment.data.originalLoanId.substring(0, 16)}...</span>
+                                            )}
+                                            <span>TX: {repayment.data.repaymentTxHash.substring(0, 8)}...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default LoansIRepaid;

@@ -9,7 +9,7 @@ const FundRequestValidatorScript: SpendingValidator = {
 };
 
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
-const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
+const API_URL = "http://localhost:9000/funded_loans.php";
 type Connection = {
     api: WalletApi;
     lucid: LucidEvolution;
@@ -434,227 +434,337 @@ async function recordLoanRepayment(fundedLoanId: string, repaymentTxHash: string
     }
 
     return (
-        <div className="p-4 pt-10">
-            <div className="flex justify-between">
-                <h1 className="text-3xl font-medium mb-6">Loans to Repay</h1>
-                
-                {/* Wallet Connection Status */}
-                {!connection ? (
-                    <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                        <h2 className="text-lg font-semibold mb-3">Connect your wallet to view loans</h2>
-                        <p className="text-gray-600 mb-3">Please connect your wallet in the sidebar to view and manage your loans.</p>
-                    </div>
-                ) : (
-                    <div className="mb-6 p-4 -translate-y-3 bg-orange-50 border border-orange-200 rounded-lg">
-                        <p className="text-zinc-800">
-                            <span className="font-semibold">Connected with:</span> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-                        </p>
-                    </div>
-                )}
-            </div> 
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
-                </div>
-            )}
-            
-
-{txHash && (
-    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <p className="text-green-800">
-            <span className="font-semibold">Loan Successfully Repaid!</span>
-            <br />
-            <span className="text-sm">Transaction Hash: {txHash}</span>
-            
-            {/* Payment feedback */}
-            {paymentFeedback && (
-                <div className="mt-3 p-3 bg-white rounded border-l-4 border-green-400">
-                    <div className="flex items-center">
-                        <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                            paymentFeedback.category === 'early' ? 'bg-blue-500' :
-                            paymentFeedback.category === 'on_time' ? 'bg-green-500' : 'bg-red-500'
-                        }`}></span>
-                        <span className="text-sm font-medium text-gray-700">
-                            Payment Impact: {paymentFeedback.details}
-                        </span>
-                    </div>
-                </div>
-            )}
-            
-            {/* Credit score update */}
-            {creditScore && (
-                <div className="mt-2 text-sm">
-                    <span>Credit score updated to: </span>
-                    <span className={`font-bold ml-1 ${getCreditScoreColor(creditScore.current_score)}`}>
-                        {creditScore.current_score}
-                    </span>
-                    <span className={`ml-2 px-2 py-1 rounded text-xs ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
-                        {getCreditScoreLabel(creditScore.current_score)}
-                    </span>
-                </div>
-            )}
-        </p>
-    </div>
-)}
-            {connection && (
-    <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-        <div className="flex justify-between items-center">
-            <div>
-                <h3 className="text-lg font-semibold text-gray-800">Credit Score</h3>
-                {creditScore ? (
-                    <div className="flex items-center gap-4">
-                        <span className={`text-2xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
-                            {creditScore.current_score}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-sm font-medium ${getCreditScoreColor(creditScore.current_score)} bg-opacity-10`}>
-                            {getCreditScoreLabel(creditScore.current_score)}
-                        </span>
-                    </div>
-                ) : (
-                    <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-20"></div>
-                    </div>
-                )}
-            </div>
-            <button
-                onClick={() => setShowCreditScore(!showCreditScore)}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-                {showCreditScore ? 'Hide Details' : 'Show Details'}
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+            <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
         </div>
-        
-        {showCreditScore && creditScore && (
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="text-center p-2 bg-white rounded">
-                    <div className="font-semibold text-gray-600">Total Loans</div>
-                    <div className="text-lg font-bold text-blue-600">{creditScore.total_loans}</div>
-                </div>
-                <div className="text-center p-2 bg-white rounded">
-                    <div className="font-semibold text-gray-600">On Time</div>
-                    <div className="text-lg font-bold text-green-600">{creditScore.on_time_payments}</div>
-                </div>
-                <div className="text-center p-2 bg-white rounded">
-                    <div className="font-semibold text-gray-600">Early</div>
-                    <div className="text-lg font-bold text-blue-600">{creditScore.early_payments}</div>
-                </div>
-                <div className="text-center p-2 bg-white rounded">
-                    <div className="font-semibold text-gray-600">Late</div>
-                    <div className="text-lg font-bold text-red-600">{creditScore.late_payments}</div>
-                </div>
-            </div>
-        )}
-    </div>
-)}
-{connection && <CreditScoreGuide />}
 
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
-            
-            {/* Loans to Repay List */}
-            <div className="mb-10 p-9 bg-white rounded-2xl mt-10 shadow-2xl">
-                <h2 className="text-xl font-semibold mb-4">Your Active Loans to Repay</h2>
-                
+        <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+                <div className="mb-6 lg:mb-0">
+                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                        Loans to Repay
+                    </h1>
+                    <p className="text-gray-600 text-lg">Manage your active loans and maintain your credit score</p>
+                </div>
+
+                {/* Wallet Connection */}
                 {!connection ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">Connect your wallet to view loans that need repayment.</p>
+                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                        <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
+                        <div className="flex flex-wrap gap-3">
+                            {wallets.map((wallet) => (
+                                <button
+                                    key={wallet.name}
+                                    onClick={() => connectWallet(wallet)}
+                                    className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                >
+                                    {wallet.icon && (
+                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
+                                    )}
+                                    Connect {wallet.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div>
+                                <p className="text-green-700 font-semibold">Wallet Connected</p>
+                                <p className="text-gray-600 text-sm">
+                                    {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Status Messages */}
+            {error && (
+                <div className="mb-8 bg-gradient-to-r from-red-50 to-red-100 backdrop-blur-xl border border-red-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <p className="text-red-700">{error}</p>
+                    </div>
+                </div>
+            )}
+
+            {txHash && (
+                <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <p className="text-green-700 font-semibold">Loan Successfully Repaid!</p>
+                    </div>
+                    <p className="text-gray-600 text-sm break-all mb-3">Hash: {txHash}</p>
+                    
+                    {/* Payment feedback */}
+                    {paymentFeedback && (
+                        <div className="mt-3 p-4 bg-white/60 backdrop-blur-xl rounded-xl border-l-4 border-green-400">
+                            <div className="flex items-center">
+                                <span className={`inline-block w-3 h-3 rounded-full mr-3 ${
+                                    paymentFeedback.category === 'early' ? 'bg-blue-500 animate-pulse' :
+                                    paymentFeedback.category === 'on_time' ? 'bg-green-500 animate-pulse' : 'bg-red-500 animate-pulse'
+                                }`}></span>
+                                <span className="text-sm font-medium text-gray-700">
+                                    Payment Impact: {paymentFeedback.details}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Credit score update */}
+                    {creditScore && (
+                        <div className="mt-3 p-3 bg-white/40 backdrop-blur-xl rounded-lg">
+                            <span className="text-sm text-gray-600">Credit score updated to: </span>
+                            <span className={`font-bold ml-1 ${getCreditScoreColor(creditScore.current_score)}`}>
+                                {creditScore.current_score}
+                            </span>
+                            <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${getCreditScoreColor(creditScore.current_score)} bg-white/20`}>
+                                {getCreditScoreLabel(creditScore.current_score)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Credit Score Section */}
+            {connection && (
+                <div className="mb-8 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
+                            <h3 className="text-2xl font-bold text-gray-800">Credit Score</h3>
+                        </div>
+                        <button
+                            onClick={() => setShowCreditScore(!showCreditScore)}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105"
+                        >
+                            {showCreditScore ? 'Hide Details' : 'Show Details'}
+                        </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 mb-4">
+                        {creditScore ? (
+                            <>
+                                <div className="text-center">
+                                    <span className={`text-4xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                                        {creditScore.current_score}
+                                    </span>
+                                </div>
+                                <div className={`px-4 py-2 rounded-xl font-medium border ${
+                                    creditScore.current_score >= 750 ? 'bg-green-50 text-green-700 border-green-200' :
+                                    creditScore.current_score >= 650 ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                    creditScore.current_score >= 550 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                    'bg-red-50 text-red-700 border-red-200'
+                                }`}>
+                                    {getCreditScoreLabel(creditScore.current_score)}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="animate-pulse flex items-center space-x-4">
+                                <div className="h-12 bg-gray-200 rounded w-20"></div>
+                                <div className="h-8 bg-gray-200 rounded w-16"></div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {showCreditScore && creditScore && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                                <div className="text-sm font-semibold text-gray-600 mb-2">Total Loans</div>
+                                <div className="text-2xl font-bold text-blue-600">{creditScore.total_loans}</div>
+                            </div>
+                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                                <div className="text-sm font-semibold text-gray-600 mb-2">On Time</div>
+                                <div className="text-2xl font-bold text-green-600">{creditScore.on_time_payments}</div>
+                            </div>
+                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                                <div className="text-sm font-semibold text-gray-600 mb-2">Early</div>
+                                <div className="text-2xl font-bold text-blue-600">{creditScore.early_payments}</div>
+                            </div>
+                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                                <div className="text-sm font-semibold text-gray-600 mb-2">Late</div>
+                                <div className="text-2xl font-bold text-red-600">{creditScore.late_payments}</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Credit Score Guide */}
+            {connection && <CreditScoreGuide />}
+
+            {/* Main Content - Loans to Repay */}
+            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center space-x-4 mb-8">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    <h2 className="text-3xl font-bold text-gray-800">Your Active Loans</h2>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                </div>
+
+                {!connection ? (
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">🔗</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">Connect your wallet to view loans</p>
+                        <p className="text-gray-500 mt-2">Access your loan repayment dashboard</p>
                     </div>
                 ) : isLoading ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                        <p className="mt-2 text-gray-600">Loading loans to repay...</p>
+                    <div className="text-center py-16">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-400 rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2" style={{animationDirection: 'reverse'}}></div>
+                        </div>
+                        <p className="text-gray-600 text-lg">Loading your active loans...</p>
                     </div>
                 ) : loansToRepay.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">No active loans found that need repayment.</p>
+                    <div className="text-center py-16 bg-gray-100/60 rounded-2xl">
+                        <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                            <span className="text-3xl">✅</span>
+                        </div>
+                        <p className="text-gray-700 text-xl">No active loans to repay</p>
+                        <p className="text-gray-500 mt-2">All caught up! Great job managing your finances</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Lender
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Interest
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Total to Repay
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Deadline
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Loan ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {loansToRepay.map((loan) => {
-                                    const interest = loan.interest || BigInt(0);
-                                    const deadline = loan.deadline || BigInt(0);
-                                    const totalToRepay = loan.loanAmount + interest;
-                                    const isExpired = isDeadlineExpired(deadline);
-                                    
-                                    return (
-                                        <tr key={loan.fundedLoanId} className={isExpired ? "bg-red-50" : ""}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {loan.lenderPKH.substring(0, 8)}...{loan.lenderPKH.substring(loan.lenderPKH.length - 8)}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {lovelaceToAda(loan.loanAmount)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {lovelaceToAda(interest)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {lovelaceToAda(totalToRepay)} ADA
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatDate(deadline)}
-                                                <br />
+                    <div className="space-y-6">
+                        {loansToRepay.map((loan, index) => {
+                            const interest = loan.interest || BigInt(0);
+                            const deadline = loan.deadline || BigInt(0);
+                            const totalToRepay = loan.loanAmount + interest;
+                            const isExpired = isDeadlineExpired(deadline);
+                            const daysLeft = daysRemaining(deadline);
+                            
+                            return (
+                                <div 
+                                    key={loan.fundedLoanId} 
+                                    className={`group backdrop-blur-xl border rounded-2xl p-6 transition-all duration-500 transform hover:scale-[1.02] ${
+                                        isExpired 
+                                            ? 'bg-gradient-to-r from-red-50/80 to-red-100/80 border-red-300 hover:border-red-400 hover:shadow-2xl' 
+                                            : 'bg-gradient-to-r from-white/80 to-gray-50/80 border-gray-200 hover:border-orange-300 hover:shadow-2xl'
+                                    }`}
+                                    style={{animationDelay: `${index * 100}ms`}}
+                                >
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                        {/* Lender Info */}
+                                        <div className="lg:col-span-3">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                                                    {loan.lenderPKH.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-600 text-sm">Lender</p>
+                                                    <p className="text-gray-800 font-mono text-sm">
+                                                        {loan.lenderPKH.substring(0, 8)}...{loan.lenderPKH.substring(loan.lenderPKH.length - 8)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Loan Amount & Interest */}
+                                        <div className="lg:col-span-4">
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Loan Amount</p>
+                                                    <p className="text-xl font-bold text-orange-600">
+                                                        {lovelaceToAda(loan.loanAmount)} <span className="text-sm text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Interest</p>
+                                                    <p className="text-lg font-semibold text-yellow-600">
+                                                        {lovelaceToAda(interest)} <span className="text-sm text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-sm mb-1">Total to Repay</p>
+                                                    <p className="text-xl font-bold text-purple-600">
+                                                        {lovelaceToAda(totalToRepay)} <span className="text-sm text-gray-500">ADA</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Deadline Status */}
+                                        <div className="lg:col-span-3">
+                                            <div className="text-center">
+                                                <p className="text-gray-500 text-sm mb-1">Deadline</p>
+                                                <p className="text-gray-800 text-sm mb-2">{formatDate(deadline)}</p>
                                                 {isExpired ? (
-                                                    <span className="text-red-600 font-medium">
-                                                        Expired!
-                                                    </span>
+                                                    <div className="flex items-center justify-center space-x-2">
+                                                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                                                        <span className="text-red-600 font-bold text-sm">OVERDUE!</span>
+                                                    </div>
                                                 ) : (
-                                                    <span className="text-green-600">
-                                                        {daysRemaining(deadline)} days remaining
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                                {loan.fundedLoanId.substring(0, 8)}...
-                                                {loan.originalLoanId && (
-                                                    <div className="mt-1 text-xs text-gray-400">
-                                                        From loan: {loan.originalLoanId.substring(0, 8)}...
+                                                    <div className="flex items-center justify-center space-x-2">
+                                                        <div className={`w-2 h-2 rounded-full animate-pulse ${
+                                                            daysLeft <= 3 ? 'bg-red-500' : daysLeft <= 7 ? 'bg-yellow-500' : 'bg-green-500'
+                                                        }`}></div>
+                                                        <span className={`font-medium text-sm ${
+                                                            daysLeft <= 3 ? 'text-red-600' : daysLeft <= 7 ? 'text-yellow-600' : 'text-green-600'
+                                                        }`}>
+                                                            {daysLeft} days remaining
+                                                        </span>
                                                     </div>
                                                 )}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <button
-                                                    onClick={() => repayLoan(loan)}
-                                                    disabled={loadingRepay === loan.fundedLoanId}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
-                                                >
-                                                    {loadingRepay === loan.fundedLoanId ? "Processing..." : "Repay Loan"}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                            </div>
+                                        </div>
+
+                                        {/* Repay Action */}
+                                        <div className="lg:col-span-2">
+                                            <button
+                                                onClick={() => repayLoan(loan)}
+                                                disabled={loadingRepay === loan.fundedLoanId}
+                                                className={`w-full px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                                                    isExpired 
+                                                        ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white' 
+                                                        : 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white'
+                                                }`}
+                                            >
+                                                {loadingRepay === loan.fundedLoanId ? (
+                                                    <div className="flex items-center justify-center space-x-2">
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                        <span>Processing...</span>
+                                                    </div>
+                                                ) : (
+                                                    isExpired ? "Repay Overdue Loan" : "Repay Loan"
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Loan ID */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-xs text-gray-400 font-mono">
+                                                ID: {loan.fundedLoanId.substring(0, 16)}...
+                                            </p>
+                                            {loan.originalLoanId && (
+                                                <p className="text-xs text-gray-400 font-mono">
+                                                    From: {loan.originalLoanId.substring(0, 8)}...
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
-            </div>           
+            </div>
         </div>
+    </div>
+
     );
 };
 export default LoanToBeRepaid;
