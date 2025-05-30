@@ -24,25 +24,25 @@ RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
 
 # Create supervisor configuration
-RUN echo -e "[supervisord]\n\
-nodaemon=true\n\
-user=root\n\
-logfile=/var/log/supervisor/supervisord.log\n\
-pidfile=/var/run/supervisord.pid\n\
-\n\
-[program:php-fpm]\n\
-command=php-fpm\n\
-autostart=true\n\
-autorestart=true\n\
-stderr_logfile=/var/log/supervisor/php-fpm.err.log\n\
-stdout_logfile=/var/log/supervisor/php-fpm.out.log\n\
-\n\
-[program:nginx]\n\
-command=nginx -g 'daemon off;'\n\
-autostart=true\n\
-autorestart=true\n\
-stderr_logfile=/var/log/supervisor/nginx.err.log\n\
-stdout_logfile=/var/log/supervisor/nginx.out.log" > /etc/supervisor/conf.d/supervisord.conf
+RUN echo "[supervisord]" > /etc/supervisor/conf.d/supervisord.conf && \
+    echo "nodaemon=true" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "user=root" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "logfile=/var/log/supervisor/supervisord.log" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "pidfile=/var/run/supervisord.pid" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "[program:php-fpm]" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "command=php-fpm" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "autostart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "autorestart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "stderr_logfile=/var/log/supervisor/php-fpm.err.log" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "stdout_logfile=/var/log/supervisor/php-fpm.out.log" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "[program:nginx]" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "command=nginx -g \"daemon off;\"" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "autostart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "autorestart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "stderr_logfile=/var/log/supervisor/nginx.err.log" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "stdout_logfile=/var/log/supervisor/nginx.out.log" >> /etc/supervisor/conf.d/supervisord.conf
 
 # Update nginx.conf to work without separate PHP container
 RUN sed -i 's/php:9000/127.0.0.1:9000/g' /etc/nginx/conf.d/default.conf
