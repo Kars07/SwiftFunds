@@ -7,8 +7,7 @@ RUN apk add --no-cache \
     mysql-client \
     && docker-php-ext-install pdo pdo_mysql mysqli
 
-# Create nginx user and directories
-RUN adduser -D -s /bin/sh nginx
+# Create directories for nginx
 RUN mkdir -p /var/log/nginx /var/cache/nginx /etc/nginx/conf.d
 
 # Copy nginx configuration
