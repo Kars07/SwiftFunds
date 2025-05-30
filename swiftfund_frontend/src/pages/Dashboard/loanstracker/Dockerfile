@@ -11,7 +11,7 @@ RUN apk add --no-cache \
 RUN mkdir -p /var/log/nginx /var/cache/nginx /etc/nginx/conf.d /var/log/supervisor /etc/supervisor/conf.d
 
 # Copy nginx configuration and update for single container
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 RUN sed -i 's/php:9000/127.0.0.1:9000/g' /etc/nginx/conf.d/default.conf
 
 # Copy PHP configuration
