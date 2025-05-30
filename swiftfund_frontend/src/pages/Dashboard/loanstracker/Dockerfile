@@ -1,4 +1,4 @@
-FROM php:8.1-fmp-alpine
+FROM php:8.1-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -7,8 +7,15 @@ RUN apk add --no-cache \
     mysql-client \
     && docker-php-ext-install pdo pdo_mysql mysqli
 
-# Create directories
-RUN mkdir -p /var/log/nginx /var/cache/nginx /etc/nginx/conf.d /var/log/supervisor /etc/supervisor/conf.d /run/nginx
+# Create nginx user and directories
+RUN adduser -D -S nginx nginx \
+    && mkdir -p /var/log/nginx \
+    && mkdir -p /var/cache/nginx \
+    && mkdir -p /etc/nginx/conf.d \
+    && mkdir -p /var/log/supervisor \
+    && mkdir -p /etc/supervisor/conf.d \
+    && mkdir -p /run/nginx \
+    && mkdir -p /var/lib/nginx/tmp
 
 # Create main nginx configuration
 RUN cat > /etc/nginx/nginx.conf << 'EOF'
@@ -41,43 +48,28 @@ http {
 }
 EOF
 
-# Create site configuration
-RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name _;
-    root /var/www/html;
-    index index.php index.html index.htm;
+# Copy nginx server configuration
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+# Update fastcgi_pass to use localhost instead of php service name
+RUN sed -i 's/php:9000/127.0.0.1:9000/g' /etc/nginx/conf.d/default.conf
 
-    location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.ht {
-        deny all;
-    }
-}
-EOF
-
-# Copy PHP configuration if it exists
-COPY src/custom.ini /usr/local/etc/php/conf.d/custom.ini 2>/dev/null || echo "No custom.ini found, skipping..."
+# Copy PHP configuration
+COPY src/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Copy application source
 COPY src/ /var/www/html/
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chown -R nginx:nginx /var/cache/nginx \
+    && chown -R nginx:nginx /var/log/nginx \
+    && chown -R nginx:nginx /run/nginx \
+    && chown -R nginx:nginx /var/lib/nginx
 
 # Create supervisor configuration file
-RUN cat > /etc/supervisor/conf.d/supervisord.conf << 'EOF'
+COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
 [supervisord]
 nodaemon=true
 user=root
@@ -90,6 +82,7 @@ autostart=true
 autorestart=true
 stderr_logfile=/var/log/supervisor/php-fpm.err.log
 stdout_logfile=/var/log/supervisor/php-fpm.out.log
+user=root
 
 [program:nginx]
 command=nginx -g "daemon off;"
@@ -97,6 +90,7 @@ autostart=true
 autorestart=true
 stderr_logfile=/var/log/supervisor/nginx.err.log
 stdout_logfile=/var/log/supervisor/nginx.out.log
+user=root
 EOF
 
 EXPOSE 80
