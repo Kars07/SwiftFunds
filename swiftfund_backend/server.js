@@ -20,23 +20,31 @@ app.use(cookieParser());
 
 // Enable CORS for your frontend URL
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "https://swift-funds.vercel.app",
-  "http://localhost:5173",
-];
+  "https://swift-funds.vercel.app",
+  "http://localhost:5173", // For local development
+  "http://localhost:5174", // Alternative local port
+  process.env.FRONTEND_URL // If you have this set in Render
+].filter(Boolean); // Remove any undefined values
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.error("Blocked by CORS: ", origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Allow cookies and credentials
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 app.use(cors(corsOptions));
+
 
 // Session middleware
 app.use(
@@ -46,13 +54,13 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true if using HTTPS in production
+      secure: process.env.NODE_ENV === 'production', // Auto-detect based on environment
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-origin cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
 );
 
-// MongoDB connection
 // MongoDB connection
 const mongoURI = process.env.MONGO_URI;
 
