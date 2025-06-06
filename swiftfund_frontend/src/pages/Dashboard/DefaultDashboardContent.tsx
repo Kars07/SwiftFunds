@@ -55,7 +55,7 @@ type CreditScoreData = {
   late_payments: number;
 };
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://swiftfund-6b61.onrender.com";
 function shortenAddress(address: string, start = 6, end = 4) {
   if (!address) return "";
   return `${address.slice(0, start)}...${address.slice(-end)}`;

@@ -57,7 +57,7 @@ type CivilServantData = {
     company_name: string;
     verification_status: string;
 };
-const API_BASE_URL = "http://localhost:5000/api/loans";
+const API_BASE_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 const LoansFunded: React.FC = () => {
     const { connection, isConnecting } = useWallet();
     const [fundedLoans, setFundedLoans] = useState<FundedLoanDetails[]>([]);

@@ -18,7 +18,7 @@ const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestVal
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
 
-const API_BASE_URL = "http://localhost:5000/api/loans";
+const API_BASE_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 
 type LoanRequest = {
     txId: string;

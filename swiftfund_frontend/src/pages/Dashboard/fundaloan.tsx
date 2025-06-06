@@ -17,7 +17,7 @@ const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValida
 
 // const API_URL = "https://swiftfundsloantracker.42web.io/funded_loans.php";
 // const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
-const API_URL = "http://localhost:5000/api/loans";
+const API_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 // const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
 
 type LoanRequest = {

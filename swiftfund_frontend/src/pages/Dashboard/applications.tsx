@@ -20,8 +20,9 @@ const PREMIUM_LOAN_FEE = BigInt(5_000_000); // 10 ADA in lovelace
 const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
 
 // const API_URL = "http://localhost:9000/funded_loans.php";
-const civil_service_api =  "http://localhost:9000/civil_servants.php";
-const API_URL = "http://localhost:5000/api/loans";
+// const civil_service_api =  "http://localhost:9000/civil_servants.php";
+// const API_URL = "http://localhost:5000/api/loans";
+const API_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 
 type CreditScoreData = {
     current_score: number;

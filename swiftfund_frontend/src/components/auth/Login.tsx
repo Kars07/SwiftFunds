@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import arrow from '../../assets/arrow.png'
 
+
+const API_URL = "https://swiftfund-6b61.onrender.com";
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -23,7 +26,7 @@ const Login: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/login`, {
+      const res = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

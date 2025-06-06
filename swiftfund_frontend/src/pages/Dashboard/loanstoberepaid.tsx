@@ -10,7 +10,7 @@ const FundRequestValidatorScript: SpendingValidator = {
 
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 // const API_URL = "http://localhost:9000/funded_loans.php";
-const API_URL = "http://localhost:5000/api/loans";
+const API_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 type Connection = {
     api: WalletApi;
     lucid: LucidEvolution;

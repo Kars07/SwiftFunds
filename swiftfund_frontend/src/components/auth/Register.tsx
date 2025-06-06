@@ -9,6 +9,8 @@ interface FormData {
   password: string;
 }
 
+const API_URL = "https://swiftfund-6b61.onrender.com";
+
 const Registration: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({ fullname: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -43,7 +45,7 @@ const Registration: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/register`, {
+      const response = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

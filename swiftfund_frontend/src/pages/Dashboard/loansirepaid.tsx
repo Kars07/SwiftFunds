@@ -10,7 +10,7 @@ type CreditScoreData = {
     late_payments: number;
 };
 // Define the API URL
-const API_URL = "http://localhost:5000/api/loans";
+const API_URL = "https://swiftfund-6b61.onrender.com/api/loans";
 
 type RepaidLoan = {
     id: string;           // Unique ID for the repaid loan (fundedLoanId)
