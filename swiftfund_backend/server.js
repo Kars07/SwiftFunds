@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 // Enable CORS for your frontend URL
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
+  process.env.FRONTEND_URL || "https://swift-funds.vercel.app",
   "http://localhost:5173",
 ];
 
