@@ -17,7 +17,7 @@ const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValida
 
 // const API_URL = "https://swiftfundsloantracker.42web.io/funded_loans.php";
 // const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
-const API_URL = "http://localhost:9000";
+const API_URL = "http://localhost:5000/api/loans";
 // const API_URL = "http://localhost:8080/Swiftfund/SwiftFunds/funded_loans.php";
 
 type LoanRequest = {
@@ -118,17 +118,16 @@ const FundLoan: React.FC = () => {
 
     // Register or get user from database
 async function registerUser(address: string, pkh: string): Promise<void> {
-  await apiCall('users.php?action=register', 'POST', { address, pkh });
+ await apiCall('users', 'POST', { address, pkh });
 }
 async function fetchCreditScore(userPKH: string): Promise<CreditScoreData | null> {
   try {
-    const response = await fetch(`${API_URL}/funded_loans.php?action=getCreditScore`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userPKH }),
-    });
+const response = await fetch(`${API_URL}/credit-score/${userPKH}`, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
     const data = await response.json();
     if (data.status === 'success') {
@@ -207,12 +206,12 @@ async function fetchFundedLoans(lucidInstance: LucidEvolution): Promise<FundedLo
     let fundedLoans: FundedLoan[] = [];
     try {
         //sync the on-chain status with the database
-        await apiCall('funded_loans.php?action=verify', 'POST', { 
-            activeFundedUTXOs 
-        });
+await apiCall('verify', 'POST', { 
+    activeFundedUTXOs 
+});
         
         // Then fetch ALL loans, not just for the current user
-        const response = await apiCall('funded_loans.php?action=getAll', 'GET');
+        const response = await apiCall('funded', 'GET');
         
         if (response.status === 'success') {
             // Transform the API data to match our FundedLoan type
@@ -254,7 +253,7 @@ async function fetchAllFundedLoanIds(lucidInstance: LucidEvolution): Promise<Set
     
     try {
         // Make API call to get all funded loan IDs
-        const response = await apiCall('funded_loans.php?action=getAllFundedLoanIds', 'GET');
+        const response = await apiCall('funded/ids', 'GET');
         
         if (response.status === 'success' && Array.isArray(response.loanIds)) {
             response.loanIds.forEach((id: string) => {
@@ -271,13 +270,7 @@ async function fetchAllFundedLoanIds(lucidInstance: LucidEvolution): Promise<Set
             
             try {
                 const datumObject = Data.from(utxo.datum, redeemerType);
-                
-                // If this is a valid funded loan UTxO, get its originating loan ID
-                // We might need to call the API to map this funded loan to its original loan ID
-                // For now, let's add this to our list of IDs to check
-                const response = await apiCall('funded_loans.php?action=getOriginalLoanId', 'POST', {
-                    fundedLoanId: createUtxoId(utxo.txHash, utxo.outputIndex)
-                });
+               const response = await apiCall(`original/${createUtxoId(utxo.txHash, utxo.outputIndex)}`, 'GET');
                 
                 if (response.status === 'success' && response.originalLoanId) {
                     fundedLoanOriginalIds.add(response.originalLoanId);
@@ -447,21 +440,21 @@ async function fetchLoanRequests(lucidInstance: LucidEvolution, fundedLoansData:
             
             // Record the funded loan in the database
             try {
-                await apiCall('funded_loans.php?action=add', 'POST', {
-                    loanId: loanRequest.uniqueId,
-                    fundedLoanId,
-                    lenderPKH: pkh,
-                    borrowerPKH: loanRequest.borrowerPKH,
-                    loanAmount: loanRequest.loanAmount.toString(),
-                    interest: loanRequest.interest.toString(),
-                    deadline: loanRequest.deadline.toString(),
-                    txHash,
-                    fundedAt: Date.now(),
-                    fundedWith: [{
-                        txHash,
-                        outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
-                    }]
-                });
+                await apiCall('funded', 'POST', {
+    loanId: loanRequest.uniqueId,
+    fundedLoanId,
+    lenderPKH: pkh,
+    borrowerPKH: loanRequest.borrowerPKH,
+    loanAmount: loanRequest.loanAmount.toString(),
+    interest: loanRequest.interest.toString(),
+    deadline: loanRequest.deadline.toString(),
+    txHash,
+    fundedAt: Date.now(),
+    fundedWith: [{
+        txHash,
+        outputIndex: fundedOutputIndex >= 0 ? fundedOutputIndex : 0
+    }]
+});
                 
                 console.log('Loan funding recorded in database');
             } catch (error) {

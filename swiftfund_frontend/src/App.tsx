@@ -28,6 +28,7 @@ import Profile from './pages/Dashboard/Profile'
 import Settings from './pages/Dashboard/settings';
 import NotFound from './components/NotFound';
 import ScrollToTop from './ScrollToTop';
+import CivilServantVerification from './pages/Dashboard/CivilServantVerification';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -73,7 +74,8 @@ const App: React.FC = () => {
             <Route path="loans-funded" element={<LoansFunded />} />
             <Route path="loansirepaid" element={<LoansRepaid />} />
              {/* <Route path="KYC-Verify" element={<Verification />} /> */}
-             <Route path="KYC-Verify" element={<Verification onComplete={() => {}} onClose={() => {}} />} />
+            <Route path="KYC-Verify" element={<Verification onComplete={() => {}} onClose={() => {}} />} />
+          <Route path="civil-servant-verification" element={<CivilServantVerification />} />
             <Route path="transactions" element={<Transaction />} />
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />

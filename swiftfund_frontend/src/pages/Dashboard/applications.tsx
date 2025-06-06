@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Address, LucidEvolution, validatorToAddress, SpendingValidator, UTxO, Datum, Redeemer, Data, credentialToAddress } from "@lucid-evolution/lucid";
 import { useWallet } from "./Dashboard";
 
@@ -19,8 +19,9 @@ const STANDARD_LOAN_FEE = BigInt(2_000_000); // 5 ADA in lovelace
 const PREMIUM_LOAN_FEE = BigInt(5_000_000); // 10 ADA in lovelace
 const MAX_LOAN_AMOUNT = 500000; // Maximum loan amount in Naira
 
-
-const API_URL = "http://localhost:9000/funded_loans.php";
+// const API_URL = "http://localhost:9000/funded_loans.php";
+const civil_service_api =  "http://localhost:9000/civil_servants.php";
+const API_URL = "http://localhost:5000/api/loans";
 
 type CreditScoreData = {
     current_score: number;
@@ -30,30 +31,6 @@ type CreditScoreData = {
     late_payments: number;
 };
 
-// type LoanRequest = {
-//     txId: string;
-//     outputIndex: number;
-//     borrowerPKH: string;
-//     loanAmount: bigint;
-//     interest: bigint;
-//     deadline: bigint;
-//     datumObject: any;
-//     utxo: UTxO;
-//     uniqueId: string; // Unique identifier for this specific loan request UTXO
-// };
-
-// type FundedLoan = {
-//     txId: string;
-//     outputIndex: number;
-//     lenderPKH: string;
-//     loanAmount: bigint;
-//     borrowerPKH?: string;
-//     interest?: bigint;
-//     deadline?: bigint;
-//     utxo: UTxO;
-//     fundedLoanId: string; // Unique identifier for this specific funded loan UTXO
-//     originalLoanId?: string; // Reference to the original loan request UTXO ID
-// };
 const loanRequestSchema = Data.Object({
     borrowerPKH: Data.Bytes(),
     loanAmount: Data.Integer(),
@@ -71,7 +48,14 @@ type redeemerType = Data.Static<typeof fundloanredeemerschema>;
 const redeemerType = fundloanredeemerschema as unknown as redeemerType;
 
 const Applications: React.FC = () => {
-    const { connection, wallets, connectWallet, isConnecting } = useWallet();
+    const { 
+        connection, 
+        wallets, 
+        connectWallet, 
+        isConnecting,
+        // civilServantStatus,
+        // checkCivilServantStatus 
+    } = useWallet();
     
     // Exchange rate state
     const [adaToNgnRate, setAdaToNgnRate] = useState<number>(0);
@@ -92,6 +76,9 @@ const Applications: React.FC = () => {
         interest?: string;
         deadline?: string;
     }>({});
+
+    // Add a state to track if civil servant check has been performed
+    const [civilServantCheckPerformed, setCivilServantCheckPerformed] = useState<boolean>(false);
     
     // Fetch exchange rates
     useEffect(() => {
@@ -120,18 +107,20 @@ const Applications: React.FC = () => {
     }, []);
 
     // Fetch credit score when wallet is connected
-    async function fetchCreditScore(userPKH: string): Promise<void> {
+    const fetchCreditScore = useCallback(async (userPKH: string): Promise<void> => {
         try {
             setLoadingCreditScore(true);
-            const response = await fetch(`${API_URL}?action=getCreditScore`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userPKH }),
-            });
+        const response = await fetch(`${API_URL}/credit-score/${userPKH}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
             
             const data = await response.json();
+            console.log('Credit score response:', data);
+            console.log('Response status:', response.status);
+            console.log('User PKH:', userPKH);
             
             if (data.status === 'success') {
                 setCreditScore(data.creditScore);
@@ -159,113 +148,123 @@ const Applications: React.FC = () => {
         } finally {
             setLoadingCreditScore(false);
         }
-    }
+    }, []);
 
     // Load credit score when connection is established
     useEffect(() => {
         if (connection && connection.pkh) {
             fetchCreditScore(connection.pkh);
         }
-    }, [connection]);
+    }, [connection, fetchCreditScore]);
+
+    // // MODIFIED: Check civil servant status only once when connection is established
+    // useEffect(() => {
+    //     if (connection && connection.address && !civilServantCheckPerformed) {
+    //         // checkCivilServantStatus(connection.address);
+    //         setCivilServantCheckPerformed(true);
+    //     } else if (!connection) {
+    //         // Reset the check when wallet is disconnected
+    //         setCivilServantCheckPerformed(false);
+    //     }
+    // }, [connection?.address, civilServantCheckPerformed]); // REMOVED checkCivilServantStatus from dependencies
 
     // Get maximum loan amount based on credit score
-    function getMaxLoanAmountByCreditScore(creditScore: number): number {
+    const getMaxLoanAmountByCreditScore = useCallback((creditScore: number): number => {
         if (creditScore >= 750) return MAX_LOAN_AMOUNT; // Excellent - can request any amount
         if (creditScore >= 650) return 100000; // Good - up to 100,000 naira
         if (creditScore >= 550) return 80000; // Fair - up to 80,000 naira
         return 40000; // Poor - up to 40,000 naira
-    }
+    }, []);
 
     // Get credit score color
-    function getCreditScoreColor(score: number): string {
+    const getCreditScoreColor = useCallback((score: number): string => {
         if (score >= 750) return 'text-green-600';
         if (score >= 650) return 'text-blue-600';
         if (score >= 550) return 'text-yellow-600';
         return 'text-red-600';
-    }
+    }, []);
 
     // Get credit score label
-    function getCreditScoreLabel(score: number): string {
+    const getCreditScoreLabel = useCallback((score: number): string => {
         if (score >= 750) return 'Excellent';
         if (score >= 650) return 'Good';
         if (score >= 550) return 'Fair';
         return 'Poor';
-    }
+    }, []);
 
     // Get risk level
-    function getRiskLevel(score: number): string {
+    const getRiskLevel = useCallback((score: number): string => {
         if (score >= 750) return 'Very Low Risk';
         if (score >= 650) return 'Low Risk';
         if (score >= 550) return 'Moderate Risk';
         return 'High Risk';
-    }
+    }, []);
     
     // Create a unique identifier for a specific UTxO
-    function createUtxoId(txId: string, outputIndex: number): string {
+    const createUtxoId = useCallback((txId: string, outputIndex: number): string => {
         return `${txId}-${outputIndex}`;
-    }
+    }, []);
 
     // Convert Naira to ADA
-    function nairaToAda(naira: number): number {
+    const nairaToAda = useCallback((naira: number): number => {
         if (adaToNgnRate === 0) return 0;
         return naira / adaToNgnRate;
-    }
+    }, [adaToNgnRate]);
     
     // Convert Naira to lovelace
-    function nairaToLovelace(naira: number): bigint {
+    const nairaToLovelace = useCallback((naira: number): bigint => {
         const ada = nairaToAda(naira);
         return BigInt(Math.round(ada * 1_000_000));
-    }
+    }, [nairaToAda]);
     
     // Convert lovelace to ADA
-    function lovelaceToAda(lovelace: bigint): number {
+    const lovelaceToAda = useCallback((lovelace: bigint): number => {
         return Number(lovelace) / 1_000_000;
-    }
+    }, []);
     
     // Convert lovelace to Naira
-    function lovelaceToNaira(lovelace: bigint): number {
+    const lovelaceToNaira = useCallback((lovelace: bigint): number => {
         const ada = lovelaceToAda(lovelace);
         return ada * adaToNgnRate;
-    }
+    }, [lovelaceToAda, adaToNgnRate]);
     
     // Format Naira currency
-    function formatNaira(amount: number): string {
+    const formatNaira = useCallback((amount: number): string => {
         return amount.toLocaleString('en-NG', {
             style: 'currency',
             currency: 'NGN',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         });
-    }
+    }, []);
     
     // Format ADA
-    function formatAda(ada: number): string {
+    const formatAda = useCallback((ada: number): string => {
         return `${ada.toFixed(6)} ADA`;
-    }
+    }, []);
 
     // Determine loan request fee based on loan amount
-    function getLoanRequestFee(loanAmountNaira: number): bigint {
+    const getLoanRequestFee = useCallback((loanAmountNaira: number): bigint => {
         if (loanAmountNaira <= 100000) {
             return STANDARD_LOAN_FEE; // 5 ADA for Standard Loan
         } else if (loanAmountNaira <= 500000) {
             return PREMIUM_LOAN_FEE; // 10 ADA for Premium Loan
         } else {
-            // This should not happen as we'll validate the amount in the UI
             throw new Error("Loan amount exceeds maximum allowed");
         }
-    }
+    }, []);
 
     // Get loan type name based on amount
-    function getLoanTypeName(loanAmountNaira: number): string {
+    const getLoanTypeName = useCallback((loanAmountNaira: number): string => {
         if (loanAmountNaira <= 100000) {
             return "Standard Loan";
         } else {
             return "Premium Loan";
         }
-    }
+    }, []);
 
     // Handle loan amount change with validation
-    function handleLoanAmountChange(value: number): void {
+    const handleLoanAmountChange = useCallback((value: number): void => {
         // Clear previous input error
         setInputError(prev => ({ ...prev, loanAmount: undefined }));
         
@@ -282,14 +281,19 @@ const Applications: React.FC = () => {
         } else {
             setLoanAmountNaira(value);
         }
-    }
+    }, [creditScore, getMaxLoanAmountByCreditScore, formatNaira]);
 
     // Create loan request function
-    async function createLoanRequest(): Promise<void> {
+    const createLoanRequest = useCallback(async (): Promise<void> => {
         if (!connection) {
             setError("Please connect your wallet first");
             return;
         }
+
+        // if (!civilServantStatus.verified) {
+        //     setError("You must be verified as a civil servant to create loan requests");
+        //     return;
+        // }
 
         if (adaToNgnRate === 0) {
             setError("Exchange rate not loaded. Please wait a moment and try again.");
@@ -364,23 +368,36 @@ const Applications: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }
+    }, [
+        connection,
+        // civilServantStatus.verified,
+        adaToNgnRate,
+        creditScore,
+        loanAmountNaira,
+        interestNaira,
+        deadlineDays,
+        getMaxLoanAmountByCreditScore,
+        formatNaira,
+        nairaToLovelace,
+        getLoanRequestFee
+    ]);
     
     // Format date
-    function formatDate(timestamp: bigint): string {
+    const formatDate = useCallback((timestamp: bigint): string => {
         return new Date(Number(timestamp)).toLocaleString();
-    }
+    }, []);
     
     // Calculate days remaining until deadline
-    function daysRemaining(deadline: bigint): number {
+    const daysRemaining = useCallback((deadline: bigint): number => {
         const now = Date.now();
         const deadlineTime = Number(deadline);
         const diffMs = deadlineTime - now;
         return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    }
+    }, []);
 
-return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+    // Rest of your JSX remains the same...
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">
             <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -525,6 +542,126 @@ return (
                     )}
                 </div>
             )}
+
+{/* Civil Servant Verification Status
+{connection && (
+    <div className="mb-8 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 backdrop-blur-xl border border-indigo-200 rounded-2xl p-6 shadow-2xl">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Civil Servant Verification</h3>
+        {civilServantStatus.loading ? (
+            <div className="animate-pulse space-y-4">
+                <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                    <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        <div className="h-3 bg-gray-200 rounded w-48"></div>
+                    </div>
+                </div>
+            </div>
+        ) : civilServantStatus.verified ? (
+            <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl bg-gradient-to-r from-green-500 to-green-600 text-white">
+                        ✓
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="px-4 py-2 rounded-xl text-lg font-bold text-green-600 bg-white/60 backdrop-blur-sm border border-white/40">
+                            Verified Civil Servant
+                        </span>
+                        <span className="text-sm text-gray-600 mt-2">
+                            You are eligible to create loan requests
+                        </span>
+                    </div>
+                </div>
+                
+                {civilServantStatus.data && (
+                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span className="text-gray-600">Company:</span>
+                                <div className="font-medium">{civilServantStatus.data.company_name}</div>
+                            </div>
+                            <div>
+                                <span className="text-gray-600">Status:</span>
+                                <div className="font-medium text-green-600">Approved</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        ) : civilServantStatus.data?.verification_status === 'pending' ? (
+            <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+                        ⏳
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="px-4 py-2 rounded-xl text-lg font-bold text-yellow-600 bg-white/60 backdrop-blur-sm border border-white/40">
+                            Verification Pending
+                        </span>
+                        <span className="text-sm text-gray-600 mt-2">
+                            Your application is under review
+                        </span>
+                    </div>
+                </div>
+                
+                <div className="bg-yellow-50/60 backdrop-blur-xl rounded-xl p-4 border border-yellow-200">
+                    <p className="text-yellow-800 text-sm">
+                        Your civil servant verification is still being processed. You cannot create loan requests until verified.
+                    </p>
+                </div>
+            </div>
+        ) : civilServantStatus.data?.verification_status === 'rejected' ? (
+            <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl bg-gradient-to-r from-red-500 to-red-600 text-white">
+                        ✗
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="px-4 py-2 rounded-xl text-lg font-bold text-red-600 bg-white/60 backdrop-blur-sm border border-white/40">
+                            Verification Rejected
+                        </span>
+                        <span className="text-sm text-gray-600 mt-2">
+                            Please resubmit your application
+                        </span>
+                    </div>
+                </div>
+                
+                <div className="bg-red-50/60 backdrop-blur-xl rounded-xl p-4 border border-red-200">
+                    <p className="text-red-800 text-sm">
+                        Your civil servant verification was rejected. 
+                        {civilServantStatus.data.rejection_reason && (
+                            <span className="block mt-1 font-medium">
+                                Reason: {civilServantStatus.data.rejection_reason}
+                            </span>
+                        )}
+                    </p>
+                </div>
+            </div>
+        ) : (
+            <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl bg-gradient-to-r from-gray-500 to-gray-600 text-white">
+                        ?
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="px-4 py-2 rounded-xl text-lg font-bold text-gray-600 bg-white/60 backdrop-blur-sm border border-white/40">
+                            Not Verified
+                        </span>
+                        <span className="text-sm text-gray-600 mt-2">
+                            Submit your civil servant verification
+                        </span>
+                    </div>
+                </div>
+                
+                <div className="bg-gray-50/60 backdrop-blur-xl rounded-xl p-4 border border-gray-200">
+                    <p className="text-gray-800 text-sm">
+                        You need to be verified as a civil servant to create loan requests. Please submit your verification documents.
+                    </p>
+                </div>
+            </div>
+        )}
+    </div>
+)} */}
 
             {/* Status Messages */}
             {error && (
@@ -700,29 +837,33 @@ return (
                         </div>
                     )}
                     
-                    <button
-                        onClick={createLoanRequest}
-                        disabled={
-                            isSubmitting || 
-                            adaToNgnRate === 0 || 
-                            loadingCreditScore || 
-                            !creditScore ||
-                            (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score))
-                        }
-                        className="w-full md:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                        {isSubmitting ? (
-                            <div className="flex items-center justify-center space-x-2">
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>Submitting...</span>
-                            </div>
-                        ) : adaToNgnRate === 0 ? "Loading rates..." :
-                         loadingCreditScore ? "Loading credit score..." :
-                         !creditScore ? "Credit score unavailable" :
-                         (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score)) ? 
-                            "Amount exceeds credit limit" :
-                         "Create Loan Request"}
-                    </button>
+                   <button
+    onClick={createLoanRequest}
+    disabled={
+        isSubmitting || 
+        adaToNgnRate === 0 || 
+        loadingCreditScore || 
+        !creditScore ||
+        // !civilServantStatus.verified || // ADD THIS LINE
+        // civilServantStatus.loading || // ADD THIS LINE
+        (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score))
+    }
+    className="w-full md:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+>
+    {isSubmitting ? (
+        <div className="flex items-center justify-center space-x-2">
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <span>Submitting...</span>
+        </div>
+    ) : adaToNgnRate === 0 ? "Loading rates..." :
+     loadingCreditScore ? "Loading credit score..." :
+     !creditScore ? "Credit score unavailable" :
+    //  civilServantStatus.loading ? "Checking verification..." : // ADD THIS LINE
+    //  !civilServantStatus.verified ? "Civil servant verification required" : // ADD THIS LINE
+     (creditScore && loanAmountNaira > getMaxLoanAmountByCreditScore(creditScore.current_score)) ? 
+        "Amount exceeds credit limit" :
+     "Create Loan Request"}
+</button>
                 </div>
             )}
         </div>

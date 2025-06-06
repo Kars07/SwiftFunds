@@ -55,7 +55,7 @@ type CreditScoreData = {
   late_payments: number;
 };
 
-const API_BASE_URL = "http://localhost:9000";
+const API_BASE_URL = "http://localhost:5000";
 function shortenAddress(address: string, start = 6, end = 4) {
   if (!address) return "";
   return `${address.slice(0, start)}...${address.slice(-end)}`;
@@ -153,12 +153,11 @@ const DefaultDashboardContent: React.FC = () => {
   const fetchCreditScore = async (userPKH: string): Promise<void> => {
     try {
       setIsCreditScoreLoading(true);
-      const response = await fetch(`${API_BASE_URL}/funded_loans.php?action=getCreditScore`, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/api/loans/credit-score/${userPKH}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userPKH }),
       });
       
       const data = await response.json();
@@ -248,14 +247,11 @@ const DefaultDashboardContent: React.FC = () => {
     
     try {
       // Fetch borrower loans (active loans)
-      const activeLoansResponse = await fetch(`${API_BASE_URL}/funded_loans.php?action=getBorrowerLoans`, {
-        method: 'POST',
+      const activeLoansResponse = await fetch(`${API_BASE_URL}/api/loans/borrower/${connection.pkh}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          borrowerPKH: connection.pkh
-        })
       });
       
       const activeLoansData = await activeLoansResponse.json();
@@ -266,14 +262,11 @@ const DefaultDashboardContent: React.FC = () => {
       }
       
       // Fetch repaid loans
-      const repaidLoansResponse = await fetch(`${API_BASE_URL}/funded_loans.php?action=getBorrowerRepaidLoans`, {
-        method: 'POST',
+      const repaidLoansResponse = await fetch(`${API_BASE_URL}/api/loans/borrower/${connection.pkh}/repaid`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          borrowerPKH: connection.pkh
-        })
       });
       
       const repaidLoansData = await repaidLoansResponse.json();
@@ -411,7 +404,7 @@ return (
         </div>
 
         {/* User Actions Section */}
-        <div className="bg-white/80 backdrop-blur-xl border z-10 border-gray-200 rounded-2xl p-6 shadow-2xl">
+        <div className="">
           <div className="flex items-center space-x-6">
             {/* Notification Icon */}
             <button className="relative text-gray-600 hover:text-orange-600 transition-colors duration-300">

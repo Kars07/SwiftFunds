@@ -5,6 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const loanRoutes = require('./routes/loanRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const cookieParser = require('cookie-parser');
 
@@ -52,16 +53,36 @@ app.use(
 );
 
 // MongoDB connection
+// MongoDB connection
 const mongoURI = process.env.MONGO_URI;
-mongoose
-  .connect(mongoURI)
-  .then(() => {
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(mongoURI);
     console.log('Connected to Mongo Atlas!');
-  })
-  .catch((err) => {
+    
+    // Initialize collections and indexes
+    const models = [
+      require('./models/CreditScore'),
+      require('./models/FundedLoan'),
+      require('./models/FundingUtxo'),
+      require('./models/LoanRequest'),
+      require('./models/RepaidLoan'),
+      require('./models/Wallet')
+    ];
+    
+    for (const model of models) {
+      await model.createIndexes();
+    }
+    console.log('Collections initialized!');
+  } catch (err) {
     console.error('Error connecting to MongoDB:', err);
-    process.exit(1); // Exit the application if the connection fails
-  });
+    process.exit(1);
+  }
+};
+
+connectDB();
+  
 
 // Root route
 app.get("/", (req, res) => {
@@ -71,6 +92,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/loans', loanRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

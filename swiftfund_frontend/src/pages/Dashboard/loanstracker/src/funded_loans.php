@@ -515,6 +515,67 @@ case 'getBorrowerRepaidLoans':
     
     echo json_encode(['status' => 'success', 'repaidLoans' => $repaidLoans]);
     break;
+    // Add this case to your existing users.php switch statement
+
+case 'getWalletFromPKH':
+    $data = json_decode(file_get_contents('php://input'), true);
+    $pkh = $data['pkh'] ?? '';
+    
+    if (empty($pkh)) {
+        echo json_encode(['status' => 'error', 'message' => 'Missing PKH']);
+        exit;
+    }
+    
+    try {
+        $stmt = $conn->prepare("SELECT wallet_address FROM users WHERE payment_key_hash = ?");
+        $stmt->bind_param("s", $pkh);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            echo json_encode([
+                'status' => 'success', 
+                'walletAddress' => $user['wallet_address']
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error', 
+                'message' => 'User not found'
+            ]);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 'error', 
+            'message' => 'Database error: ' . $e->getMessage()
+        ]);
+    }
+    break;
+    case 'getByPKH':
+    $data = json_decode(file_get_contents('php://input'), true);
+    $paymentKeyHash = $data['pkh'] ?? '';
+    
+    if (empty($paymentKeyHash)) {
+        echo json_encode(['status' => 'error', 'message' => 'Missing PKH parameter']);
+        exit;
+    }
+    
+    try {
+        $stmt = $conn->prepare("SELECT wallet_address FROM users WHERE payment_key_hash = ?");
+        $stmt->bind_param("s", $paymentKeyHash);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            echo json_encode(['status' => 'success', 'walletAddress' => $user['wallet_address']]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    }
+    break;
         
     case 'get':
         $data = json_decode(file_get_contents('php://input'), true);

@@ -51,6 +51,7 @@ switch ($action) {
         $userId = getOrCreateUser($walletAddress, $paymentKeyHash);
         echo json_encode(['status' => 'success', 'user_id' => $userId]);
         break;
+
         
     default:
         echo json_encode(['status' => 'error', 'message' => 'Invalid action']);

@@ -22,6 +22,7 @@ type RepaidLoan = {
   };
 };
 
+const API_BASE_URL = "http://localhost:5000/api/loans";
 const RepaymentTimelineChart: React.FC = () => {
   const { connection } = useWallet();
   const [chartData, setChartData] = useState<RepaymentData[]>([]);

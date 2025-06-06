@@ -9,7 +9,8 @@ const FundRequestValidatorScript: SpendingValidator = {
 };
 
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
-const API_URL = "http://localhost:9000/funded_loans.php";
+// const API_URL = "http://localhost:9000/funded_loans.php";
+const API_URL = "http://localhost:5000/api/loans";
 type Connection = {
     api: WalletApi;
     lucid: LucidEvolution;
@@ -108,56 +109,162 @@ const LoanToBeRepaid: React.FC = () => {
         if (connection) {
             fetchLoansToRepay(connection);
             fetchCreditScore(connection.pkh); // Add this line
+            testApiEndpoints(connection.pkh);
         }
     }, [connection]);
     // Fetch funded loans and filter those that need to be repaid
-    async function fetchLoansToRepay(conn: Connection): Promise<void> {
-        try {
-            setIsLoading(true);
-            const { lucid, pkh } = conn;
-            // First, fetch all funded loans
-            const allFundedLoans = await fetchFundedLoans(lucid);
-            setFundedLoans(allFundedLoans);
-            // Fetch borrower's loans from API
-            const borrowerLoans = await fetchBorrowerLoansFromApi(pkh);
-            // Filter to get only active loans (not repaid)
-            const loansNeedingRepayment = borrowerLoans.filter(loan => 
-                loan.isActive && !loan.repaymentInfo
-            );
-            console.log("Loans needing repayment:", loansNeedingRepayment);
-            // converting API loans to FundedLoan format
-            const activeBorrowerFundedLoans = await convertApiLoansToFundedLoans(loansNeedingRepayment, lucid);
-            setLoansToRepay(activeBorrowerFundedLoans);
-        } catch (error) {
-            console.error("Error fetching loans to repay:", error);
-            setError("Failed to fetch loans to repay. Please try again.");
-        } finally {
-            setIsLoading(false);
+async function fetchLoansToRepay(conn: Connection): Promise<void> {
+    try {
+        setIsLoading(true);
+        const { lucid, pkh } = conn;
+        
+        console.log("🚀 Starting fetchLoansToRepay for PKH:", pkh);
+        
+        // First, fetch all funded loans
+        console.log("📊 Fetching all funded loans from blockchain...");
+        const allFundedLoans = await fetchFundedLoans(lucid);
+        console.log("📊 Total funded loans found on blockchain:", allFundedLoans.length);
+        setFundedLoans(allFundedLoans);
+        
+        // Fetch borrower's loans from API
+        console.log("🔍 Fetching borrower loans from API...");
+        const borrowerLoans = await fetchBorrowerLoansFromApi(pkh);
+        console.log("📋 Borrower loans returned from API:", borrowerLoans.length);
+        
+        if (borrowerLoans.length === 0) {
+            console.log("⚠️ No borrower loans found in API. Possible causes:");
+            console.log("   - PKH doesn't match database records");
+            console.log("   - User has no loans");
+            console.log("   - API endpoint issue");
+            console.log("   - Database connection issue");
         }
+        
+        // Filter to get only active loans (not repaid)
+        const loansNeedingRepayment = borrowerLoans.filter(loan => {
+            const isActive = loan.isActive && !loan.repaymentInfo;
+            console.log(`📝 Loan ${loan.fundedLoanId}: isActive=${loan.isActive}, hasRepaymentInfo=${!!loan.repaymentInfo}, needsRepayment=${isActive}`);
+            return isActive;
+        });
+        
+        console.log("🎯 Loans needing repayment after filtering:", loansNeedingRepayment.length);
+        console.log("📋 Filtered loans:", loansNeedingRepayment);
+        
+        // Converting API loans to FundedLoan format
+        console.log("🔄 Converting API loans to FundedLoan format...");
+        const activeBorrowerFundedLoans = await convertApiLoansToFundedLoans(loansNeedingRepayment, lucid);
+        console.log("✅ Converted loans:", activeBorrowerFundedLoans.length);
+        console.log("📋 Final loans to repay:", activeBorrowerFundedLoans);
+        
+        setLoansToRepay(activeBorrowerFundedLoans);
+    } catch (error) {
+        console.error("💥 Error fetching loans to repay:", error);
+        setError("Failed to fetch loans to repay. Please try again.");
+    } finally {
+        setIsLoading(false);
     }
-    async function fetchBorrowerLoansFromApi(borrowerPKH: string): Promise<ApiBorrowerLoan[]> {
+}
+
+async function testApiEndpoints(borrowerPKH: string) {
+    console.log("🧪 Testing API endpoints...");
+    
+    // Test different possible endpoint formats
+    const endpointsToTest = [
+        `${API_URL}/borrower/${borrowerPKH}`,
+        `${API_URL}/loans/borrower/${borrowerPKH}`,
+        `${API_URL}?action=getBorrowerLoans&borrowerPKH=${borrowerPKH}`,
+    ];
+    
+    for (const endpoint of endpointsToTest) {
         try {
-            const response = await fetch(`${API_URL}?action=getBorrowerLoans`, {
-                method: 'POST',
+            console.log(`🔍 Testing endpoint: ${endpoint}`);
+            const response = await fetch(endpoint, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ borrowerPKH }),
             });
             
-            const data = await response.json();
+            console.log(`📡 ${endpoint} - Status: ${response.status}`);
             
-            if (data.status === 'success') {
-                return data.loans;
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ ${endpoint} - Response:`, data);
             } else {
-                console.error("API error:", data.message);
-                return [];
+                console.log(`❌ ${endpoint} - Error: ${response.statusText}`);
             }
         } catch (error) {
-            console.error("Error fetching borrower loans from API:", error);
-            return [];
+            console.log(`💥 ${endpoint} - Exception:`, error);
         }
     }
+    
+    // Also test POST method (in case your API expects POST)
+    try {
+        console.log("🔍 Testing POST method...");
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getBorrowerLoans',
+                borrowerPKH: borrowerPKH
+            }),
+        });
+        
+        console.log(`📡 POST method - Status: ${response.status}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ POST method - Response:`, data);
+        } else {
+            console.log(`❌ POST method - Error: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.log(`💥 POST method - Exception:`, error);
+    }
+}
+async function fetchBorrowerLoansFromApi(borrowerPKH: string): Promise<ApiBorrowerLoan[]> {
+    try {
+        console.log("🔍 Fetching loans for borrower PKH:", borrowerPKH);
+        console.log("🌐 API URL:", `${API_URL}/borrower/${borrowerPKH}`);
+        
+        const response = await fetch(`${API_URL}/borrower/${borrowerPKH}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        console.log("📡 Response status:", response.status);
+        console.log("📡 Response ok:", response.ok);
+        
+        if (!response.ok) {
+            console.error("❌ HTTP Error:", response.status, response.statusText);
+            return [];
+        }
+        
+        const data = await response.json();
+        console.log("📦 Raw API response:", data);
+        
+        if (data.status === 'success') {
+            console.log("✅ API success - loans found:", data.loans?.length || 0);
+            console.log("📋 Loans data:", data.loans);
+            return data.loans || [];
+        } else {
+            console.error("❌ API error:", data.message);
+            console.log("🔍 Full error response:", data);
+            return [];
+        }
+    } catch (error) {
+        console.error("💥 Fetch error:", error);
+        console.error("🔍 Error details:", {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+        });
+        return [];
+    }
+}
     async function convertApiLoansToFundedLoans(apiLoans: ApiBorrowerLoan[], lucidInstance: LucidEvolution): Promise<FundedLoan[]> {
         // Get all UTXOs at fund loan address
         const fundedUtxos: UTxO[] = await lucidInstance.utxosAt(FundLoanAddress);
@@ -212,14 +319,13 @@ const LoanToBeRepaid: React.FC = () => {
         }
         return fundedLoans;
     }
-    async function fetchCreditScore(userPKH: string): Promise<void> {
+async function fetchCreditScore(userPKH: string): Promise<void> {
     try {
-        const response = await fetch(`${API_URL}?action=getCreditScore`, {
-            method: 'POST',
+        const response = await fetch(`${API_URL}/credit-score/${userPKH}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userPKH }),
         });
         
         const data = await response.json();
@@ -322,7 +428,8 @@ const LoanToBeRepaid: React.FC = () => {
     
 async function recordLoanRepayment(fundedLoanId: string, repaymentTxHash: string): Promise<void> {
     try {
-        const response = await fetch(`${API_URL}?action=repay`, {
+        // Use the REST endpoint
+        const response = await fetch(`${API_URL}/repay`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

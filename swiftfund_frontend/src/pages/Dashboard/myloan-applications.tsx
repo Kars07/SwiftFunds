@@ -18,7 +18,7 @@ const LoanRequestAddress: Address = validatorToAddress("Preprod", loanRequestVal
 const FundLoanAddress: Address = validatorToAddress("Preprod", FundRequestValidatorScript);
 
 
-const API_BASE_URL = "http://localhost:9000/funded_loans.php";
+const API_BASE_URL = "http://localhost:5000/api/loans";
 
 type LoanRequest = {
     txId: string;
@@ -64,7 +64,7 @@ const MyLoanApplications: React.FC = () => {
     // Helper function to get funded loan IDs from the API
     async function getFundedLoanIds(): Promise<string[]> {
         try {
-            const response = await axios.get(`${API_BASE_URL}?action=getAllFundedLoanIds`);
+            const response = await axios.get(`${API_BASE_URL}/funded/ids`);
             if (response.data.status === 'success') {
                 return response.data.loanIds || [];
             }

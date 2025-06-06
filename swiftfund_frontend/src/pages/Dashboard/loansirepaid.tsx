@@ -10,7 +10,7 @@ type CreditScoreData = {
     late_payments: number;
 };
 // Define the API URL
-const API_URL = "http://localhost:9000/funded_loans.php";
+const API_URL = "http://localhost:5000/api/loans";
 
 type RepaidLoan = {
     id: string;           // Unique ID for the repaid loan (fundedLoanId)
@@ -43,12 +43,11 @@ const LoansIRepaid: React.FC = () => {
             setIsLoading(true);
             setError(null);
             
-            const response = await fetch(`${API_URL}?action=getBorrowerRepaidLoans`, {
-                method: 'POST',
+            const response = await fetch(`${API_URL}/borrower/${userPkh}/repaid`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ borrowerPKH: userPkh }),
             });
             
             const data = await response.json();
@@ -73,12 +72,11 @@ const LoansIRepaid: React.FC = () => {
 
     async function fetchCreditScore(userPKH: string): Promise<void> {
         try {
-            const response = await fetch(`${API_URL}?action=getCreditScore`, {
-                method: 'POST',
+            const response = await fetch(`${API_URL}/credit-score/${userPKH}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userPKH }),
             });
             
             const data = await response.json();

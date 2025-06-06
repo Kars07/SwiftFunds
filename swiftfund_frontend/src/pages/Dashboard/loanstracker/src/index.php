@@ -36,6 +36,16 @@ if ($isApiRequest) {
                 $result = $conn->query("SELECT COUNT(*) as repaid_loans FROM repaid_loans");
                 $repaidCount = $result->fetch_assoc()['repaid_loans'];
                 
+                // Get civil servants stats
+                $result = $conn->query("SELECT COUNT(*) as total_civil_servants FROM civil_servants");
+                $civilServantsCount = $result->fetch_assoc()['total_civil_servants'];
+                
+                $result = $conn->query("SELECT COUNT(*) as verified_civil_servants FROM civil_servants WHERE verification_status = 'approved'");
+                $verifiedCivilServantsCount = $result->fetch_assoc()['verified_civil_servants'];
+                
+                $result = $conn->query("SELECT COUNT(*) as pending_civil_servants FROM civil_servants WHERE verification_status = 'pending'");
+                $pendingCivilServantsCount = $result->fetch_assoc()['pending_civil_servants'];
+                
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Cardano Loan Tracker API is operational',
@@ -45,7 +55,10 @@ if ($isApiRequest) {
                         'total_loan_requests' => (int)$loanCount,
                         'funded_loans' => (int)$fundedCount,
                         'repaid_loans' => (int)$repaidCount,
-                        'active_loans' => (int)$fundedCount - (int)$repaidCount
+                        'active_loans' => (int)$fundedCount - (int)$repaidCount,
+                        'total_civil_servants' => (int)$civilServantsCount,
+                        'verified_civil_servants' => (int)$verifiedCivilServantsCount,
+                        'pending_civil_servants' => (int)$pendingCivilServantsCount
                     ]
                 ]);
             } catch (Exception $e) {
@@ -75,6 +88,12 @@ if ($isApiRequest) {
                         'verify' => 'POST - Verify active loans against blockchain',
                         'getAllFundedLoanIds' => 'GET - Get all funded loan IDs',
                         'getOriginalLoanId' => 'POST - Get original loan ID from funded loan ID'
+                    ],
+                    'civil_servants.php' => [
+                        'submit' => 'POST - Submit civil servant verification application',
+                        'getStatus' => 'POST - Get civil servant verification status for a wallet',
+                        'getAllPending' => 'GET - Get all pending civil servant applications (Admin)',
+                        'verify' => 'POST - Approve/reject civil servant applications (Admin)'
                     ]
                 ]
             ]);
@@ -155,7 +174,7 @@ if ($isApiRequest) {
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -168,8 +187,12 @@ if ($isApiRequest) {
             text-align: center;
         }
         
+        .stat-card.civil-servant {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+        
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -211,6 +234,18 @@ if ($isApiRequest) {
             font-size: 0.9rem;
         }
         
+        .endpoint-category {
+            background: #e6fffa;
+            border-left-color: #38b2ac;
+            margin-top: 20px;
+        }
+        
+        .endpoint-category h4 {
+            color: #38b2ac;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
         .test-section {
             margin-top: 20px;
         }
@@ -224,10 +259,19 @@ if ($isApiRequest) {
             cursor: pointer;
             font-size: 1rem;
             margin-right: 10px;
+            margin-bottom: 10px;
         }
         
         .test-button:hover {
             background: #38a169;
+        }
+        
+        .test-button.civil-servant {
+            background: #ed8936;
+        }
+        
+        .test-button.civil-servant:hover {
+            background: #dd6c20;
         }
         
         .test-result {
@@ -265,6 +309,15 @@ if ($isApiRequest) {
             .card {
                 padding: 20px;
             }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            .stat-number {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
@@ -272,7 +325,7 @@ if ($isApiRequest) {
     <div class="container">
         <div class="header">
             <h1>Cardano Loan Tracker</h1>
-            <p>Decentralized Lending Platform API</p>
+            <p>Decentralized Lending Platform API with Civil Servant Verification</p>
         </div>
         
         <div class="card">
@@ -298,11 +351,25 @@ if ($isApiRequest) {
                     <div class="stat-number" id="activeLoans">-</div>
                     <div class="stat-label">Active Loans</div>
                 </div>
+                <div class="stat-card civil-servant">
+                    <div class="stat-number" id="totalCivilServants">-</div>
+                    <div class="stat-label">Total Applications</div>
+                </div>
+                <div class="stat-card civil-servant">
+                    <div class="stat-number" id="verifiedCivilServants">-</div>
+                    <div class="stat-label">Verified Civil Servants</div>
+                </div>
+                <div class="stat-card civil-servant">
+                    <div class="stat-number" id="pendingCivilServants">-</div>
+                    <div class="stat-label">Pending Applications</div>
+                </div>
             </div>
         </div>
         
         <div class="card">
             <h2>🔗 API Endpoints</h2>
+            
+            <!-- Loan Management Endpoints -->
             <ul class="endpoint-list">
                 <li>
                     <span class="method">GET</span>
@@ -341,15 +408,45 @@ if ($isApiRequest) {
                 </li>
             </ul>
             
+            <!-- Civil Servants Endpoints -->
+            <div class="endpoint-category">
+                <h4>👔 Civil Servant Verification Endpoints</h4>
+                <ul class="endpoint-list">
+                    <li>
+                        <span class="method">POST</span>
+                        <span class="url">/civil_servants.php?action=submit</span>
+                        <div class="description">Submit civil servant verification application with documents</div>
+                    </li>
+                    <li>
+                        <span class="method">POST</span>
+                        <span class="url">/civil_servants.php?action=getStatus</span>
+                        <div class="description">Get civil servant verification status for a wallet address</div>
+                    </li>
+                    <li>
+                        <span class="method">GET</span>
+                        <span class="url">/civil_servants.php?action=getAllPending</span>
+                        <div class="description">Get all pending civil servant applications (Admin only)</div>
+                    </li>
+                    <li>
+                        <span class="method">POST</span>
+                        <span class="url">/civil_servants.php?action=verify</span>
+                        <div class="description">Approve or reject civil servant applications (Admin only)</div>
+                    </li>
+                </ul>
+            </div>
+            
             <div class="test-section">
                 <button class="test-button" onclick="testApiStatus()">Test API Status</button>
                 <button class="test-button" onclick="testEndpoints()">Get All Endpoints</button>
+                <button class="test-button civil-servant" onclick="testCivilServantStatus()">Test Civil Servant Status</button>
+                <button class="test-button civil-servant" onclick="testPendingApplications()">Test Pending Applications</button>
                 <div id="testResult" class="test-result" style="display: none;"></div>
             </div>
         </div>
         
         <div class="card">
             <h2>📚 Usage Examples</h2>
+            
             <h3>Register a User</h3>
             <div class="code">
 POST /users.php?action=register
@@ -358,6 +455,32 @@ Content-Type: application/json
 {
     "address": "addr1qxy...",
     "pkh": "abc123..."
+}
+            </div>
+            
+            <h3>Submit Civil Servant Application</h3>
+            <div class="code">
+POST /civil_servants.php?action=submit
+Content-Type: application/json
+
+{
+    "walletAddress": "addr1qxy...",
+    "companyName": "Ministry of Education",
+    "officialId": "CS12345",
+    "hrVerificationDocument": "doc_url_here",
+    "officialCompanyLetters": ["letter1_url", "letter2_url"],
+    "fullName": "John Doe",
+    "email": "john.doe@gov.ng"
+}
+            </div>
+            
+            <h3>Check Civil Servant Status</h3>
+            <div class="code">
+POST /civil_servants.php?action=getStatus
+Content-Type: application/json
+
+{
+    "walletAddress": "addr1qxy..."
 }
             </div>
             
@@ -380,13 +503,21 @@ Content-Type: application/json
 }
             </div>
             
-            <h3>Get Credit Score</h3>
+            <h3>Verify Civil Servant Application (Admin)</h3>
             <div class="code">
-POST /funded_loans.php?action=getCreditScore
+POST /civil_servants.php?action=verify
 Content-Type: application/json
 
 {
-    "userPKH": "user_payment_key_hash"
+    "civilServantId": 123,
+    "action": "approve"
+}
+
+// Or for rejection:
+{
+    "civilServantId": 123,
+    "action": "reject",
+    "rejectionReason": "Insufficient documentation"
 }
             </div>
         </div>
@@ -400,6 +531,9 @@ Content-Type: application/json
                 <li><strong>Payment Analysis:</strong> Detailed tracking of early, on-time, and late payments</li>
                 <li><strong>UTXO Management:</strong> Track funding UTXOs for each loan</li>
                 <li><strong>Verification:</strong> Verify active loans against blockchain state</li>
+                <li><strong>Civil Servant Verification:</strong> Comprehensive verification system for government employees</li>
+                <li><strong>Document Management:</strong> Handle HR documents and official company letters</li>
+                <li><strong>Admin Dashboard:</strong> Administrative tools for managing civil servant applications</li>
             </ul>
         </div>
     </div>
@@ -421,6 +555,9 @@ Content-Type: application/json
                     document.getElementById('fundedLoans').textContent = data.stats.funded_loans;
                     document.getElementById('repaidLoans').textContent = data.stats.repaid_loans;
                     document.getElementById('activeLoans').textContent = data.stats.active_loans;
+                    document.getElementById('totalCivilServants').textContent = data.stats.total_civil_servants;
+                    document.getElementById('verifiedCivilServants').textContent = data.stats.verified_civil_servants;
+                    document.getElementById('pendingCivilServants').textContent = data.stats.pending_civil_servants;
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -460,6 +597,56 @@ Content-Type: application/json
                 
                 resultDiv.innerHTML = `
                     <h4>Available Endpoints:</h4>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+                resultDiv.className = 'test-result';
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                resultDiv.className = 'test-result';
+            }
+        }
+        
+        async function testCivilServantStatus() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Testing civil servant status endpoint...</p>';
+            resultDiv.className = 'test-result loading';
+            
+            try {
+                const response = await fetch('/civil_servants.php?action=getStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        walletAddress: 'test_wallet_address'
+                    })
+                });
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h4>Civil Servant Status Test:</h4>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+                resultDiv.className = 'test-result';
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                resultDiv.className = 'test-result';
+            }
+        }
+        
+        async function testPendingApplications() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>Loading pending applications...</p>';
+            resultDiv.className = 'test-result loading';
+            
+            try {
+                const response = await fetch('/civil_servants.php?action=getAllPending');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h4>Pending Civil Servant Applications:</h4>
                     <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
                 `;
                 resultDiv.className = 'test-result';

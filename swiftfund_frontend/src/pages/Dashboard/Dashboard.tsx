@@ -1,9 +1,10 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import default_profile from "../../assets/avatar-default.png";
 import { Address, Blockfrost, Lucid, LucidEvolution, paymentCredentialOf, WalletApi, PaymentKeyHash } from "@lucid-evolution/lucid";
 import Verification from "./Verification";
+
 
 type Wallet = {
   name: string;
@@ -26,7 +27,15 @@ interface WalletContextType {
   isConnecting: boolean;
   connectWallet: (wallet: Wallet) => Promise<void>;
   disconnectWallet: () => void;
+  // civilServantStatus: {
+  //   verified: boolean;
+  //   data: any;
+  //   loading: boolean;
+  // };
+  // submitCivilServantApplication: (data: any) => Promise<{ success: boolean; message: string }>;
+  // checkCivilServantStatus: (walletAddress: string) => Promise<void>;
 }
+
 
 const WalletContext = createContext<WalletContextType | null>(null);
 
@@ -38,6 +47,8 @@ export const useWallet = () => {
   return context;
 };
 
+// const civil_service_api =  "http://localhost:9000/civil_servants.php";
+
 // Welcome Modal Component
 const WelcomeModal: React.FC<{ 
   isOpen: boolean; 
@@ -46,6 +57,7 @@ const WelcomeModal: React.FC<{
   onProceedKYC: () => void; 
 }> = ({ isOpen, userName, onClose, onProceedKYC }) => {
   if (!isOpen) return null;
+
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -162,6 +174,17 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" && window.innerWidth < 768
   );
+  // Add these state variables after the existing wallet states
+  // const [civilServantStatus, setCivilServantStatus] = useState<{
+  //   verified: boolean;
+  //   data: any;
+  //   loading: boolean;
+  // }>({
+  //   verified: false,
+  //   data: null,
+  //   loading: false
+  // });
+  // const [statusError, setStatusError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExchangeRate = async () => {
@@ -259,6 +282,32 @@ const Dashboard: React.FC = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Add this useEffect after the existing wallet-related useEffects
+// useEffect(() => {
+//   let timeoutId: ReturnType<typeof setTimeout>;
+  
+//   if (connection?.address) {
+//     // Debounce the status check to prevent rapid successive calls
+//     timeoutId = setTimeout(() => {
+//       checkCivilServantStatus(connection.address);
+//     }, 500); // 500ms delay
+//   } else {
+//     // Reset civil servant status when wallet disconnects
+//     setCivilServantStatus({
+//       verified: false,
+//       data: null,
+//       loading: false
+//     });
+//   }
+
+//   // Cleanup timeout on dependency change
+//   return () => {
+//     if (timeoutId) {
+//       clearTimeout(timeoutId);
+//     }
+//   };
+// }, [connection?.address]);
 
   const handleLogout = async () => {
     disconnectWallet();
@@ -372,14 +421,142 @@ const Dashboard: React.FC = () => {
     localStorage.removeItem("connected_wallet");
   };
 
+//   const checkCivilServantStatus = useCallback(async (walletAddress: string) => {
+//   if (civilServantStatus.loading) {
+//     return;
+//   }
+
+//   try {
+//     setStatusError(null); // Clear previous errors
+//     setCivilServantStatus(prev => ({ ...prev, loading: true }));
+    
+//     const response = await fetch(`${civil_service_api}?action=getStatus`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ walletAddress })
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+    
+//     const result = await response.json();
+    
+//     if (result.status === 'success') {
+//       setCivilServantStatus({
+//         verified: result.verified || false,
+//         data: result.civilServant || null,
+//         loading: false
+//       });
+//     } else {
+//       setStatusError(result.message || 'Unknown error occurred');
+//       setCivilServantStatus({
+//         verified: false,
+//         data: null,
+//         loading: false
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error checking civil servant status:', error);
+//     setStatusError('Failed to check status. Please try again.');
+//     setCivilServantStatus({
+//       verified: false,
+//       data: null,
+//       loading: false
+//     });
+//   }
+// }, [civilServantStatus.loading]);
+
+
+
+// const submitCivilServantApplication = async (applicationData: any) => {
+//   try {
+//     if (!connection?.address) {
+//       throw new Error('No wallet connected');
+//     }
+
+//     console.log('Submitting application data:', applicationData); // Debug log
+
+//     const requestBody = {
+//       action: 'submit', // Include action in the body
+//       ...applicationData,
+//       walletAddress: connection.address
+//     };
+
+//     console.log('Request body:', requestBody); // Debug log
+
+//     const response = await fetch(civil_service_api, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json',
+//         // Add CORS headers if needed
+//         'Access-Control-Allow-Origin': '*',
+//         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+//         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+//       },
+//       body: JSON.stringify(requestBody)
+//     });
+
+//     console.log('Response status:', response.status); // Debug log
+//     console.log('Response headers:', response.headers); // Debug log
+
+//     // Check if response is ok
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//       console.error('HTTP Error Response:', errorText);
+//       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+//     }
+
+//     // Try to parse JSON response
+//     let result;
+//     try {
+//       const responseText = await response.text();
+//       console.log('Raw response:', responseText); // Debug log
+//       result = JSON.parse(responseText);
+//     } catch (parseError) {
+//       console.error('Failed to parse JSON response:', parseError);
+//       throw new Error('Invalid JSON response from server');
+//     }
+
+//     console.log('Parsed result:', result); // Debug log
+    
+//     if (result.status === 'success') {
+//       // Refresh the status after successful submission
+//       await checkCivilServantStatus(connection.address);
+//       return { success: true, message: result.message || 'Application submitted successfully' };
+//     } else {
+//       console.error('API Error:', result);
+//       return { success: false, message: result.message || 'Unknown error occurred' };
+//     }
+//   } catch (error) {
+//     console.error('Error submitting civil servant application:', error);
+    
+//     // More detailed error messages
+//     if (error instanceof TypeError && error.message.includes('fetch')) {
+//       return { success: false, message: 'Network error: Unable to connect to server' };
+//     } else if (error instanceof SyntaxError) {
+//       return { success: false, message: 'Server response format error' };
+//     } else {
+//       return { success: false, message: (error instanceof Error ? error.message : 'Failed to submit application') };
+//     }
+//   }
+// };
+
   // Create wallet context value
-  const walletContextValue: WalletContextType = {
-    wallets,
-    connection,
-    isConnecting,
-    connectWallet,
-    disconnectWallet
-  };
+// Update the wallet context value to include civil servant functions
+const walletContextValue: WalletContextType = {
+  wallets,
+  connection,
+  isConnecting,
+  connectWallet,
+  disconnectWallet,
+  // civilServantStatus,
+  // submitCivilServantApplication,
+  // checkCivilServantStatus
+};
 
 return (
     <WalletContext.Provider value={walletContextValue}>
@@ -508,7 +685,7 @@ return (
     </div>
   )}
   {walletError && (
-    <div className="mt-3 p-3 bg-red-50/60 border border-red-200 rounded-lg">
+    <div className="mt-3  p-3 bg-red-50/60 border border-red-200 rounded-lg">
       <div className="flex items-start">
         <i className="bx bx-error-circle text-red-500 text-sm mr-2 mt-0.5 flex-shrink-0"></i>
         <p className="text-xs text-red-600 flex-1">{walletError}</p>
@@ -516,9 +693,222 @@ return (
     </div>
   )}
 </div>
+{/* {connection && (
+  <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 to-indigo-50/90 backdrop-blur-xl border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-semibold text-blue-700 flex items-center">
+        <div className="relative mr-2">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <div className="absolute inset-0 w-2 h-2 bg-blue-500 rounded-full animate-ping opacity-20"></div>
+        </div>
+        Civil Servant Status
+      </h3> */}
+      
+      {/* Refresh button */}
+{/* <button
+  onClick={() => {
+    if (!civilServantStatus.loading && connection?.address) {
+      checkCivilServantStatus(connection.address);
+    }
+  }}
+  disabled={civilServantStatus.loading}
+  className="p-1.5 rounded-lg hover:bg-blue-100/60 transition-all duration-200 disabled:opacity-50"
+  title="Refresh status"
+> */}
+  {/* <i className={`bx bx-refresh text-blue-600 text-sm ${civilServantStatus.loading ? 'animate-spin' : 'hover:rotate-180 transition-transform duration-300'}`}></i>
+</button>
+    </div>
+
+    {civilServantStatus.loading ? (
+      <div className="flex items-center justify-center py-6">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="relative">
+            <div className="w-8 h-8 border-4 border-blue-200 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-8 h-8 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-xs text-blue-600 animate-pulse">Verifying status...</p>
+        </div>
+      </div>
+    ) : civilServantStatus.verified ? (
+      <div className="space-y-3"> */}
+        {/* Success header */}
+        {/* <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-100/80 to-emerald-100/80 rounded-xl border border-green-200/50">
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <i className="bx bx-badge-check text-green-600 text-lg"></i>
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            <span className="text-sm font-semibold text-green-700">Verified Civil Servant</span>
+          </div>
+          <div className="bg-green-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-green-300/30">
+            <span className="text-xs font-bold text-green-700 flex items-center">
+              <i className="bx bx-check text-xs mr-1"></i>
+              Approved
+            </span>
+          </div>
+        </div> */}
+
+        {/* Additional verified info */}
+        {/* {civilServantStatus.data && (
+          <div className="grid grid-cols-1 gap-2 text-xs">
+            {civilServantStatus.data.ministry && (
+              <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-green-200/30">
+                <span className="text-gray-600">Ministry:</span>
+                <span className="font-medium text-gray-800 truncate ml-2">{civilServantStatus.data.ministry}</span>
+              </div>
+            )}
+            {civilServantStatus.data.position && (
+              <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-green-200/30">
+                <span className="text-gray-600">Position:</span>
+                <span className="font-medium text-gray-800 truncate ml-2">{civilServantStatus.data.position}</span>
+              </div>
+            )}
+          </div> */}
+        {/* )}
+      </div>
+    ) : civilServantStatus.data ? (
+      <div className="space-y-3"> */}
+        {/* Pending/Rejected header */}
+        {/* <div className={`flex items-center justify-between p-3 rounded-xl border ${
+          civilServantStatus.data.verification_status === 'pending' 
+            ? 'bg-gradient-to-r from-orange-100/80 to-amber-100/80 border-orange-200/50' 
+            : 'bg-gradient-to-r from-red-100/80 to-pink-100/80 border-red-200/50'
+        }`}>
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <i className={`bx ${
+                civilServantStatus.data.verification_status === 'pending' 
+                  ? 'bx-time-five text-orange-600' 
+                  : 'bx-x-circle text-red-600'
+              } text-lg`}></i>
+              {civilServantStatus.data.verification_status === 'pending' && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+              )}
+            </div>
+            <span className={`text-sm font-semibold ${
+              civilServantStatus.data.verification_status === 'pending' 
+                ? 'text-orange-700' 
+                : 'text-red-700'
+            }`}>
+              {civilServantStatus.data.verification_status === 'pending' 
+                ? 'Verification Pending' 
+                : 'Application Rejected'}
+            </span>
+          </div>
+          <div className={`backdrop-blur-sm px-3 py-1 rounded-full border ${
+            civilServantStatus.data.verification_status === 'pending'
+              ? 'bg-orange-500/20 border-orange-300/30'
+              : 'bg-red-500/20 border-red-300/30'
+          }`}>
+            <span className={`text-xs font-bold flex items-center ${
+              civilServantStatus.data.verification_status === 'pending' 
+                ? 'text-orange-700' 
+                : 'text-red-700'
+            }`}>
+              <i className={`bx ${
+                civilServantStatus.data.verification_status === 'pending' 
+                  ? 'bx-hourglass' 
+                  : 'bx-x'
+              } text-xs mr-1`}></i>
+              {civilServantStatus.data.verification_status === 'pending' ? 'Pending' : 'Rejected'}
+            </span>
+          </div>
+        </div> */}
+
+        {/* Application details */}
+        {/* <div className="grid grid-cols-1 gap-2 text-xs">
+          <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-gray-200/30">
+            <span className="text-gray-600">Applied:</span>
+            <span className="font-medium text-gray-800">
+              {civilServantStatus.data.created_at ? 
+                new Date(civilServantStatus.data.created_at).toLocaleDateString() : 
+                'Recently'
+              }
+            </span>
+          </div> */}
+          
+          {/* {civilServantStatus.data.verification_status === 'pending' && (
+            <div className="p-3 bg-orange-50/60 rounded-lg border border-orange-200/30">
+              <div className="flex items-start space-x-2">
+                <i className="bx bx-info-circle text-orange-600 text-sm mt-0.5 flex-shrink-0"></i>
+                <p className="text-orange-700 text-xs leading-relaxed">
+                  Your application is under review. You'll be notified once verification is complete.
+                </p>
+              </div>
+            </div>
+          )} */}
+          
+          {/* {civilServantStatus.data.verification_status === 'rejected' && (
+            <>
+              {civilServantStatus.data.rejection_reason && (
+                <div className="p-3 bg-red-50/60 rounded-lg border border-red-200/30">
+                  <div className="flex items-start space-x-2">
+                    <i className="bx bx-error text-red-600 text-sm mt-0.5 flex-shrink-0"></i>
+                    <div>
+                      <p className="text-red-700 text-xs font-medium mb-1">Rejection Reason:</p>
+                      <p className="text-red-600 text-xs leading-relaxed">
+                        {civilServantStatus.data.rejection_reason}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )} */}
+{/*               
+              <button
+                onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
+                className="w-full text-xs px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+              >
+                <i className="bx bx-refresh"></i>
+                <span>Reapply for Verification</span>
+              </button>
+            </>
+          )}
+        </div>
+      </div> */}
+    {/* ) : (
+      <div className="space-y-4"> */}
+        {/* No application state */}
+        {/* <div className="text-center py-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i className="bx bx-shield-plus text-blue-600 text-xl"></i>
+          </div>
+          <h4 className="text-sm font-semibold text-gray-800 mb-2">Not Verified</h4>
+          <p className="text-xs text-gray-600 leading-relaxed mb-4">
+            Apply for civil servant verification to unlock exclusive lending benefits and higher loan limits.
+          </p>
+        </div> */}
+
+        {/* Benefits preview */}
+        {/* <div className="space-y-2">
+          <p className="text-xs font-medium text-gray-700 mb-2">Verification Benefits:</p>
+          <div className="space-y-1">
+            {[
+              { icon: 'bx-trending-up', text: 'Higher loan limits' },
+              { icon: 'bx-percentage', text: 'Better interest rates' },
+              { icon: 'bx-time', text: 'Faster approval times' }
+            ].map((benefit, index) => (
+              <div key={index} className="flex items-center space-x-2 text-xs text-gray-600">
+                <i className={`bx ${benefit.icon} text-blue-500`}></i>
+                <span>{benefit.text}</span>
+              </div>
+            ))}
+          </div>
+        </div> */}
+
+        {/* <button
+          onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
+          className="w-full text-xs px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+        >
+          <i className="bx bx-plus"></i>
+          <span>Start Verification Process</span>
+        </button>
+      </div>
+    )}
+  </div>
+)} */}
 
               <nav>
-                <ul className="space-y-4 cursor-pointer">
+                <ul className="space-y-4 border-6 cursor-pointer">
                   {/* Home */}
                   <li
                     className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -634,6 +1024,21 @@ return (
                     <i className="bx bx-user text-xl font-bold group-hover:text-orange-600"></i>
                     <span>Profile</span>
                   </li>
+                  {/* {connection && !civilServantStatus.verified && (
+                    <li
+                      className="group flex items-center space-x-3 py-3 px-6 text-gray-700 hover:text-orange-600 rounded-2xl bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
+                      onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
+                    >
+                      <i className="bx bx-shield-check text-xl font-bold group-hover:text-orange-600"></i>
+                      <span>Civil Servant Verification</span>
+
+                      {civilServantStatus.data && civilServantStatus.data.verification_status === 'pending' && (
+                        <div className="ml-auto bg-orange-100 px-2 py-1 rounded-full">
+                          <i className="bx bx-time text-xs text-orange-600"></i>
+                        </div>
+                      )}
+                    </li>
+                  )} */}
 
                   {/* Settings */}
                   <li

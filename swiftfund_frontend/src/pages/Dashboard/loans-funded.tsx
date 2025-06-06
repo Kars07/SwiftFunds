@@ -52,7 +52,12 @@ type FundedLoanDetails = {
         repaymentTxHash: string;
     };
 };
-const API_BASE_URL = "http://localhost:9000/funded_loans.php";
+type CivilServantData = {
+    full_name: string;
+    company_name: string;
+    verification_status: string;
+};
+const API_BASE_URL = "http://localhost:5000/api/loans";
 const LoansFunded: React.FC = () => {
     const { connection, isConnecting } = useWallet();
     const [fundedLoans, setFundedLoans] = useState<FundedLoanDetails[]>([]);
@@ -61,8 +66,8 @@ const LoansFunded: React.FC = () => {
     const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
     const [initialized, setInitialized] = useState<boolean>(false);
     const [debugInfo, setDebugInfo] = useState<string>("No errors");
+    const [civilServants, setCivilServants] = useState<Map<string, CivilServantData>>(new Map());
 
-    // Mark as initialized on component mount
     useEffect(() => {
         setInitialized(true);
     }, []);
@@ -102,14 +107,13 @@ const LoansFunded: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            
+
             // Get funded loans from API endpoint 
-            const response = await fetch(`${API_BASE_URL}?action=get`, {
-                method: 'POST',
+            const response = await fetch(`${API_BASE_URL}/lender/${userPkh}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ lenderPKH: userPkh }),
             });
             
             if (!response.ok) {
@@ -174,7 +178,7 @@ const LoansFunded: React.FC = () => {
             // Calling the API to verify and update any loans that are no longer on-chain
             if (activeFundedUTXOs.length > 0) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}?action=verify`, {
+                    const response = await fetch(`${API_BASE_URL}/verify`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -223,7 +227,7 @@ const LoansFunded: React.FC = () => {
         fundedAt: number;
     }): Promise<boolean> {
         try {
-            const response = await fetch(`${API_BASE_URL}?action=add`, {
+            const response = await fetch(`${API_BASE_URL}/funded`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -261,7 +265,7 @@ const LoansFunded: React.FC = () => {
         repaymentTxHash: string;
     }): Promise<boolean> {
         try {
-            const response = await fetch(`${API_BASE_URL}?action=repay`, {
+            const response = await fetch(`${API_BASE_URL}/repay`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
