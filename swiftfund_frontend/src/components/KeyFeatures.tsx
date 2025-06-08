@@ -37,7 +37,7 @@ const KeyFeatures: React.FC = () => {
   }, []);
 
   return (
-    <div className="md:py-30 pb-0 px-5 md:mt-20 mt-90 overflow-hidden">
+    <div className="md:py-30 pb-0 px-5 md:mt-20 mt-100 overflow-hidden">
       <h1 className="text-4xl md:pt-10 font-bold text-gray-900 text-center">KEY FEATURES OF SWIFTFUND</h1>
       <div className="justify-center text-center items-center pt-3 flex">
          <div className=''>We are all about our client's comfort and safety. That's why we provide the best service you</div>
@@ -80,24 +80,24 @@ const KeyFeatures: React.FC = () => {
       {/* 📝 Key Features Content */}
       <div className=' text-center md:text-left mx-4 md:mx-0'>
         <div className='py-20 md:py-0 md:border-none border-4 mb-14 md:mb-0 md:rounded-none md:shadow-none rounded-4xl shadow-2xl'>
-          <h1 className="text-black font-medium text-4xl md:text-3xl pt-0 md:pt-10 pb-5">🔁 Dual Roles</h1>
-          <h2 className='md:text-lg text-2xl px-4'>
+          <h1 className="text-black font-medium text-3xl md:text-3xl pt-0 md:pt-10 pb-5">🔁 Dual Roles</h1>
+          <h2 className='md:text-lg text-xl px-4'>
             Every user can be a borrower or lender at <br />
             any time. This flexibility promotes a healthy,<br />
             sustainable loan ecosystem.
           </h2>
         </div>
         <div className="justify-center md:flex md:flex-col items-center mb-14 md:mb-0  py-20 md:py-0 md:border-none md:rounded-none md:shadow-none border-4 rounded-4xl shadow-2xl">
-          <h1 className="text-black md:px-0 px-10 font-medium text-4xl md:text-3xl pt-0 md:pt-10 pb-5">📤 Blockchain Submissions</h1>
-          <h2 className='md:text-lg text-2xl px-2'>
+          <h1 className="text-black md:px-0 px-10 font-medium text-3xl md:text-3xl pt-0 md:pt-10 pb-5">📤 Blockchain Submissions</h1>
+          <h2 className='md:text-lg text-xl px-2'>
             Loan requests are submitted to the Cardano<br />
             blockchain, ensuring transparency, immutability, <br />
             and auditability of all actions.
           </h2>
         </div>
         <div className="justify-end md:flex md:flex-col items-end py-20 mb-24 md:mb-0 md:py-0 md:border-none border-4 md:rounded-none md:shadow-none rounded-4xl shadow-2xl">
-          <h1 className="text-black md:px-0 px-10 font-medium items-center md:item-end text-4xl md:text-3xl pt-0 md:pt-10 pb-5 transform md:-translate-x-30">⏳ Timely Repayment</h1>
-          <h2 className='md:text-lg text-2xl px-2'>
+          <h1 className="text-black md:px-0 px-10 font-medium items-center md:item-end text-3xl md:text-3xl pt-0 md:pt-10 pb-5 transform md:-translate-x-30">⏳ Timely Repayment</h1>
+          <h2 className='md:text-lg text-xl px-2'>
             Borrowers are expected to repay on or before<br />
             the deadline. Failure to repay may affect reputation<br />
             and access to future funds.

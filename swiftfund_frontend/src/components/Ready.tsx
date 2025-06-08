@@ -27,7 +27,7 @@ export const Ready: React.FC = () => {
         <div className="flex justify-center">
           <button
             onClick={handleLaunchApp}
-            className="bg-orange-600 cursor-pointer md:w-[50%] w-[70%] lg:text-2xl text-2xl md:text-4xl my-30 text-white md:mb-50 mt-20 font-bold py-6  px-8 lg:px-6 rounded-full lg:rounded-4xl transition duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-orange-700"
+            className="bg-orange-600 cursor-pointer md:w-[50%] w-[90%] lg:text-4xl text-2xl md:text-4xl my-30  md:mb-50 mt-20 font-bold py-5 md:py-10  px-8 lg:px-6 rounded-full text-white lg:rounded-4xl transition shadow-lg duration-300 ease-in-out   hover:bg-white hover:text-black hover:border-8 hover:border-amber-600"
           >
             Start Lending or Borrowing
           </button>
