@@ -36,7 +36,7 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white py-8 flex flex-col items-center">
+    <div className="min-h-screen py-8 flex flex-col items-center">
       {/* Header */}
       <div className="w-full flex items-center mb-8 max-w-5xl px-6">
         <button className="text-orange-500 text-2xl mr-2 hover:bg-orange-50 rounded-full p-2">
@@ -50,7 +50,7 @@ const Profile: React.FC = () => {
       {/* Main Content Container */}
       <div className="w-full flex flex-col gap-8 items-center">
         {/* Profile Card */}
-        <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg px-10 pt-8 pb-6 border border-orange-100">
+        <div className="w-full max-w-5xl ml-10 bg-white rounded-2xl shadow-lg px-10 pt-8 pb-6 border border-orange-100">
           <div className="flex items-center mb-4">
             <img
               src={default_profile}
@@ -87,7 +87,7 @@ const Profile: React.FC = () => {
         </div>
 
         {/* Details Card */}
-        <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg px-10 pt-8 pb-6 border border-orange-100">
+        <div className="w-full max-w-5xl ml-10 bg-white rounded-2xl shadow-lg px-10 pt-8 pb-6 border border-orange-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
             <ProfileRow label="KYC Levels" value={profile.kycLevel} />
             <ProfileRow label="Full Name" value={profile.fullName} />

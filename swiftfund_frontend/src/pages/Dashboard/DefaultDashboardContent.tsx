@@ -381,169 +381,158 @@ const DefaultDashboardContent: React.FC = () => {
 
   
 return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
-    {/* Animated Background Elements */}
-    <div className="absolute inset-0 opacity-20">
-      <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-      <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-      <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
-    </div>
+  <div className="min-h-screen relative overflow-hidden">
+    <div className="relative z-10 p-6 pt-8">
 
-    {/* Grid Pattern Overlay */}
-    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-
-    <div className="relative z-10 p-6 pt-16">
       {/* Dashboard Header */}
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex items-center justify-between mb-8">
+        
         {/* Welcome Section */}
         <div>
-          <h1 className="text-5xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
-            Welcome, {userName} 👋
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-2 flex items-center gap-3">
+            Welcome, {userName} 
+            <span className="text-3xl">👋</span>
           </h1>
-          <p className="text-gray-600 text-lg">Your personal loan management dashboard in the decentralized ecosystem</p>
+          <p className="text-gray-600 text-base">Your personal loan management dashboard in the decentralized ecosystem</p>
         </div>
 
         {/* User Actions Section */}
-        <div className="">
-          <div className="flex items-center space-x-6">
-            {/* Notification Icon */}
-            <button className="relative text-gray-600 hover:text-orange-600 transition-colors duration-300">
-              <i className="bx bx-bell text-2xl"></i>
-              <span className="absolute -top-1 -right-1 inline-block w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full animate-pulse"></span>
-            </button>
+        <div className="flex items-center space-x-4">
+          {/* Notification Icon */}
+          <button className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
+            <i className="bx bx-bell text-xl"></i>
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+          </button>
 
-            {/* Settings Icon */}
-            <button className="text-gray-600 hover:text-orange-600 transition-colors duration-300">
-              <i className="bx bx-cog text-2xl"></i>
-            </button>
+          {/* Settings Icon */}
+          <button className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
 
-            {/* User Avatar */}
-            <div className="relative inline-block text-left" ref={dropdownRef}>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
-                  <img src={default_profile} alt="User Avatar" className="w-full h-full object-cover" />
-                </div>
-                <button
-                  className="text-gray-600 hover:text-orange-600 transition-colors duration-300"
-                  onClick={() => setShowDropdown((prev) => !prev)}
-                >
-                  <i className="bx bx-chevron-down text-lg"></i>
-                </button>
+          {/* User Avatar */}
+          <div className="relative" ref={dropdownRef}>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
+                <img src={default_profile} alt="User Avatar" className="w-full h-full object-cover" />
               </div>
-
-              {showDropdown && (
-                <div className="absolute right-0 mt-4 w-80 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6 transform animate-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <p className="text-sm text-gray-600">Signed in as</p>
-                  </div>
-                  <p className="font-semibold text-gray-800 mb-4">{userName || "User"}</p>
-                
-                  {connection?.address && (
-                    <>
-                      <div className="h-px bg-gradient-to-r from-gray-300 to-transparent mb-4"></div>
-                      <p className="text-sm text-gray-600 mb-2">Wallet Address:</p>
-                      <div className="bg-gray-100/60 rounded-xl p-3">
-                        <p className="text-xs font-mono text-orange-600 break-all">
-                          {shortenAddress(connection.address)}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>  
-              )}
+              <button
+                className="text-gray-600 hover:text-orange-600 transition-colors duration-300"
+                onClick={() => setShowDropdown((prev) => !prev)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-4 w-80 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <p className="text-sm text-gray-600">Signed in as</p>
+                </div>
+                <p className="font-semibold text-gray-800 mb-4">{userName || "User"}</p>
+              
+                {connection?.address && (
+                  <>
+                    <div className="h-px bg-gradient-to-r from-gray-300 to-transparent mb-4"></div>
+                    <p className="text-sm text-gray-600 mb-2">Wallet Address:</p>
+                    <div className="bg-gray-100/60 rounded-xl p-3">
+                      <p className="text-xs font-mono text-orange-600 break-all">
+                        {shortenAddress(connection.address)}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>  
+            )}
           </div>
         </div>
       </div>
       
-      {/* Stats Cards */}
-      <div className="grid justify-center items-center grid-cols-1 md:grid-cols-4 gap-40 mb-12">
+      {/* Stats Cards - Improved layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
         {/* Total Applications */}
-        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Applications</h3>
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
-              <i className="bx bx-file text-xl"></i>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+          <p className="text-3xl font-bold text-gray-800 mb-2">
             {isLoading ? (
-              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+              <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
             ) : totalApplications}
           </p>
           <div className="flex items-center text-sm text-blue-600">
-            <i className="bx bx-info-circle mr-2"></i>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <span>All loan requests made</span>
           </div>
         </div>
 
         {/* Active Loans */}
-        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Active Loans</h3>
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
-              <i className="bx bx-money text-xl"></i>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+          <p className="text-3xl font-bold text-gray-800 mb-2">
             {isLoading ? (
-              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+              <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
             ) : activeLoans}
           </p>
           <div className="flex items-center text-sm text-green-600">
-            <i className="bx bx-trending-up mr-2"></i>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
             <span>Funded & not repaid</span>
           </div>
         </div>
 
-        {/* Pending Approval
-        <div className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-600">Pending Approval</h3>
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
-              <i className="bx bx-time text-xl"></i>
-            </div>
-          </div>
-          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-            {isLoading ? (
-              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
-            ) : pendingApproval}
-          </p>
-          <div className="flex items-center text-sm text-yellow-600">
-            <i className="bx bx-time mr-2"></i>
-            <span>Awaiting funding</span>
-          </div>
-        </div> */}
-
         {/* Total Repaid */}
-        <div className="group w-[300px] bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl hover:border-orange-300 hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Repaid</h3>
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-orange-200 transition-all duration-300">
-              <i className="bx bx-check-circle text-xl"></i>
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+          <p className="text-3xl font-bold text-gray-800 mb-2">
             {isLoading ? (
-              <div className="animate-pulse bg-gray-200 h-10 w-16 rounded"></div>
+              <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
             ) : totalRepaid}
           </p>
           <div className="flex items-center text-sm text-green-600">
-            <i className="bx bx-trending-up mr-2"></i>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
             <span>Repaid Loans</span>
           </div>
         </div>
       </div>
 
-      {/* Wallet Balance Section */}
-      <div className="bg-gradient-to-r from-orange-500/90 to-orange-400/90 backdrop-blur-xl border border-orange-300 rounded-3xl shadow-2xl p-8 mb-12 max-w-4xl  "> 
+      {/* Wallet Balance Section - Improved design */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl shadow-xl p-8 mb-8 max-w-5xl mx-auto"> 
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
-            <div className="w-1 h-12 bg-gradient-to-b from-white to-orange-200 rounded-full"></div>
+            <div className="w-1 h-12 bg-white/50 rounded-full"></div>
             <div>
               <h2 className="text-2xl font-bold text-white">Wallet Balance</h2>
-              <div className="h-px w-24 bg-gradient-to-r from-white to-transparent mt-2"></div>
+              <div className="h-px w-24 bg-white/30 mt-2"></div>
             </div>
           </div>
           
@@ -579,14 +568,14 @@ return (
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+          <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
             <p className="text-orange-100 text-sm mb-2">Total Balance (₦)</p> 
             <h3 className="text-3xl font-bold text-white">
               ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
             </h3>
           </div>
 
-          <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-6">
+          <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
             <p className="text-orange-100 text-sm mb-2">Total Balance (ADA)</p>
             <h3 className="text-3xl font-bold text-white"> 
               {connection ? lovelaceToAda(walletBalance) : "0"} ADA
@@ -595,38 +584,40 @@ return (
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      {/* Main Content Grid - Improved spacing */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {/* Chart Section */}
-        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+        <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-8 shadow-lg">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
-            <h2 className="text-2xl font-bold text-gray-800">Repayment Timeline</h2>
+            <h2 className="text-xl font-bold text-gray-800">Repayment Timeline</h2>
             <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
           </div>
           <RepaymentTimelineChart />
         </div>
 
         {/* Verification Status Section */}
-        <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-8 shadow-lg">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
-            <h2 className="text-xl font-bold text-gray-800">Verification Status</h2>
+            <h2 className="text-lg font-bold text-gray-800">Verification Status</h2>
           </div>
 
           {/* KYC Level Progress */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm text-gray-600">KYC Level</span>
-              <span className="text-sm font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">Level 1</span>
+              <span className="text-sm font-bold text-orange-600">Level 1</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
-              <div className="h-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 animate-pulse" style={{ width: "33%" }}></div>
+              <div className="h-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-1000" style={{ width: "33%" }}></div>
             </div>
-            <a href="#" className="text-orange-600 text-sm font-medium hover:text-orange-700 transition-colors duration-300 flex items-center">
+            <button className="text-orange-600 text-sm font-medium hover:text-orange-700 transition-colors duration-300 flex items-center">
               Upgrade to Level 2 
-              <i className="bx bx-right-arrow-alt ml-1"></i>
-            </a>
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
           </div>
 
           {/* Credit Reputation Score */}
@@ -636,18 +627,18 @@ return (
               {isCreditScoreLoading ? (
                 <div className="animate-pulse bg-gray-200 h-6 w-12 rounded"></div>
               ) : (
-                <span className={`text-sm font-bold ${creditScore ? getCreditScoreColor(creditScore.current_score) : 'text-gray-900'}`}>
+                <span className={`text-sm font-bold ${creditScore ? getCreditScoreColor(creditScore.current_score) : 'text-green-600'}`}>
                   {creditScore ? creditScore.current_score : "600"}
                 </span>
               )}
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
               <div 
-                className={`h-3 rounded-full transition-all duration-1000 ${creditScore ? getCreditScoreBgColor(creditScore.current_score) : 'bg-green-500'}`} 
+                className={`h-3 rounded-full transition-all duration-1000 ${creditScore ? getCreditScoreBgColor(creditScore.current_score) : 'bg-gradient-to-r from-green-500 to-green-400'}`} 
                 style={{ width: `${creditScore ? getCreditScoreProgress(creditScore.current_score) : 10}%` }}
               ></div>
             </div>
-            <div className={`${creditScore && creditScore.current_score >= 650 ? 'bg-green-50 border-green-200 text-green-800' : creditScore && creditScore.current_score >= 550 ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : 'bg-red-50 border-red-200 text-red-800'} border backdrop-blur-sm text-sm p-4 rounded-2xl shadow-lg`}>
+            <div className={`${creditScore && creditScore.current_score >= 650 ? 'bg-green-50 border-green-200 text-green-800' : creditScore && creditScore.current_score >= 550 ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : 'bg-red-50 border-red-200 text-red-800'} border backdrop-blur-sm text-sm p-4 rounded-2xl shadow-sm`}>
               <p className="font-semibold mb-2">
                 {creditScore ? getCreditScoreLabel(creditScore.current_score) : "Good"} credit score
               </p>
@@ -668,7 +659,7 @@ return (
           </div>
 
           {/* Verification Button */}
-          <button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl font-semibold">
+          <button className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-semibold">
             Verify Your Account
           </button>
         </div>

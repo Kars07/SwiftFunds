@@ -561,6 +561,7 @@ const walletContextValue: WalletContextType = {
 return (
     <WalletContext.Provider value={walletContextValue}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -582,498 +583,267 @@ return (
           )}
           
           {/* Sidebar */}
-          <aside className={`w-[100vw] scroll-auto shadow-lg md:w-1/4 z-10 bg-white/60 backdrop-blur-xl border-r border-gray-200 text-white p-3 flex flex-col justify-between h-full md:h-[100vh] overflow-hidden fixed transform transition-transform duration-300 md:static ${
+          <aside className={`w-[100vw] scroll-auto shadow-xl md:w-1/4 z-10 bg-white/70 backdrop-blur-xl border-r border-gray-200/50 text-white p-4 flex flex-col justify-between h-full md:h-[100vh] overflow-hidden fixed transform transition-transform duration-300 md:static ${
             isMobile ? "w-2/3 bg-white/80 backdrop-blur-xl " : "w-1/5"}
            ${menuOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}`}
           >
            {isMobile && (
               <button
                 onClick={toggleMenu}
-                className="absolute top-7 pl-3 right-2 text-xl hover:bg-gray-200/50 rounded-full p-1 transition-all duration-300"
+                className="absolute top-4 right-4 text-xl hover:bg-gray-200/50 rounded-full p-2 transition-all duration-300 text-gray-700"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
               </button>
             )}
 
-            <div>
-              <div className="flex items-center md:pt-0 pt-4 space-x-2 mb-10">
-                <img src={logo} alt="Swiftfund Logo" className="w-7 h-auto" />
-                <div className="text-2xl font-bold">
-                  <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent">SWIFTFUND</span>
+            <div className="flex-1 overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center md:pt-0 pt-8 space-x-3 mb-8">
+                <img src={logo} alt="Swiftfund Logo" className="w-8 h-8" />
+                <div className="text-xl font-bold">
+                  <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent">DASHBOARD</span>
                 </div>
               </div>
- {/* /* Wallet Connection Status */ }
-<div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 shadow-lg">
-  <h3 className="text-sm font-semibold text-orange-600 mb-3 flex items-center">
-    <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
-    Wallet Connection
-  </h3>
-  {connection ? (
-    <div className="flex flex-col space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-600 font-mono bg-green-100/60 px-3 py-2 rounded-lg border border-green-200 flex-1 mr-3 truncate">
-          {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
-        </span>
-      </div>
-      <button 
-        onClick={disconnectWallet}
-        className="w-full text-xs px-3 py-2 bg-gradient-to-r from-red-50 to-red-100 text-red-700 rounded-lg hover:from-red-100 hover:to-red-200 transition-all duration-300 transform hover:scale-105 border border-red-200 hover:border-red-300 font-medium"
-      >
-        <i className="bx bx-log-out mr-1"></i>
-        Disconnect Wallet
-      </button>
-    </div>
-  ) : (
-    <div className="space-y-2">
-      {/* Simple wallet buttons without dropdown */}
-      {!showWalletDropdown ? (
-        <button
-          onClick={toggleWalletDropdown}
-          disabled={isConnecting}
-          className="w-full text-xs px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-between disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          <span>{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
-          <i className="bx bx-chevron-down text-sm"></i>
-        </button>
-      ) : (
-        <div className="space-y-2">
-          {/* Back button */}
-          <button
-            onClick={toggleWalletDropdown}
-            className="w-full text-xs px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-300 flex items-center"
-          >
-            <i className="bx bx-arrow-back text-sm mr-2"></i>
-            Back
-          </button>
-          
-          {/* Wallet options */}
-          {wallets.length > 0 ? (
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500 px-2 py-1">Choose a wallet:</p>
-              {wallets.map((wallet) => (
-                <button
-                  key={wallet.name}
-                  onClick={() => {
-                    connectWallet(wallet);
-                    toggleWalletDropdown();
-                  }}
-                  className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 flex items-center transition-all duration-300 rounded-lg border border-gray-200 hover:border-orange-300"
+
+              {/* Wallet Connection Status */}
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-white/90 to-gray-50/90 backdrop-blur-xl border border-gray-200/50 shadow-sm">
+                <h3 className="text-xs font-semibold text-orange-600 mb-3 flex items-center">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
+                  Wallet Connection
+                </h3>
+                {connection ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600 font-mono bg-green-100/60 px-2 py-1.5 rounded-md border border-green-200 flex-1 mr-2 truncate">
+                        {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={disconnectWallet}
+                      className="w-full text-xs px-3 py-2 bg-gradient-to-r from-red-50 to-red-100 text-red-700 rounded-md hover:from-red-100 hover:to-red-200 transition-all duration-200 border border-red-200 hover:border-red-300 font-medium"
+                    >
+                      <i className="bx bx-log-out mr-1"></i>
+                      Disconnect
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {!showWalletDropdown ? (
+                      <button
+                        onClick={toggleWalletDropdown}
+                        disabled={isConnecting}
+                        className="w-full text-xs px-3 py-2.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-md transition-all duration-200 flex items-center justify-between disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        <span>{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
+                        <i className="bx bx-chevron-down text-sm"></i>
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <button
+                          onClick={toggleWalletDropdown}
+                          className="w-full text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-all duration-200 flex items-center"
+                        >
+                          <i className="bx bx-arrow-back text-sm mr-2"></i>
+                          Back
+                        </button>
+                        
+                        {wallets.length > 0 ? (
+                          <div className="space-y-1">
+                            <p className="text-xs text-gray-500 px-2 py-1">Choose a wallet:</p>
+                            {wallets.map((wallet) => (
+                              <button
+                                key={wallet.name}
+                                onClick={() => {
+                                  connectWallet(wallet);
+                                  toggleWalletDropdown();
+                                }}
+                                className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 flex items-center transition-all duration-200 rounded-md border border-gray-200 hover:border-orange-300"
+                              >
+                                {wallet.icon && (
+                                  <img 
+                                    src={wallet.icon} 
+                                    alt={wallet.name} 
+                                    className="w-4 h-4 mr-3 flex-shrink-0" 
+                                  />
+                                )}
+                                <span className="truncate">{wallet.name}</span>
+                                <div className="ml-auto flex-shrink-0">
+                                  <i className="bx bx-chevron-right text-xs text-gray-400"></i>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="px-3 py-4 text-center border border-gray-200 rounded-md bg-gray-50/50">
+                            <i className="bx bx-wallet text-lg mb-2 block text-gray-400"></i>
+                            <p className="text-xs text-gray-500">No wallets detected</p>
+                            <p className="text-xs text-gray-400 mt-1">Install a wallet extension</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {walletError && (
+                  <div className="mt-3 p-3 bg-red-50/60 border border-red-200 rounded-md">
+                    <div className="flex items-start">
+                      <i className="bx bx-error-circle text-red-500 text-sm mr-2 mt-0.5 flex-shrink-0"></i>
+                      <p className="text-xs text-red-600 flex-1">{walletError}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <nav className="space-y-2">
+                {/* Home */}
+                <div
+                  className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  onClick={() => handleNavigation("/dashboard")}
                 >
-                  {wallet.icon && (
-                    <img 
-                      src={wallet.icon} 
-                      alt={wallet.name} 
-                      className="w-4 h-4 mr-3 flex-shrink-0" 
-                    />
-                  )}
-                  <span className="truncate">{wallet.name}</span>
-                  <div className="ml-auto flex-shrink-0">
-                    <i className="bx bx-chevron-right text-xs text-gray-400"></i>
+                  <i className="bx bx-home text-lg"></i>
+                  <span className="text-sm font-medium">Home</span>
+                </div>
+
+                {/* Borrower Actions */}
+                <div className="group">
+                  <div
+                    className="flex items-center justify-between py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
+                    onClick={toggleBorrowerActions}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <i className="bx bx-user text-lg"></i>
+                      <span className="text-sm font-medium">Borrower Actions</span>
+                    </div>
+                    <i
+                      className={`bx bx-chevron-down text-sm transition-transform duration-200 ${
+                        showBorrowerActions ? "rotate-180" : "rotate-0"
+                      }`}
+                    ></i>
                   </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="px-3 py-4 text-center border border-gray-200 rounded-lg bg-gray-50/50">
-              <i className="bx bx-wallet text-xl mb-2 block text-gray-400"></i>
-              <p className="text-xs text-gray-500">No wallets detected</p>
-              <p className="text-xs text-gray-400 mt-1">Install a wallet extension</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )}
-  {walletError && (
-    <div className="mt-3  p-3 bg-red-50/60 border border-red-200 rounded-lg">
-      <div className="flex items-start">
-        <i className="bx bx-error-circle text-red-500 text-sm mr-2 mt-0.5 flex-shrink-0"></i>
-        <p className="text-xs text-red-600 flex-1">{walletError}</p>
-      </div>
-    </div>
-  )}
-</div>
-{/* {connection && (
-  <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 to-indigo-50/90 backdrop-blur-xl border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-blue-700 flex items-center">
-        <div className="relative mr-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <div className="absolute inset-0 w-2 h-2 bg-blue-500 rounded-full animate-ping opacity-20"></div>
-        </div>
-        Civil Servant Status
-      </h3> */}
-      
-      {/* Refresh button */}
-{/* <button
-  onClick={() => {
-    if (!civilServantStatus.loading && connection?.address) {
-      checkCivilServantStatus(connection.address);
-    }
-  }}
-  disabled={civilServantStatus.loading}
-  className="p-1.5 rounded-lg hover:bg-blue-100/60 transition-all duration-200 disabled:opacity-50"
-  title="Refresh status"
-> */}
-  {/* <i className={`bx bx-refresh text-blue-600 text-sm ${civilServantStatus.loading ? 'animate-spin' : 'hover:rotate-180 transition-transform duration-300'}`}></i>
-</button>
-    </div>
 
-    {civilServantStatus.loading ? (
-      <div className="flex items-center justify-center py-6">
-        <div className="flex flex-col items-center space-y-3">
-          <div className="relative">
-            <div className="w-8 h-8 border-4 border-blue-200 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-8 h-8 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-          <p className="text-xs text-blue-600 animate-pulse">Verifying status...</p>
-        </div>
-      </div>
-    ) : civilServantStatus.verified ? (
-      <div className="space-y-3"> */}
-        {/* Success header */}
-        {/* <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-100/80 to-emerald-100/80 rounded-xl border border-green-200/50">
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <i className="bx bx-badge-check text-green-600 text-lg"></i>
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            </div>
-            <span className="text-sm font-semibold text-green-700">Verified Civil Servant</span>
-          </div>
-          <div className="bg-green-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-green-300/30">
-            <span className="text-xs font-bold text-green-700 flex items-center">
-              <i className="bx bx-check text-xs mr-1"></i>
-              Approved
-            </span>
-          </div>
-        </div> */}
-
-        {/* Additional verified info */}
-        {/* {civilServantStatus.data && (
-          <div className="grid grid-cols-1 gap-2 text-xs">
-            {civilServantStatus.data.ministry && (
-              <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-green-200/30">
-                <span className="text-gray-600">Ministry:</span>
-                <span className="font-medium text-gray-800 truncate ml-2">{civilServantStatus.data.ministry}</span>
-              </div>
-            )}
-            {civilServantStatus.data.position && (
-              <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-green-200/30">
-                <span className="text-gray-600">Position:</span>
-                <span className="font-medium text-gray-800 truncate ml-2">{civilServantStatus.data.position}</span>
-              </div>
-            )}
-          </div> */}
-        {/* )}
-      </div>
-    ) : civilServantStatus.data ? (
-      <div className="space-y-3"> */}
-        {/* Pending/Rejected header */}
-        {/* <div className={`flex items-center justify-between p-3 rounded-xl border ${
-          civilServantStatus.data.verification_status === 'pending' 
-            ? 'bg-gradient-to-r from-orange-100/80 to-amber-100/80 border-orange-200/50' 
-            : 'bg-gradient-to-r from-red-100/80 to-pink-100/80 border-red-200/50'
-        }`}>
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <i className={`bx ${
-                civilServantStatus.data.verification_status === 'pending' 
-                  ? 'bx-time-five text-orange-600' 
-                  : 'bx-x-circle text-red-600'
-              } text-lg`}></i>
-              {civilServantStatus.data.verification_status === 'pending' && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-              )}
-            </div>
-            <span className={`text-sm font-semibold ${
-              civilServantStatus.data.verification_status === 'pending' 
-                ? 'text-orange-700' 
-                : 'text-red-700'
-            }`}>
-              {civilServantStatus.data.verification_status === 'pending' 
-                ? 'Verification Pending' 
-                : 'Application Rejected'}
-            </span>
-          </div>
-          <div className={`backdrop-blur-sm px-3 py-1 rounded-full border ${
-            civilServantStatus.data.verification_status === 'pending'
-              ? 'bg-orange-500/20 border-orange-300/30'
-              : 'bg-red-500/20 border-red-300/30'
-          }`}>
-            <span className={`text-xs font-bold flex items-center ${
-              civilServantStatus.data.verification_status === 'pending' 
-                ? 'text-orange-700' 
-                : 'text-red-700'
-            }`}>
-              <i className={`bx ${
-                civilServantStatus.data.verification_status === 'pending' 
-                  ? 'bx-hourglass' 
-                  : 'bx-x'
-              } text-xs mr-1`}></i>
-              {civilServantStatus.data.verification_status === 'pending' ? 'Pending' : 'Rejected'}
-            </span>
-          </div>
-        </div> */}
-
-        {/* Application details */}
-        {/* <div className="grid grid-cols-1 gap-2 text-xs">
-          <div className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-gray-200/30">
-            <span className="text-gray-600">Applied:</span>
-            <span className="font-medium text-gray-800">
-              {civilServantStatus.data.created_at ? 
-                new Date(civilServantStatus.data.created_at).toLocaleDateString() : 
-                'Recently'
-              }
-            </span>
-          </div> */}
-          
-          {/* {civilServantStatus.data.verification_status === 'pending' && (
-            <div className="p-3 bg-orange-50/60 rounded-lg border border-orange-200/30">
-              <div className="flex items-start space-x-2">
-                <i className="bx bx-info-circle text-orange-600 text-sm mt-0.5 flex-shrink-0"></i>
-                <p className="text-orange-700 text-xs leading-relaxed">
-                  Your application is under review. You'll be notified once verification is complete.
-                </p>
-              </div>
-            </div>
-          )} */}
-          
-          {/* {civilServantStatus.data.verification_status === 'rejected' && (
-            <>
-              {civilServantStatus.data.rejection_reason && (
-                <div className="p-3 bg-red-50/60 rounded-lg border border-red-200/30">
-                  <div className="flex items-start space-x-2">
-                    <i className="bx bx-error text-red-600 text-sm mt-0.5 flex-shrink-0"></i>
-                    <div>
-                      <p className="text-red-700 text-xs font-medium mb-1">Rejection Reason:</p>
-                      <p className="text-red-600 text-xs leading-relaxed">
-                        {civilServantStatus.data.rejection_reason}
-                      </p>
+                  <div
+                    className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
+                      showBorrowerActions ? "max-h-48" : "max-h-0"
+                    }`}
+                  >
+                    <div className="mt-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm">
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 first:rounded-t-lg text-sm"
+                        onClick={() => handleNavigation("/dashboard/applications")}
+                      >
+                        <i className="bx bx-folder text-base"></i>
+                        <span>Apply for Loan</span>
+                      </div>
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 text-sm border-t border-gray-100"
+                        onClick={() => handleNavigation("/dashboard/myloan-applications")}
+                      >
+                        <i className="bx bx-edit text-base"></i>
+                        <span>My Loan Requests</span>
+                      </div>
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 text-sm border-t border-gray-100"
+                        onClick={() => handleNavigation("/dashboard/loanstoberepaid")}
+                      >
+                        <i className="bx bx-transfer text-base"></i>
+                        <span>Repay Loan</span>
+                      </div>
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 text-sm border-t border-gray-100 last:rounded-b-lg"
+                        onClick={() => handleNavigation("/dashboard/loansirepaid")}
+                      >
+                        <i className="bx bx-refresh text-base"></i>
+                        <span>Repaid Loans</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )} */}
-{/*               
-              <button
-                onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
-                className="w-full text-xs px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
-              >
-                <i className="bx bx-refresh"></i>
-                <span>Reapply for Verification</span>
-              </button>
-            </>
-          )}
-        </div>
-      </div> */}
-    {/* ) : (
-      <div className="space-y-4"> */}
-        {/* No application state */}
-        {/* <div className="text-center py-6">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i className="bx bx-shield-plus text-blue-600 text-xl"></i>
-          </div>
-          <h4 className="text-sm font-semibold text-gray-800 mb-2">Not Verified</h4>
-          <p className="text-xs text-gray-600 leading-relaxed mb-4">
-            Apply for civil servant verification to unlock exclusive lending benefits and higher loan limits.
-          </p>
-        </div> */}
 
-        {/* Benefits preview */}
-        {/* <div className="space-y-2">
-          <p className="text-xs font-medium text-gray-700 mb-2">Verification Benefits:</p>
-          <div className="space-y-1">
-            {[
-              { icon: 'bx-trending-up', text: 'Higher loan limits' },
-              { icon: 'bx-percentage', text: 'Better interest rates' },
-              { icon: 'bx-time', text: 'Faster approval times' }
-            ].map((benefit, index) => (
-              <div key={index} className="flex items-center space-x-2 text-xs text-gray-600">
-                <i className={`bx ${benefit.icon} text-blue-500`}></i>
-                <span>{benefit.text}</span>
-              </div>
-            ))}
-          </div>
-        </div> */}
-
-        {/* <button
-          onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
-          className="w-full text-xs px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
-        >
-          <i className="bx bx-plus"></i>
-          <span>Start Verification Process</span>
-        </button>
-      </div>
-    )}
-  </div>
-)} */}
-
-              <nav>
-                <ul className="space-y-4 border-6 cursor-pointer">
-                  {/* Home */}
-                  <li
-                    className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    onClick={() => handleNavigation("/dashboard")}
+                {/* Lender Actions */}
+                <div className="group">
+                  <div
+                    className="flex items-center justify-between py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
+                    onClick={toggleLenderActions}
                   >
-                    <i className="bx bx-home text-xl font-bold group-hover:animate-pulse"></i>
-                    <span>Home</span>
-                  </li>
-
-                 {/* Borrower Actions */}
-                  <li className="relative">
-                    <div
-                      className="group flex items-center justify-between py-3 text-gray-700 px-6 hover:text-orange-600 rounded-2xl cursor-pointer w-full bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
-                      onClick={toggleBorrowerActions}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <i className="bx bx-user text-xl font-bold group-hover:text-orange-600"></i>
-                        <span className="group-hover:text-orange-600">Borrower Actions</span>
-                      </div>
-                      <i
-                        className={`bx bx-chevron-down text-lg transition-transform duration-300 ${
-                          showBorrowerActions ? "rotate-180" : "rotate-0"
-                        } group-hover:text-orange-600`}
-                      ></i>
+                    <div className="flex items-center space-x-3">
+                      <i className="bx bx-money text-lg"></i>
+                      <span className="text-sm font-medium">Lender Actions</span>
                     </div>
-
-                    {/* Dropdown with slide animation */}
-                    <div
-                      className={`transition-[max-height] duration-500 ease-in-out overflow-hidden ${
-                        showBorrowerActions ? "max-h-60" : "max-h-0"
+                    <i
+                      className={`bx bx-chevron-down text-sm transition-transform duration-200 ${
+                        showLenderActions ? "rotate-180" : "rotate-0"
                       }`}
-                    >
-                      <ul className="mt-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-lg">
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 first:rounded-t-2xl"
-                          onClick={() => handleNavigation("/dashboard/applications")}
-                        >
-                          <i className="bx bx-folder text-lg group-hover:text-orange-600"></i>
-                          <span>Apply for Loan</span>
-                        </li>
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300"
-                          onClick={() => handleNavigation("/dashboard/myloan-applications")}
-                        >
-                          <i className="bx bx-edit text-lg group-hover:text-orange-600"></i>
-                          <span>My Loan Requests</span>
-                        </li>
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300"
-                          onClick={() => handleNavigation("/dashboard/loanstoberepaid")}
-                        >
-                          <i className="bx bx-transfer text-lg group-hover:text-orange-600"></i>
-                          <span>Repay Loan</span>
-                        </li>
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 last:rounded-b-2xl"
-                          onClick={() => handleNavigation("/dashboard/loansirepaid")}
-                        >
-                          <i className="bx bx-refresh text-lg group-hover:text-orange-600"></i>
-                          <span>Repaid Loans</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </li>
+                    ></i>
+                  </div>
 
-                  {/* Lender Actions */}
-                  <li className="relative">
-                    <div
-                      className="group flex items-center justify-between py-3 text-gray-700 px-6 hover:text-orange-600 rounded-2xl cursor-pointer w-full bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
-                      onClick={toggleLenderActions}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <i className="bx bx-money text-xl font-bold group-hover:text-orange-600"></i>
-                        <span className="group-hover:text-orange-600">Lender Actions</span>
+                  <div
+                    className={`transition-[max-height] duration-300 ease-in-out overflow-hidden ${
+                      showLenderActions ? "max-h-32" : "max-h-0"
+                    }`}
+                  >
+                    <div className="mt-1 bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm">
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 first:rounded-t-lg text-sm"
+                        onClick={() => handleNavigation("/dashboard/fundaloan")}
+                      >
+                        <i className="bx bx-search text-base"></i>
+                        <span>Fund a Loan</span>
                       </div>
-                      <i
-                        className={`bx bx-chevron-down text-lg transition-transform duration-300 ${
-                          showLenderActions ? "rotate-180" : "rotate-0"
-                        } group-hover:text-orange-600`}
-                      ></i>
+                      <div
+                        className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 text-sm border-t border-gray-100 last:rounded-b-lg"
+                        onClick={() => handleNavigation("/dashboard/loans-funded")}
+                      >
+                        <i className="bx bx-dollar-circle text-base"></i>
+                        <span>My Funded Loans</span>
+                      </div>
                     </div>
+                  </div>
+                </div>
 
-                    {/* Dropdown with transition */}
-                    <div
-                      className={`transition-[max-height] duration-500 ease-in-out overflow-hidden ${
-                        showLenderActions ? "max-h-40" : "max-h-0"
-                      }`}
-                    >
-                      <ul className="mt-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-lg">
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 first:rounded-t-2xl"
-                          onClick={() => handleNavigation("/dashboard/fundaloan")}
-                        >
-                          <i className="bx bx-search text-lg group-hover:text-orange-600"></i>
-                          <span>Fund a Loan</span>
-                        </li>
-                        <li
-                          className="group flex items-center space-x-3 px-4 py-3 text-black hover:text-orange-600 cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 last:rounded-b-2xl"
-                          onClick={() => handleNavigation("/dashboard/loans-funded")}
-                        >
-                          <i className="bx bx-dollar-circle text-lg group-hover:text-orange-600"></i>
-                          <span>My Funded Loans</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </li>
+                {/* Profile */}
+                <div
+                  className="group flex items-center space-x-3 py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
+                  onClick={() => handleNavigation("/dashboard/profile")}
+                >
+                  <i className="bx bx-user text-lg"></i>
+                  <span className="text-sm font-medium">Profile</span>
+                </div>
 
-                  {/* Profile */}
-                  <li
-                    className="group flex items-center space-x-3 py-3 px-6 text-gray-700 hover:text-orange-600 rounded-2xl bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
-                    onClick={() => handleNavigation("/dashboard/profile")}
-                  >
-                    <i className="bx bx-user text-xl font-bold group-hover:text-orange-600"></i>
-                    <span>Profile</span>
-                  </li>
-                  {/* {connection && !civilServantStatus.verified && (
-                    <li
-                      className="group flex items-center space-x-3 py-3 px-6 text-gray-700 hover:text-orange-600 rounded-2xl bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
-                      onClick={() => handleNavigation("/dashboard/civil-servant-verification")}
-                    >
-                      <i className="bx bx-shield-check text-xl font-bold group-hover:text-orange-600"></i>
-                      <span>Civil Servant Verification</span>
-
-                      {civilServantStatus.data && civilServantStatus.data.verification_status === 'pending' && (
-                        <div className="ml-auto bg-orange-100 px-2 py-1 rounded-full">
-                          <i className="bx bx-time text-xs text-orange-600"></i>
-                        </div>
-                      )}
-                    </li>
-                  )} */}
-
-                  {/* Settings */}
-                  <li
-                    className="group flex items-center space-x-3 py-3 px-6 text-gray-700 hover:text-orange-600 rounded-2xl bg-white/40 backdrop-blur-xl border border-gray-200 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-orange-100/80 transition-all duration-300 transform hover:scale-105"
-                    onClick={() => handleNavigation("/dashboard/settings")}
-                  >
-                    <i className="bx bx-cog text-xl font-bold group-hover:text-orange-600"></i>
-                    <span>Settings</span>
-                  </li>
-                </ul>
+                {/* Settings */}
+                <div
+                  className="group flex items-center space-x-3 py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
+                  onClick={() => handleNavigation("/dashboard/settings")}
+                >
+                  <i className="bx bx-cog text-lg"></i>
+                  <span className="text-sm font-medium">Settings</span>
+                </div>
               </nav>
             </div>
 
-            {/* Sign Out */}
-            <div className="mt-2 flex pt-10 items-center py-5 px-3 bg-white/40 backdrop-blur-xl border border-gray-200 rounded-2xl">
+            {/* User Profile Section - Fixed at bottom */}
+            <div className="mt-4 flex items-center py-3 px-3 bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm">
               <img
                 src={default_profile}
                 alt="User Avatar"
-                className="w-12 h-12 rounded-full border-2 border-orange-300 shadow-lg"
+                className="w-10 h-10 rounded-full border-2 border-orange-300 shadow-sm flex-shrink-0"
               />
-              <div className="ml-3 flex-1">
-                <h2 className="text-sm text-black font-bold">{userName}</h2>
+              <div className="ml-3 flex-1 min-w-0">
+                <h2 className="text-sm text-gray-800 font-semibold truncate">{userName}</h2>
                 <p className="text-xs text-gray-500 truncate">{userEmail}</p>
               </div>
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="text-gray-600 hover:text-orange-600 cursor-pointer bg-white/60 p-2 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-300 transform hover:scale-110"
+                className="text-gray-600 hover:text-orange-600 cursor-pointer bg-white/60 p-2 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 flex-shrink-0"
+                title="Logout"
               >
-                <i className="bx bx-log-in text-xl"></i>
+                <i className="bx bx-log-out text-lg"></i>
               </button>
             </div>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 bg-white/30 backdrop-blur-xl p-6 h-screen overflow-y-auto">
+          <main className="flex-1 bg-white/30 backdrop-blur-xl pl-0 pr-6 py-6 h-screen overflow-y-auto">
             <Outlet />
           </main>
 
