@@ -57,7 +57,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className='bg-orange-50 h-[120vh] md:p-15 p-8'>
+    <div className='bg-orange-50 h-[120vh] md:p-15 p-4'>
       <div className="flex items-center mb-">
         <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
         <h2 className="text-2xl font-bold text-zinc-800">SWIFTFUND</h2>
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
             <h2 className='text-2xl p-2'>Login to Continue</h2>
           </div>
         </div>
-        <div className='bg-white mt-6 md:mt-0 rounded-2xl shadow-2xl p-12 md:w-[40%]'>
+        <div className='bg-white mt-6 md:mt-0 rounded-2xl shadow-2xl p-8 md:w-[40%]'>
           <h2 className="text-xl font-bold text-orange-600">Login</h2>
           <h4 className="text-gray-500 mb-6">Enter your details below to access your account</h4>
           <form onSubmit={handleSubmit}>

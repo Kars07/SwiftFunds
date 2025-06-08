@@ -73,18 +73,18 @@ const Registration: React.FC = () => {
   };
 
   return (
-    <div className="  h-[150vh] bg-orange-50  md:p-15 p-8">
+    <div className="  h-[150vh] bg-orange-50  md:p-15 pt-8 px-4 ">
       <div className="flex items-center4 mb-">
         <img src={logo} alt="SwiftFunds Logo" className="w-8 h-auto mr-3" />
         <h2 className="text-2xl font-bold text-zinc-800">SWIFTFUND</h2>
       </div>
       <div className='flex flex-col md:flex-row w-full mt-15 md:mt-20  justify-between'>
-       <div className='p-8 bg-white w-full rounded-2xl shadow-2xl  md:w-[55%]'>
+       <div className='md:p-8 py-6 px-5 bg-white w-full rounded-2xl shadow-2xl  md:w-[55%]'>
           <h1 className='md:text-6xl text-4xl font-bold mb-4 text-zinc-800'>Start your journey <br />to smarter lending.</h1>
           <h2 className="text-xl font-bold text-orange-500 ">Sign Up</h2>
           <h4 className="text-gray-500 mb-6">Enter your details below to create an account</h4>
           <form onSubmit={handleSubmit}>
-            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full">
+            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full  relative">
               <input
                 type="text"
                 name="fullname"
@@ -94,11 +94,11 @@ const Registration: React.FC = () => {
                 value={formData.fullname}
                 onChange={handleChange}
               />
-              <span className="ml-2 text-orange-500">
+              <span className="ml-2 text-orange-500 cursor-pointer absolute right-3">
                 <i className="bx bxs-user"></i>
               </span>
             </div>
-            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full">
+            <div className="flex items-center bg-gray-100 rounded-lg p-2 mb-4 border border-gray-300 w-full  relative">
               <input
                 type="email"
                 name="email"
@@ -108,7 +108,7 @@ const Registration: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
-              <span className="ml-2 text-orange-500">
+              <span className="ml-2 text-orange-500 cursor-pointer absolute right-3">
                 <i className="bx bx-envelope"></i>
               </span>
             </div>

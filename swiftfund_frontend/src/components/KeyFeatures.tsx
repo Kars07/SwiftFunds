@@ -82,9 +82,8 @@ const KeyFeatures: React.FC = () => {
         <div className='py-20 md:py-0 md:border-none border-4 mb-14 md:mb-0 md:rounded-none md:shadow-none rounded-4xl shadow-2xl'>
           <h1 className="text-black font-medium text-3xl md:text-3xl pt-0 md:pt-10 pb-5">🔁 Dual Roles</h1>
           <h2 className='md:text-lg text-xl px-4'>
-            Every user can be a borrower or lender at <br />
-            any time. This flexibility promotes a healthy,<br />
-            sustainable loan ecosystem.
+            Anyone can be a lender at any time students, <br></br>retirees, business owners.
+            Only employees of<br></br> registered companies can borrow.
           </h2>
         </div>
         <div className="justify-center md:flex md:flex-col items-center mb-14 md:mb-0  py-20 md:py-0 md:border-none md:rounded-none md:shadow-none border-4 rounded-4xl shadow-2xl">

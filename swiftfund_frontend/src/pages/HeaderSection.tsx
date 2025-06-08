@@ -36,12 +36,7 @@ const Video: React.FC<{ scrollYProgress: any }> = ({ scrollYProgress }) => {
             Borrow and Lend with Ease
           </h1>
           <h2 className="lg:px-0 px-5">
-            Whether you’re a student, small‑business owner, or retiree, SwiftFund
-            lets you borrow or lend in minutes. <span className="lg:block hidden">
-            With clear, simple terms and the security of Cardano’s smart contracts,
-            you get quick approvals <br />
-            and total peace of mind, backed by real community recommendations.</span>
-          </h2>
+           Whether you’re a student, retiree, or business owner, SwissFund lets you lend in minutes, or borrow securely <br />if you’re an employee of a registered company. With clear terms and the power of Cardano smart <br /> contracts, you’ll enjoy quick approvals and peace of mind backed by real community trust. </h2>
           <div className="flex justify-center">
             <button
               onClick={handleLearnMore}
