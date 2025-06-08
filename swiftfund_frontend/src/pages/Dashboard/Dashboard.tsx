@@ -695,7 +695,7 @@ return (
               </div>
 
               {/* Navigation */}
-              <nav className="space-y-2">
+              <nav className="mt-10 space-y-2">
                 {/* Home */}
                 <div
                   className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
@@ -837,7 +837,7 @@ return (
                 className="text-gray-600 hover:text-orange-600 cursor-pointer bg-white/60 p-2 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 flex-shrink-0"
                 title="Logout"
               >
-                <i className="bx bx-log-out text-lg"></i>
+                <i className="bx bx-log-in text-lg"></i>
               </button>
             </div>
           </aside>

@@ -385,19 +385,10 @@ return (
     <div className="relative z-10 p-6 pt-8">
 
       {/* Dashboard Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8">
         
-        {/* Welcome Section */}
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-2 flex items-center gap-3">
-            Welcome, {userName} 
-            <span className="text-3xl">👋</span>
-          </h1>
-          <p className="text-gray-600 text-base">Your personal loan management dashboard in the decentralized ecosystem</p>
-        </div>
-
-        {/* User Actions Section */}
-        <div className="flex items-center space-x-4">
+        {/* Mobile Layout - Icons on top */}
+        <div className="flex md:hidden items-center justify-end mb-4 space-x-2">
           {/* Notification Icon */}
           <button className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
             <i className="bx bx-bell text-xl"></i>
@@ -415,7 +406,7 @@ return (
           {/* User Avatar */}
           <div className="relative" ref={dropdownRef}>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
                 <img src={default_profile} alt="User Avatar" className="w-full h-full object-cover" />
               </div>
               <button
@@ -449,6 +440,72 @@ return (
                 )}
               </div>  
             )}
+          </div>
+        </div>
+
+        {/* Welcome Section - Full width on mobile */}
+        <div className="md:flex md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-2 flex items-center gap-3">
+              Welcome, {userName} 
+            </h1>
+            <p className="text-gray-600 text-sm md:text-base">Your personal loan management dashboard in the decentralized ecosystem</p>
+          </div>
+
+          {/* Desktop Layout - Icons on the right (hidden on mobile) */}
+          <div className="hidden md:flex items-center space-x-2">
+            {/* Notification Icon */}
+            <button className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
+              <i className="bx bx-bell text-xl"></i>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+            </button>
+
+            {/* Settings Icon */}
+            <button className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+
+            {/* User Avatar */}
+            <div className="relative" ref={dropdownRef}>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
+                  <img src={default_profile} alt="User Avatar" className="w-full h-full object-cover" />
+                </div>
+                <button
+                  className="text-gray-600 hover:text-orange-600 transition-colors duration-300"
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-4 w-80 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <p className="text-sm text-gray-600">Signed in as</p>
+                  </div>
+                  <p className="font-semibold text-gray-800 mb-4">{userName || "User"}</p>
+                
+                  {connection?.address && (
+                    <>
+                      <div className="h-px bg-gradient-to-r from-gray-300 to-transparent mb-4"></div>
+                      <p className="text-sm text-gray-600 mb-2">Wallet Address:</p>
+                      <div className="bg-gray-100/60 rounded-xl p-3">
+                        <p className="text-xs font-mono text-orange-600 break-all">
+                          {shortenAddress(connection.address)}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>  
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -667,7 +724,7 @@ return (
       
       <Outlet />
     </div>
-  </div>
+  </div> 
 );
 };
 

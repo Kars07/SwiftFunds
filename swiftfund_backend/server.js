@@ -21,9 +21,9 @@ app.use(cookieParser());
 // Enable CORS for your frontend URL
 const allowedOrigins = [
   "https://swift-funds.vercel.app",
-  "http://localhost:5173", // For local development
-  "http://localhost:5174", // Alternative local port
-  process.env.FRONTEND_URL // If you have this set in Render
+  "http://localhost:5173", 
+  "http://localhost:5174",
+  process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined values
 
 const corsOptions = {
