@@ -4,21 +4,12 @@ const CreditScoreGuide = () => {
     const [showGuide, setShowGuide] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-                <div className="absolute top-40 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-                <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
-            </div>
+        <div className="min-h-screen bg-white-100 rounded-lg text-gray-900 mb-5 relative overflow-hidden">
 
-            {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-
-            <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
+            <div className="relative z-10 p-4 pt-5 max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-12">
-                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         Credit Score Guide
                     </h1>
                     <p className="text-gray-600 text-lg">Master the decentralized credit scoring system</p>

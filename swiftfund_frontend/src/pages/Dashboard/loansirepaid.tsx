@@ -192,7 +192,8 @@ const LoansIRepaid: React.FC = () => {
         }
     }
 return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+    <div className="min-h-screen text-gray-900 relative overflow-hidden">
+
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">
             <div className="absolute top-20 left-20 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -200,14 +201,12 @@ return (
             <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
         </div>
 
-        {/* Grid Pattern Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <div className="relative z-10 p-4 pt-5 max-w-6xl mx-auto">
 
-        <div className="relative z-10 p-6 pt-16 max-w-7xl mx-auto">
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
                 <div className="mb-6 lg:mb-0">
-                    <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         Loans I Have Repaid
                     </h1>
                     <p className="text-gray-600 text-lg">Track your loan repayment history and build your credit score in the decentralized ecosystem</p>

@@ -9,8 +9,9 @@ const Navbar: React.FC = () => {
   const handleToggle = () => setIsOpen(!isOpen);
 
   const handleLaunchApp = () => {
-    window.open("/register", "_blank");
-  };
+  window.location.href = "/register";
+};
+
 
   const navItems = [
     { label: "About", path: "/about" },
