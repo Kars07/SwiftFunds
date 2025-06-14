@@ -95,3 +95,15 @@ border-radius: 50px;
 }
 /* end of Zoom Parallax effect */
 
+
+
+/* hide scroll bar */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+/* end of hide scroll bar */

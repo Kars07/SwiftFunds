@@ -560,7 +560,7 @@ const walletContextValue: WalletContextType = {
 
 return (
     <WalletContext.Provider value={walletContextValue}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br  from-gray-50 via-orange-50 to-gray-100 text-gray-900 relative overflow-hidden">
 
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">
@@ -596,24 +596,24 @@ return (
               </button>
             )}
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1">
               {/* Header */}
               <div className="flex items-center md:pt-0 pt-8 space-x-3 mb-8">
                 <img src={logo} alt="Swiftfund Logo" className="w-8 h-8" />
-                <div className="text-xl font-bold">
-                  <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent">DASHBOARD</span>
+                <div className="text-xl text-black font-bold">
+                  <span >DASHBOARD</span>
                 </div>
               </div>
 
               {/* Wallet Connection Status */}
-              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-white/90 to-gray-50/90 backdrop-blur-xl border border-gray-200/50 shadow-sm">
+              <div className="mb-6 p-4  rounded-xl bg-gradient-to-r from-white/90 to-gray-50/90 backdrop-blur-xl border border-gray-200/50 shadow-sm">
                 <h3 className="text-xs font-semibold text-orange-600 mb-3 flex items-center">
                   <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
                   Wallet Connection
                 </h3>
                 {connection ? (
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className=" hidden items-center justify-between">
                       <span className="text-xs text-gray-600 font-mono bg-green-100/60 px-2 py-1.5 rounded-md border border-green-200 flex-1 mr-2 truncate">
                         {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
                       </span>
@@ -698,7 +698,7 @@ return (
               <nav className="mt-10 space-y-2">
                 {/* Home */}
                 <div
-                  className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="group flex items-center space-x-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white py-4 px-10 rounded-4xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/dashboard")}
                 >
                   <i className="bx bx-home text-lg"></i>
@@ -708,7 +708,7 @@ return (
                 {/* Borrower Actions */}
                 <div className="group">
                   <div
-                    className="flex items-center justify-between py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
+                    className="flex items-center justify-between py-4 px-10 rounded-4xl text-gray-700 hover:text-orange-600  cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
                     onClick={toggleBorrowerActions}
                   >
                     <div className="flex items-center space-x-3">
@@ -763,7 +763,7 @@ return (
                 {/* Lender Actions */}
                 <div className="group">
                   <div
-                    className="flex items-center justify-between py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
+                    className="flex items-center justify-between py-4 px-10 rounded-4xl text-gray-700 hover:text-orange-600cursor-pointer bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200"
                     onClick={toggleLenderActions}
                   >
                     <div className="flex items-center space-x-3">
@@ -803,7 +803,7 @@ return (
 
                 {/* Profile */}
                 <div
-                  className="group flex items-center space-x-3 py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
+                  className="group flex items-center space-x-3 py-4 px-10 rounded-4xl text-gray-700 hover:text-orange-600  bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/dashboard/profile")}
                 >
                   <i className="bx bx-user text-lg"></i>
@@ -812,7 +812,7 @@ return (
 
                 {/* Settings */}
                 <div
-                  className="group flex items-center space-x-3 py-2.5 px-4 text-gray-700 hover:text-orange-600 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
+                  className="group flex items-center space-x-3 py-4 px-10 rounded-4xl text-gray-700 hover:text-orange-600 bg-white/50 backdrop-blur-sm border border-gray-200/50 hover:border-orange-300 hover:bg-gradient-to-r hover:from-orange-50/70 hover:to-orange-100/70 transition-all duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/dashboard/settings")}
                 >
                   <i className="bx bx-cog text-lg"></i>

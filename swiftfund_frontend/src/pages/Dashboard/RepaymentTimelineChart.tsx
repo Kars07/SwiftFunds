@@ -153,9 +153,8 @@ const RepaymentTimelineChart: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-[400px] bg-white p-6 pb-25 rounded-2xl shadow-md">
-      <h2 className="text-xl font-semibold mb-13 text-gray-800">Repayment Timeline</h2>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-[300px]  pt-10 bg-white ">
+       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -165,7 +164,7 @@ const RepaymentTimelineChart: React.FC = () => {
           />
           <YAxis 
             tick={{ fontSize: 12 }}
-            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' , offset:0 , dy:50}}
+            label={{ value: 'Amount (ADA)', angle: -90, position: 'insideLeft' , offset:10 , dy:50}}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />

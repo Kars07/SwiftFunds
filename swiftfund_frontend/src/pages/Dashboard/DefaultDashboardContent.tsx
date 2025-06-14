@@ -388,11 +388,11 @@ return (
       <div className="mb-8">
         
         {/* Mobile Layout - Icons on top */}
-        <div className="flex md:hidden items-center justify-end mb-4 space-x-2">
+        <div className="flex absolute top-0 right-0 md:hidden items-center justify-end mb-4 space-x-1">
           {/* Notification Icon */}
           <button className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
             <i className="bx bx-bell text-xl"></i>
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+            <span className="absolute top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
           </button>
 
           {/* Settings Icon */}
@@ -444,7 +444,7 @@ return (
         </div>
 
         {/* Welcome Section - Full width on mobile */}
-        <div className="md:flex md:items-center md:justify-between">
+        <div className="md:flex pt-10 md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-2 flex items-center gap-3">
               Welcome, {userName} 
@@ -453,7 +453,7 @@ return (
           </div>
 
           {/* Desktop Layout - Icons on the right (hidden on mobile) */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center -translate-y-10 space-x-2">
             {/* Notification Icon */}
             <button className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300">
               <i className="bx bx-bell text-xl"></i>
@@ -485,7 +485,7 @@ return (
               </div>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-4 w-80 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6">
+                <div className="absolute  right-0 mt-4 w-80 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl z-50 p-6">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                     <p className="text-sm text-gray-600">Signed in as</p>
@@ -511,9 +511,9 @@ return (
       </div>
       
       {/* Stats Cards - Improved layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-5xl  mx-auto">
         {/* Total Applications */}
-        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className="group -z-10 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Applications</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
@@ -536,7 +536,7 @@ return (
         </div>
 
         {/* Active Loans */}
-        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className="group -z-10 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Active Loans</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
@@ -559,7 +559,7 @@ return (
         </div>
 
         {/* Total Repaid */}
-        <div className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className="group bg-white/80 -z-10 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-600">Total Repaid</h3>
             <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
@@ -610,8 +610,8 @@ return (
               ))}
             </div>
           ) : (
-            <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-4">
-              <div className="flex items-center space-x-3">
+            <div className="bg-white/20 backdrop-blur-sm border border-white/30 hidden md:block rounded-2xl p-4">
+              <div className="flex items-center space-x-2`">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                 <div>
                   <p className="text-white font-semibold">Wallet Connected</p>
@@ -627,14 +627,14 @@ return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
             <p className="text-orange-100 text-sm mb-2">Total Balance (₦)</p> 
-            <h3 className="text-3xl font-bold text-white">
+            <h3 className="text-2xl md:text-3xl font-bold text-white">
               ₦ {connection ? adaToNgn(lovelaceToAda(walletBalance)) : "0"}
             </h3>
           </div>
 
           <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
             <p className="text-orange-100 text-sm mb-2">Total Balance (ADA)</p>
-            <h3 className="text-3xl font-bold text-white"> 
+            <h3 className="text-2xl md:text-3xl font-bold text-white"> 
               {connection ? lovelaceToAda(walletBalance) : "0"} ADA
             </h3>
           </div>
@@ -642,9 +642,9 @@ return (
       </div>
 
       {/* Main Content Grid - Improved spacing */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="flex  flex-col md:flex-row gap-6  mx-auto">
         {/* Chart Section */}
-        <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-8 shadow-lg">
+        <div className=" md:w-[60%] p-7 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-lg">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
             <h2 className="text-xl font-bold text-gray-800">Repayment Timeline</h2>
@@ -654,7 +654,7 @@ return (
         </div>
 
         {/* Verification Status Section */}
-        <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-8 shadow-lg">
+        <div className="bg-white/80 md:w-[40%] backdrop-blur-sm border border-gray-200 rounded-3xl p-8 shadow-lg">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
             <h2 className="text-lg font-bold text-gray-800">Verification Status</h2>

@@ -552,46 +552,47 @@ async function recordLoanRepayment(fundedLoanId: string, repaymentTxHash: string
 
         <div className="relative z-10 p-4 pt-5 max-w-6xl mx-auto">
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-2 md:mb-12">
                 <div className="mb-6 lg:mb-0">
-                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-4xl mt-3 md:mt-0 lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         Loans to Repay
                     </h1>
                     <p className="text-gray-600 text-lg">Manage your active loans and maintain your credit score</p>
                 </div>
-
-                {/* Wallet Connection */}
-                {!connection ? (
-                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
-                        <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
-                        <div className="flex flex-wrap gap-3">
-                            {wallets.map((wallet) => (
-                                <button
-                                    key={wallet.name}
-                                    onClick={() => connectWallet(wallet)}
-                                    className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-                                >
-                                    {wallet.icon && (
-                                        <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
-                                    )}
-                                    Connect {wallet.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                            <div>
-                                <p className="text-green-700 font-semibold">Wallet Connected</p>
-                                <p className="text-gray-600 text-sm">
-                                    {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
-                                </p>
+                <div className="absolute md:block right-0 top-0">
+                    {/* Wallet Connection */}
+                    {!connection ? (
+                        <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                            <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
+                            <div className="flex flex-wrap gap-3">
+                                {wallets.map((wallet) => (
+                                    <button
+                                        key={wallet.name}
+                                        onClick={() => connectWallet(wallet)}
+                                        className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                                    >
+                                        {wallet.icon && (
+                                            <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
+                                        )}
+                                        Connect {wallet.name}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <div className="bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-2 md:p-6 shadow-2xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <div>
+                                    <p className="text-green-700 font-semibold">Wallet Connected</p>
+                                    <p className="text-gray-600 text-sm">
+                                        {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Status Messages */}
@@ -644,73 +645,119 @@ async function recordLoanRepayment(fundedLoanId: string, repaymentTxHash: string
 
             {/* Credit Score Section */}
             {connection && (
-                <div className="mb-8 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center space-x-4">
-                            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
-                            <h3 className="text-2xl font-bold text-gray-800">Credit Score</h3>
-                        </div>
-                        <button
-                            onClick={() => setShowCreditScore(!showCreditScore)}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105"
+            <div className="md:mb-8 mb-2  bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl md:p-8 p-4 shadow-lg">
+                {/* Header with Toggle Button */}
+                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                    <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    <h3 className="text-2xl font-bold text-gray-800">Credit Score</h3>
+                </div>
+                <button
+                    onClick={() => setShowCreditScore(!showCreditScore)}
+                    className="bg-gradient-to-r from-orange-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 text-white md:px-4 px-2 py-2 rounded-xl transition-all duration-300 transform hover:scale-105"
+                >
+                    {showCreditScore ? 'Hide Details' : 'Show Details'}
+                </button>
+                </div>
+
+                {/* Score Overview */}
+                <div className="flex items-center  px-2 gap-6 mb-4">
+                {creditScore ? (
+                    <>
+                    <div className="text-center">
+                        <span
+                        className={`text-4xl font-bold ${getCreditScoreColor(
+                            creditScore.current_score
+                        )}`}
                         >
-                            {showCreditScore ? 'Hide Details' : 'Show Details'}
-                        </button>
+                        {creditScore.current_score}
+                        </span>
                     </div>
-                    
-                    <div className="flex items-center gap-6 mb-4">
-                        {creditScore ? (
-                            <>
-                                <div className="text-center">
-                                    <span className={`text-4xl font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
-                                        {creditScore.current_score}
-                                    </span>
-                                </div>
-                                <div className={`px-4 py-2 rounded-xl font-medium border ${
-                                    creditScore.current_score >= 750 ? 'bg-green-50 text-green-700 border-green-200' :
-                                    creditScore.current_score >= 650 ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                    creditScore.current_score >= 550 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                                    'bg-red-50 text-red-700 border-red-200'
-                                }`}>
-                                    {getCreditScoreLabel(creditScore.current_score)}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="animate-pulse flex items-center space-x-4">
-                                <div className="h-12 bg-gray-200 rounded w-20"></div>
-                                <div className="h-8 bg-gray-200 rounded w-16"></div>
-                            </div>
-                        )}
+                    <div
+                        className={`px-4 py-2 rounded-xl font-medium border ${
+                        creditScore.current_score >= 750
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : creditScore.current_score >= 650
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : creditScore.current_score >= 550
+                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
+                        }`}
+                    >
+                        {getCreditScoreLabel(creditScore.current_score)}
                     </div>
-                    
-                    {showCreditScore && creditScore && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
-                                <div className="text-sm font-semibold text-gray-600 mb-2">Total Loans</div>
-                                <div className="text-2xl font-bold text-blue-600">{creditScore.total_loans}</div>
-                            </div>
-                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
-                                <div className="text-sm font-semibold text-gray-600 mb-2">On Time</div>
-                                <div className="text-2xl font-bold text-green-600">{creditScore.on_time_payments}</div>
-                            </div>
-                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
-                                <div className="text-sm font-semibold text-gray-600 mb-2">Early</div>
-                                <div className="text-2xl font-bold text-blue-600">{creditScore.early_payments}</div>
-                            </div>
-                            <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
-                                <div className="text-sm font-semibold text-gray-600 mb-2">Late</div>
-                                <div className="text-2xl font-bold text-red-600">{creditScore.late_payments}</div>
-                            </div>
+                    </>
+                ) : (
+                    <div className="animate-pulse flex items-center space-x-4">
+                    <div className="h-12 bg-gray-200 rounded w-20"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                    </div>
+                )}
+                </div>
+
+                {/* Details with Animation */}
+                <div
+                className={`transition-all duration-500 ease-in-out ${
+                    showCreditScore && creditScore ? 'mb-6' : 'mb-0'
+                }`}
+                >
+                <div
+                    className={`grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden transition-all duration-500 ease-in-out transform ${
+                    showCreditScore && creditScore
+                        ? 'opacity-100 max-h-96 scale-100'
+                        : 'opacity-0 max-h-0 scale-95 pointer-events-none'
+                    }`}
+                    style={{
+                    transitionProperty: 'opacity, transform, max-height, margin',
+                    }}
+                >
+                    {creditScore && (
+                    <>
+                        <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                        <div className="text-sm font-semibold text-gray-600 mb-2">
+                            Total Loans
                         </div>
+                        <div className="text-2xl font-bold text-zinc-700">
+                            {creditScore.total_loans}
+                        </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                        <div className="text-sm font-semibold text-gray-600 mb-2">
+                            On Time
+                        </div>
+                        <div className="text-2xl font-bold text-green-600">
+                            {creditScore.on_time_payments}
+                        </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                        <div className="text-sm font-semibold text-gray-600 mb-2">
+                            Early
+                        </div>
+                        <div className="text-2xl font-bold text-zinc-700">
+                            {creditScore.early_payments}
+                        </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-white/80 to-gray-50/80 backdrop-blur-xl border border-gray-200 rounded-xl p-4 text-center">
+                        <div className="text-sm font-semibold text-gray-600 mb-2">
+                            Late
+                        </div>
+                        <div className="text-2xl font-bold text-red-600">
+                            {creditScore.late_payments}
+                        </div>
+                        </div>
+                    </>
                     )}
                 </div>
+                </div>
+            </div>
             )}
+
 
             {/* Credit Score Guide */}
             {connection && <CreditScoreGuide />}
 
             {/* Main Content - Loans to Repay */}
-            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 -translate-y-10 md:-translate-y-55 shadow-2xl">
                 <div className="flex items-center space-x-4 mb-8">
                     <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
                     <h2 className="text-3xl font-bold text-gray-800">Your Active Loans</h2>

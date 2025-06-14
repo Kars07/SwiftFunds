@@ -407,68 +407,71 @@ const Applications: React.FC = () => {
                 <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
             </div>
 
-        <div className="relative z-10 p-4 pt-5 max-w-6xl mx-auto">
+        <div className="relative z-10 p-4 pl-9 pt-5 max-w-6xl mx-auto">
             
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
                 <div className="mb-6 lg:mb-0">
-                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-4xl lg:text-4xl mt-5 font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         Loan Applications
                     </h1>
                     <p className="text-gray-600 text-lg">Submit your loan request to the decentralized lending ecosystem</p>
                 </div>
-
-                {/* Exchange Rate Display */}
-                {adaToNgnRate > 0 && (
-                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-4 shadow-2xl">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                            <div>
-                                <p className="text-gray-600 text-sm">Current ADA Rate</p>
-                                <p className="text-orange-600 font-bold text-lg">{formatNaira(adaToNgnRate)}</p>
+                <div className=" absolute right-0 top-0  ">
+                  {/* Wallet Connection Status */}
+                    {!connection ? (
+                        <div className=" bg-white/80  backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                            <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
+                            <div className="flex flex-wrap gap-3">
+                                {wallets.map((wallet) => (
+                                    <button
+                                        key={wallet.name}
+                                        onClick={() => connectWallet(wallet)}
+                                        disabled={isConnecting}
+                                        className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
+                                    >
+                                        {wallet.icon && (
+                                            <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
+                                        )}
+                                        {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <div className="md:mb-2  md:px-3  ">
+                            <div className="md:flex hidden  items-center space-x-3">
+                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <div>
+                                    <p className="text-green-700 text-[13px] font-semibold">Wallet Connected</p>
+                                    <p className="text-gray-600 text-[10px]">
+                                        {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                        
+                    {/* Exchange Rate Display */}
+                    {adaToNgnRate > 0 && (
+                        <div className="bg-white/80  backdrop-blur-xl border border-gray-200 rounded-2xl p-2 md:p-4 shadow-2xl">
+                            <div className="flex items-center space-x-3">
+                                 <div>
+                                    <p className="text-gray-600 text-sm">Current ADA Rate</p>
+                                    <p className="text-orange-600 font-bold text-lg">{formatNaira(adaToNgnRate)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
             </div>
 
-            {/* Wallet Connection Status */}
-            {!connection ? (
-                <div className="mb-8 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
-                    <h2 className="text-xl font-semibold mb-4 text-orange-600">Connect Wallet</h2>
-                    <div className="flex flex-wrap gap-3">
-                        {wallets.map((wallet) => (
-                            <button
-                                key={wallet.name}
-                                onClick={() => connectWallet(wallet)}
-                                disabled={isConnecting}
-                                className="group flex items-center bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
-                            >
-                                {wallet.icon && (
-                                    <img src={wallet.icon} alt={wallet.name} className="w-5 h-5 mr-3 group-hover:animate-spin" />
-                                )}
-                                {isConnecting ? "Connecting..." : `Connect ${wallet.name}`}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                <div className="mb-8 bg-gradient-to-r from-white-100 to-orange-100 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <div>
-                            <p className="text-green-700 font-semibold">Wallet Connected</p>
-                            <p className="text-gray-600 text-sm">
-                                {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
+          
             {/* Credit Score Display */}
             {connection && (
-                <div className="mb-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 backdrop-blur-xl border border-blue-200 rounded-2xl p-6 shadow-2xl">
+                <div className="mb-8 bg-gradient-to-r w-[100%] from-grey-50/80 to-white-50/80 backdrop-blur-xl rounded-2xl p-4 md:p-6 shadow-2xl">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Your Credit Profile</h3>
                     {loadingCreditScore ? (
                         <div className="animate-pulse space-y-4">
@@ -482,7 +485,7 @@ const Applications: React.FC = () => {
                         </div>
                     ) : creditScore ? (
                         <div className="space-y-6">
-                            <div className="flex items-center gap-6">
+                            <div className=" flex items-center gap-6">
                                 <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-r ${
                                     creditScore.current_score >= 750 ? 'from-green-500 to-green-600' :
                                     creditScore.current_score >= 650 ? 'from-blue-500 to-blue-600' :
@@ -491,29 +494,32 @@ const Applications: React.FC = () => {
                                 }`}>
                                     {creditScore.current_score}
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className={`px-4 py-2 rounded-xl text-lg font-bold ${getCreditScoreColor(creditScore.current_score)} bg-white/60 backdrop-blur-sm border border-white/40`}>
-                                        {getCreditScoreLabel(creditScore.current_score)}
-                                    </span>
-                                    <span className="text-sm text-gray-600 mt-2">
-                                        {getRiskLevel(creditScore.current_score)}
-                                    </span>
-                                </div>
+                                <div className="flex gap-3 flex-col">
+                                    <div className="flex gap-2 ">
+                                        <span className={` text-lg font-bold ${getCreditScoreColor(creditScore.current_score)}`}>
+                                            {getCreditScoreLabel(creditScore.current_score)} :
+                                        </span>
+                                        <span className=" text-gray-600 mt-1 ">
+                                            {getRiskLevel(creditScore.current_score)}
+                                        </span>
+                                    </div>
+                                    <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-gray-700">
+                                                Maximum Loan Amount : 
+                                            </span>
+                                            <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                                                <span className="p-1"></span> {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            Based on your current credit score
+                                        </div>
+                                    </div>
+                               </div>
                             </div>
                             
-                            <div className="bg-white/60 backdrop-blur-xl rounded-xl p-4 border border-white/40">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium text-gray-700">
-                                        Maximum Loan Amount:
-                                    </span>
-                                    <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
-                                        {formatNaira(getMaxLoanAmountByCreditScore(creditScore.current_score))}
-                                    </span>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                    Based on your current credit score
-                                </div>
-                            </div>
+                            
                             
                             {creditScore.total_loans > 0 && (
                                 <div className="grid grid-cols-3 gap-4">

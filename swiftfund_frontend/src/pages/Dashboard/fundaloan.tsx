@@ -504,7 +504,7 @@ const getCreditScoreBg: GetCreditScoreBg = (score) => {
 };
 
 return (
-    <div className="min-h-screen text-gray-900 relative overflow-hidden">
+    <div className="min-h-screen mt-3 text-gray-900 relative overflow-hidden">
 
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">

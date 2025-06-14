@@ -372,7 +372,7 @@ const LoansFunded: React.FC = () => {
         );
     }
 return (
-    <div className="min-h-screen text-gray-900 relative overflow-hidden">
+    <div className="min-h-screen mt-3 text-gray-900 relative overflow-hidden">
 
         {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-20">
@@ -385,7 +385,7 @@ return (
 
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
-                <div className="mb-6 lg:mb-0">
+                <div className="md:mb-6 lg:mb-0">
                     <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         Loans I Have Funded
                     </h1>

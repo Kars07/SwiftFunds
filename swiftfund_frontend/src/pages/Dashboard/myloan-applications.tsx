@@ -218,46 +218,47 @@ return (
             <div className="absolute -bottom-8 left-40 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
         </div>
 
-        <div className="relative z-10 p-4 pt-5 max-w-6xl mx-auto">
+        <div className="relative z-10 p-4 pt-5 pl-9 max-w-6xl mx-auto">
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
                 <div className="mb-6 lg:mb-0">
-                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-4xl mt-3 md:mt-0 lg:text-4xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent mb-4">
                         My Loan Applications
                     </h1>
                     <p className="text-gray-600 text-lg">Track and manage your decentralized loan requests</p>
                 </div>
-
-                {/* Wallet Status */}
-                {!connection ? (
-                    <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
-                        <h2 className="text-xl font-semibold mb-4 text-orange-600">Wallet connection required</h2>
-                        <p className="text-gray-600">Please connect your wallet from the sidebar to view your loan applications.</p>
-                    </div>
-                ) : (
-                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 backdrop-blur-xl border border-green-200 rounded-2xl p-6 shadow-2xl">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                            <div>
-                                <p className="text-green-700 font-semibold">Wallet Connected</p>
-                                <p className="text-gray-600 text-sm">
-                                    {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
-                                </p>
-                                <div className="mt-2">
-                                    <button 
-                                        onClick={refreshLoanData}
-                                        className="text-green-600 hover:text-green-700 cursor-pointer text-sm font-medium flex items-center"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        Refresh Loan Data
-                                    </button>
+               <div className="absolute  md:block right-0 top-0">
+                    {/* Wallet Status */}
+                    {!connection ? (
+                        <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-2xl">
+                            <h2 className="text-xl font-semibold mb-4 text-orange-600">Wallet connection required</h2>
+                            <p className="text-gray-600">Please connect your wallet from the sidebar to view your loan applications.</p>
+                        </div>
+                    ) : (
+                        <div className="bg-orange-50 border border-orange-200 rounded-2xl md:p-4 p-2 shadow-2xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2 h-2 bg-green-500 mb-6  rounded-full animate-pulse"></div>
+                                <div>
+                                    <p className="text-green-600 text-[13px] font-semibold">Wallet Connected</p>
+                                    <p className="text-gray-600 text-[11px]">
+                                        {connection.address.substring(0, 12)}...{connection.address.substring(connection.address.length - 12)}
+                                    </p>
+                                    <div className="mt-2">
+                                        <button 
+                                            onClick={refreshLoanData}
+                                            className="text-green-600 hover:text-green-700 cursor-pointer text-sm font-medium flex items-center"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            Refresh Loan Data
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Error Message */}
@@ -271,7 +272,7 @@ return (
             )}
             
             {/* My Loan Requests List */}
-            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl mb-10">
+            <div className="bg-white/60 -translate-y-10 lg:translate-y-0  backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl mb-10">
                 <div className="flex items-center space-x-4 mb-8">
                     <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
                     <h2 className="text-3xl font-bold text-gray-800">Your Loan Requests</h2>
